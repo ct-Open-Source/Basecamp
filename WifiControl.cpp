@@ -33,6 +33,7 @@ void WifiControl::begin(String essid, String password, String configured)
 		xTaskCreate(&DNSTask, "DNSTask", 4096, NULL, 5, NULL);
 
 	}
+	WiFi.onEvent(WiFiEvent);
 }
 
 int WifiControl::status() {
@@ -60,7 +61,7 @@ void WifiControl::WifiConnector(void *) {
 	}
 	Serial.println(WiFi.localIP());
 	
-		Preferences preferences;
+	Preferences preferences;
 	preferences.begin("basecamp", false);
 	unsigned int bootCounter = preferences.putUInt("bootcounter", 0);
 	preferences.putUInt("bootcounter", 0);
@@ -68,4 +69,16 @@ void WifiControl::WifiConnector(void *) {
 	vTaskDelete( NULL );
 }
 
+
+
+void WifiContolr::WiFiEvent(WiFiEvent_t event) {
+    switch(event) {
+    case SYSTEM_EVENT_STA_GOT_IP:
+        break;
+    case SYSTEM_EVENT_STA_DISCONNECTED:
+	delay(1000);
+	connect();
+        break;
+    }
+}
 

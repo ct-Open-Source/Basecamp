@@ -20,6 +20,7 @@ class WifiControl {
 		void begin(String essid, String password = "", String configured = "False");
 		IPAddress getIP();
 		int status();
+		void WifiEvent(WiFiEvent_t event);
 	private:
 		String _wifiEssid;
 		String _wifiPassword;

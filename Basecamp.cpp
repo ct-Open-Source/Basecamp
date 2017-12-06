@@ -30,12 +30,17 @@ bool Basecamp::begin() {
 #endif
 
 #ifndef BASECAMP_NOMQTT
+
+
+
 	mqtt.setServer(
 			configuration.get("MQTTHost").c_str(),
 			configuration.get("MQTTPort").toInt()
 		      );
-
+	mqtt.onDisconnect(onMqttDisconnect);
 	mqtt.connect();
+
+	
 #endif
 
 #ifndef BASECAMP_NOOTA
@@ -58,6 +63,19 @@ bool Basecamp::begin() {
 #endif
 
 };
+
+#ifndef BASECAMP_NOMQTT
+void Basecamp::onMqttDisconnect(AsyncMqttClient * mqtt) {
+	Serial.println("Disconnected from MQTT.");
+
+	while(1) {
+		if (WiFi.isConnected()) {
+			mqtt.connect();
+		}
+	}
+};
+#endif
+
 
 bool Basecamp::checkResetReason() {
 
