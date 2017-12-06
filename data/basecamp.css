@@ -1,0 +1,60 @@
+html {
+	font-family: Roboto, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+}
+@media (min-device-width: 400px) {
+	#wrapper {
+		width:80%;
+		max-width: 1000px;
+		margin: 0 auto;
+	}
+}
+h1 {
+	font-weight: 300;
+	line-height:110%;
+}
+h2, h3, h4 {
+	font-weight: normal;
+	line-height:110%;
+}
+p {
+	color: rgba(0,0,0,0.71);
+}
+
+label {
+	display:block;
+}
+input[type=text], input[type=password] {
+	display:block;
+	margin-bottom:1em;
+}
+
+input[type=button], input[type=submit], button, a.button {
+	border: none;
+	border-radius: 2px;
+	background: #26a69a; 
+	color: white;
+	cursor: pointer;
+	font-size: 1.25em;
+	line-height: 150%;
+	box-shadow: rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px, rgba(0, 0, 0, 0.2) 0px 3px 1px -2px;
+}
+input[type=button]:hover, input[type=submit]:hover, button, a.button:hover {
+	background-color: #2bbbad;
+	box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14),0 1px 7px 0 rgba(0,0,0,0.12),0 3px 1px -1px rgba(0,0,0,0.2);
+}
+
+.slim-border {
+	border-bottom-width: 1px;
+	border-bottom-style:solid;
+	border-image: linear-gradient(to right, rgba(192,192,192,1), rgba(0, 0, 0, 0)) 10; 
+}
+.fat-border {
+	border-bottom-width: 3px;
+	border-bottom-style:solid;
+	border-image: linear-gradient(to right, rgba(192,192,192,1), rgba(0, 0, 0, 0)) 10; 
+}
+.warning {
+	color: #F00;
+	font-weight:bold;
+}

@@ -1,0 +1,69 @@
+{
+	"meta": {"title": "Initial Setup"},
+	"elements": [
+		{
+			"element": "h1",
+			"content": "Basecamp Setup",
+			"attributes": {
+				"class": "fat-border"
+			}
+
+		},
+		{	"element": "p",
+			"content": "Your device has not been set up yet. Please complete your Wifi Configuration to continue the setup."
+		},
+		{ 
+			"element": "form",
+			"id": "configform",
+			"attributes": {
+				"action": "saveConfig"
+			}
+		},
+		{
+			"element": "input",
+			"description": "WIFI SSID",
+			"id": "wifissid",
+			"parent": "#configform",
+			"attributes": { 
+				"value": "",
+				"name": "wifiessid",
+				"type": "text",
+				"data-config": "WifiEssid"
+			}
+
+		},
+		{
+			"element": "input",
+			"description": "WIFI Password",
+			"id": "wifipassword",
+			"parent": "#configform",
+			"attributes": { 
+				"value": "",
+				"name": "wifipassword",
+				"type": "password",
+				"data-config": "WifiPassword"
+			}
+
+		},
+		{
+			"element": "input",
+			"parent": "#configform",
+			"attributes": { 
+				"value": "True",
+				"type": "hidden",
+				"data-config": "WifiConfigured"
+			}
+
+		},
+		{
+			"element": "input",
+			"id": "formsubmit",
+			"parent": "#configform",
+			"attributes": {
+				"type":"button",
+				"value": "Save",
+				"onclick": "collectConfiguration()"
+			}
+		}
+	]
+}

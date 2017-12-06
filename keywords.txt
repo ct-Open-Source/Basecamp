@@ -1,0 +1,21 @@
+Basecamp KEYWORD1
+WebServer KEYWORD1
+WifiControl KEYWORD1
+Configuration KEYWORD1
+
+checkResetReason KEYWORD2
+addInterfaceElement	KEYWORD2
+setInterfaceElementAttribute KEYWORD2
+setAttribute KEYWORD2
+OTAHandling KEYWORD2
+load KEYWORD2
+save KEYWORD2
+dump KEYWORD2
+reset KEYWORD2
+get KEYWORD2
+set KEYWORD2
+begin KEYWORD2
+status KEYWORD2
+connect KEYWORD2
+disconnect KEYWORD2
+getIP KEYWORD2
