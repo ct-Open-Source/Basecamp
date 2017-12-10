@@ -37,12 +37,11 @@ class Basecamp {
 		bool checkResetReason();
 #ifndef BASECAMP_NOWIFI
 		WifiControl wifi;
-		void WifiEvent();
 #endif
 
 #ifndef BASECAMP_NOMQTT
 		AsyncMqttClient mqtt;
-		static void onMqttDisconnect(AsyncMqttClient * mqtt);
+		void MqttReconnect(AsyncMqttClient * mqtt);
 #endif
 
 #ifndef BASECAMP_NOWEB

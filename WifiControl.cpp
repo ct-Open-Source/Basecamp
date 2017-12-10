@@ -6,7 +6,6 @@
 
 #include "WifiControl.hpp"
 #include "debug.hpp"
-
 void WifiControl::begin(String essid, String password, String configured)
 {
 	DEBUG_PRINTLN("Connecting to Wifi");
@@ -21,8 +20,9 @@ void WifiControl::begin(String essid, String password, String configured)
 		DEBUG_PRINTLN(_wifiEssid);
 
 		WiFi.begin ( _wifiEssid.c_str(), _wifiPassword.c_str());
-
-		xTaskCreate(&WifiConnector, "WifiConnectorTask", 4096, NULL, 5, NULL);
+		WiFi.setAutoConnect ( true );                                             // Autoconnect to last known Wifi on startup
+		WiFi.setAutoReconnect ( true );
+		//xTaskCreate(&WifiConnector, "WifiConnectorTask", 4096, NULL, 5, NULL);
 	} else {
 
 		DEBUG_PRINTLN("Wifi is NOT configured");
@@ -30,10 +30,9 @@ void WifiControl::begin(String essid, String password, String configured)
 
 		WiFi.mode(WIFI_AP_STA);
 		WiFi.softAP("ESP32");
-		xTaskCreate(&DNSTask, "DNSTask", 4096, NULL, 5, NULL);
+		//xTaskCreate(&DNSTask, "DNSTask", 4096, NULL, 5, NULL);
 
 	}
-	WiFi.onEvent(WiFiEvent);
 }
 
 int WifiControl::status() {
@@ -43,6 +42,9 @@ int WifiControl::status() {
 IPAddress WifiControl::getIP() {
 	return WiFi.localIP();
 }
+
+
+
 
 void WifiControl::DNSTask(void *) {
 	//DNSServer dnsServer;
@@ -54,31 +56,38 @@ void WifiControl::DNSTask(void *) {
 	}
 }
 
-void WifiControl::WifiConnector(void *) {
-	while (WiFi.status() != WL_CONNECTED) {
-		DEBUG_PRINT(".");
-		delay(1000);
-	}
-	Serial.println(WiFi.localIP());
+//void WifiControl::WifiConnector(void *) {
+	//while (WiFi.status() != WL_CONNECTED) {
+		//DEBUG_PRINT(".");
+		//delay(1000);
+	//}
+	//Serial.println(WiFi.localIP());
 	
-	Preferences preferences;
-	preferences.begin("basecamp", false);
-	unsigned int bootCounter = preferences.putUInt("bootcounter", 0);
-	preferences.putUInt("bootcounter", 0);
-	preferences.end();
-	vTaskDelete( NULL );
-}
+	//Preferences preferences;
+	//preferences.begin("basecamp", false);
+	//unsigned int bootCounter = preferences.putUInt("bootcounter", 0);
+	//preferences.putUInt("bootcounter", 0);
+	//preferences.end();
+	//vTaskDelete( NULL );
+//}
 
 
+void WifiControl::WiFiEvent(WiFiEvent_t event)
+{
+    Serial.printf("[WiFi-event] event: %d\n", event);
 
-void WifiContolr::WiFiEvent(WiFiEvent_t event) {
     switch(event) {
     case SYSTEM_EVENT_STA_GOT_IP:
+        Serial.println("WiFi connected");
+        Serial.println("IP address: ");
+        Serial.println(WiFi.localIP());
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
+        Serial.println("WiFi lost connection");
 	delay(1000);
-	connect();
+	//WiFi.connect();
         break;
     }
 }
+
 

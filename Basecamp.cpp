@@ -10,15 +10,11 @@
 bool Basecamp::begin() {
 	Serial.begin(115200);
 	Serial.println("Basecamp V.0.0.1");
-
 	configuration.begin("/basecamp.json");
-
 	if (!configuration.load()) {
 		DEBUG_PRINTLN("Configuration is broken. Resetting.");
 		configuration.reset();
 	};
-
-
 	checkResetReason();
 
 #ifndef BASECAMP_NOWIFI
@@ -30,17 +26,20 @@ bool Basecamp::begin() {
 #endif
 
 #ifndef BASECAMP_NOMQTT
-
-
-
+	//mqtt.setSecure(configuration.get("MQTTHost").toInt());
+	//mqtt.setServerFingerprint(configuration.get("MQTTFingerprint").toInt());
 	mqtt.setServer(
 			configuration.get("MQTTHost").c_str(),
 			configuration.get("MQTTPort").toInt()
 		      );
-	mqtt.onDisconnect(onMqttDisconnect);
+	mqtt.setCredentials(
+			configuration.get("MQTTUser").c_str(),
+			configuration.get("MQTTPass").c_str()
+		      );
 	mqtt.connect();
-
-	
+	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
+			MqttReconnect(&mqtt);
+		       });
 #endif
 
 #ifndef BASECAMP_NOOTA
@@ -64,18 +63,15 @@ bool Basecamp::begin() {
 
 };
 
+
 #ifndef BASECAMP_NOMQTT
-void Basecamp::onMqttDisconnect(AsyncMqttClient * mqtt) {
-	Serial.println("Disconnected from MQTT.");
-
-	while(1) {
-		if (WiFi.isConnected()) {
-			mqtt.connect();
-		}
+void Basecamp::MqttReconnect(AsyncMqttClient * mqtt) {
+	while (WiFi.status() != WL_CONNECTED) {
+		delay(1000);
 	}
-};
+	mqtt->connect();
+}
 #endif
-
 
 bool Basecamp::checkResetReason() {
 
@@ -140,5 +136,3 @@ void Basecamp::OTAHandling(void *) {
 	}
 };
 #endif
-
-
