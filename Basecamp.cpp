@@ -93,6 +93,7 @@ bool Basecamp::checkResetReason() {
 			DEBUG_PRINTLN("Configuration forcibly reset.");
 			//configuration.reset();
 			configuration.set("WifiConfigured", "False");
+			configuration.save();
 			preferences.putUInt("bootcounter", 0);
 			preferences.end();
 			ESP.restart();
