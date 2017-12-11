@@ -28,16 +28,20 @@ bool Basecamp::begin() {
 #ifndef BASECAMP_NOMQTT
 	//mqtt.setSecure(configuration.get("MQTTHost").toInt());
 	//mqtt.setServerFingerprint(configuration.get("MQTTFingerprint").toInt());
+	DEBUG_PRINTLN(configuration.get("MQTTHost").c_str());
+	DEBUG_PRINTLN(configuration.get("MQTTPort").c_str());
 	mqtt.setServer(
 			configuration.get("MQTTHost").c_str(),
 			configuration.get("MQTTPort").toInt()
 		      );
-	mqtt.setCredentials(
-			configuration.get("MQTTUser").c_str(),
-			configuration.get("MQTTPass").c_str()
-		      );
+	//mqtt.setCredentials(
+			//configuration.get("MQTTUser").c_str(),
+			//configuration.get("MQTTPass").c_str()
+		      //);
+	delay(5000);
 	mqtt.connect();
 	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
+			
 			MqttReconnect(&mqtt);
 		       });
 #endif

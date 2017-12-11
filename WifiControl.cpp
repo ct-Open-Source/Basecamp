@@ -5,6 +5,7 @@
    */
 
 #include "WifiControl.hpp"
+#include "Basecamp.hpp"
 #include "debug.hpp"
 void WifiControl::begin(String essid, String password, String configured)
 {
@@ -14,6 +15,7 @@ void WifiControl::begin(String essid, String password, String configured)
 	String _wifiEssid = essid;
 	String _wifiPassword = password;
 
+		WiFi.onEvent(WiFiEvent);
 	if (_wifiConfigured == "True") {
 		DEBUG_PRINTLN("Wifi is configured");
 		DEBUG_PRINT("Connecting to ");
@@ -30,6 +32,7 @@ void WifiControl::begin(String essid, String password, String configured)
 
 		WiFi.mode(WIFI_AP_STA);
 		WiFi.softAP("ESP32");
+		
 		//xTaskCreate(&DNSTask, "DNSTask", 4096, NULL, 5, NULL);
 
 	}
@@ -74,20 +77,24 @@ void WifiControl::DNSTask(void *) {
 
 void WifiControl::WiFiEvent(WiFiEvent_t event)
 {
-    Serial.printf("[WiFi-event] event: %d\n", event);
+	Preferences preferences;
+	preferences.begin("basecamp", false);
+	unsigned int bootCounter = preferences.putUInt("bootcounter", 0);
+	Serial.printf("[WiFi-event] event: %d\n", event);
+	switch(event) {
+		case SYSTEM_EVENT_STA_GOT_IP:
+			Serial.println("WiFi connected");
+			Serial.println("IP address: ");
+			Serial.println(WiFi.localIP());
 
-    switch(event) {
-    case SYSTEM_EVENT_STA_GOT_IP:
-        Serial.println("WiFi connected");
-        Serial.println("IP address: ");
-        Serial.println(WiFi.localIP());
-        break;
-    case SYSTEM_EVENT_STA_DISCONNECTED:
-        Serial.println("WiFi lost connection");
-	delay(1000);
-	//WiFi.connect();
-        break;
-    }
+			preferences.putUInt("bootcounter", 0);
+			preferences.end();
+			//Basecamp::mqtt.connect();
+			break;
+		case SYSTEM_EVENT_STA_DISCONNECTED:
+			Serial.println("WiFi lost connection");
+			break;
+	}
 }
 
 

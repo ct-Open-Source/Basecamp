@@ -21,7 +21,7 @@ class WifiControl {
 		IPAddress getIP();
 		int status();
 
-		void WiFiEvent(WiFiEvent_t event);
+		static void WiFiEvent(WiFiEvent_t event);
 	private:
 		String _wifiEssid;
 		String _wifiPassword;
