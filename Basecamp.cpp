@@ -24,26 +24,21 @@ bool Basecamp::begin() {
 			configuration.get("WifiConfigured")
 		  );
 #endif
-
 #ifndef BASECAMP_NOMQTT
 	//mqtt.setSecure(configuration.get("MQTTHost").toInt());
 	//mqtt.setServerFingerprint(configuration.get("MQTTFingerprint").toInt());
-	DEBUG_PRINTLN(configuration.get("MQTTHost").c_str());
-	DEBUG_PRINTLN(configuration.get("MQTTPort").c_str());
-	mqtt.setServer(
-			configuration.get("MQTTHost").c_str(),
-			configuration.get("MQTTPort").toInt()
-		      );
+	const char* mqtthost  = configuration.get("MQTTHost").c_str();
+	uint16_t mqttport = configuration.get("MQTTPort").toInt();
+	DEBUG_PRINTLN(mqtthost);
+	mqtt.setServer(mqtthost, mqttport);
 	//mqtt.setCredentials(
 			//configuration.get("MQTTUser").c_str(),
 			//configuration.get("MQTTPass").c_str()
 		      //);
-	delay(5000);
-	mqtt.connect();
-	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
-			
+        mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
 			MqttReconnect(&mqtt);
 		       });
+	xTaskCreate(&MqttConnector, "MqttConnector", 4096, (void*)&mqtt,5,NULL);
 #endif
 
 #ifndef BASECAMP_NOOTA
@@ -69,12 +64,27 @@ bool Basecamp::begin() {
 
 
 #ifndef BASECAMP_NOMQTT
-void Basecamp::MqttReconnect(AsyncMqttClient * mqtt) {
-	while (WiFi.status() != WL_CONNECTED) {
-		delay(1000);
+void Basecamp::MqttConnector(void * mqtt) {
+	AsyncMqttClient mqttclient = *((AsyncMqttClient*)mqtt);
+       	while (WiFi.status() != WL_CONNECTED || mqttclient.connected() == 0) {
+		
+		DEBUG_PRINTLN("MQTT not connected, connecting");
+		mqttclient.connect();
+
+		vTaskDelay(5000);
 	}
-	mqtt->connect();
+	vTaskDelete(NULL);
 }
+
+void Basecamp::MqttReconnect(AsyncMqttClient * mqtt) {
+       DEBUG_PRINTLN("MQTT disconnected, reconnecting");
+       while (WiFi.status() != WL_CONNECTED) {
+               delay(1000);
+       }
+       delay(1000);
+       mqtt->connect();
+}
+
 #endif
 
 bool Basecamp::checkResetReason() {
@@ -131,7 +141,6 @@ void Basecamp::OTAHandling(void *) {
 			else if (error == OTA_END_ERROR) Serial.println("End Failed");
 			});
 	ArduinoOTA.begin();
-	Serial.println("OTA");
 	while (1) {
 		ArduinoOTA.handle();
 

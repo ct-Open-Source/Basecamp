@@ -24,7 +24,6 @@ void WifiControl::begin(String essid, String password, String configured)
 		WiFi.begin ( _wifiEssid.c_str(), _wifiPassword.c_str());
 		WiFi.setAutoConnect ( true );                                             // Autoconnect to last known Wifi on startup
 		WiFi.setAutoReconnect ( true );
-		//xTaskCreate(&WifiConnector, "WifiConnectorTask", 4096, NULL, 5, NULL);
 	} else {
 
 		DEBUG_PRINTLN("Wifi is NOT configured");
@@ -46,9 +45,6 @@ IPAddress WifiControl::getIP() {
 	return WiFi.localIP();
 }
 
-
-
-
 void WifiControl::DNSTask(void *) {
 	//DNSServer dnsServer;
 	//IPAddress apIP(192, 168, 4, 1);
@@ -59,37 +55,19 @@ void WifiControl::DNSTask(void *) {
 	}
 }
 
-//void WifiControl::WifiConnector(void *) {
-	//while (WiFi.status() != WL_CONNECTED) {
-		//DEBUG_PRINT(".");
-		//delay(1000);
-	//}
-	//Serial.println(WiFi.localIP());
-	
-	//Preferences preferences;
-	//preferences.begin("basecamp", false);
-	//unsigned int bootCounter = preferences.putUInt("bootcounter", 0);
-	//preferences.putUInt("bootcounter", 0);
-	//preferences.end();
-	//vTaskDelete( NULL );
-//}
-
-
 void WifiControl::WiFiEvent(WiFiEvent_t event)
 {
 	Preferences preferences;
 	preferences.begin("basecamp", false);
 	unsigned int bootCounter = preferences.putUInt("bootcounter", 0);
-	Serial.printf("[WiFi-event] event: %d\n", event);
+	DEBUG_PRINTF("[WiFi-event] event: %d\n", event);
 	switch(event) {
 		case SYSTEM_EVENT_STA_GOT_IP:
-			Serial.println("WiFi connected");
-			Serial.println("IP address: ");
-			Serial.println(WiFi.localIP());
+			DEBUG_PRINT("Wifi IP address: ");
+			DEBUG_PRINTLN(WiFi.localIP());
 
 			preferences.putUInt("bootcounter", 0);
 			preferences.end();
-			//Basecamp::mqtt.connect();
 			break;
 		case SYSTEM_EVENT_STA_DISCONNECTED:
 			Serial.println("WiFi lost connection");
