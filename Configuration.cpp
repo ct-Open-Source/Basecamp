@@ -75,6 +75,9 @@ bool Configuration::save() {
 	}
 
 	_jsonData.printTo(configFile);
+#ifdef DEBUG
+	_jsonData.prettyPrintTo(Serial);
+#endif
 	configFile.close();
 	_configurationTainted = false;
 	return true;
@@ -82,12 +85,15 @@ bool Configuration::save() {
 
 
 bool Configuration::set(String key, String value) {
-
+	DEBUG_PRINTLN(key);
+	DEBUG_PRINTLN(configuration[key]);
 	configuration[key] = value;
 	_configurationTainted = true;
 }
 
 String Configuration::get(String key) {
+	DEBUG_PRINTLN(key);
+	DEBUG_PRINTLN(configuration[key]);
 	return configuration[key];
 }
 

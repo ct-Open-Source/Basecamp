@@ -27,17 +27,30 @@ bool Basecamp::begin() {
 #ifndef BASECAMP_NOMQTT
 	//mqtt.setSecure(configuration.get("MQTTHost").toInt());
 	//mqtt.setServerFingerprint(configuration.get("MQTTFingerprint").toInt());
-	const char* mqtthost  = configuration.get("MQTTHost").c_str();
+	String tmpstring = configuration.get("MQTTHost");
+	int tmpstring_len = tmpstring.length()+1;
+	char mqtthost[tmpstring_len];
+	configuration.get("MQTTHost").toCharArray(mqtthost,tmpstring_len);
+		
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
-	DEBUG_PRINTLN(mqtthost);
-	mqtt.setServer(mqtthost, mqttport);
-	//mqtt.setCredentials(
-			//configuration.get("MQTTUser").c_str(),
-			//configuration.get("MQTTPass").c_str()
-		      //);
-        mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
+	Serial.println("cfg");
+	Serial.println(mqtthost);
+	Serial.println(mqttport);
+	Serial.println("cfg");
+	mqtt.setServer("openhab",mqttport);
+
+	const char* mqttuser  = configuration.get("MQTTUser").c_str();
+	const char* mqttpass  = configuration.get("MQTTPass").c_str();
+	if(mqttuser != "") {
+	mqtt.setCredentials(
+			configuration.get("MQTTUser").c_str(),
+			configuration.get("MQTTPass").c_str()
+			);
+	};
+	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
 			MqttReconnect(&mqtt);
-		       });
+			});
+
 	xTaskCreate(&MqttConnector, "MqttConnector", 4096, (void*)&mqtt,5,NULL);
 #endif
 
@@ -49,14 +62,14 @@ bool Basecamp::begin() {
 	web.begin(configuration);
 
 	if (configuration.get("WifiConfigured")) {
+		web.addInterfaceElement("configform", "form", "","#wrapper");
+		web.setInterfaceElementAttribute("configform", "action", "saveConfig");
 		web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
 		web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
 		web.setInterfaceElementAttribute("WifiPassword", "type", "password");
 		web.addInterfaceElement("heading", "h1", "IoT Door Sensor","#wrapper");
 		web.setInterfaceElementAttribute("heading", "class", "fat-border");
 		web.addInterfaceElement("infotext1", "p", "Please finalize your configuration","#wrapper");
-		web.addInterfaceElement("configform", "form", "","#wrapper");
-		web.setInterfaceElementAttribute("configform", "action", "saveConfig");
 	}
 #endif
 
@@ -65,13 +78,10 @@ bool Basecamp::begin() {
 
 #ifndef BASECAMP_NOMQTT
 void Basecamp::MqttConnector(void * mqtt) {
-	AsyncMqttClient mqttclient = *((AsyncMqttClient*)mqtt);
-       	while (WiFi.status() != WL_CONNECTED || mqttclient.connected() == 0) {
-		
-		DEBUG_PRINTLN("MQTT not connected, connecting");
-		mqttclient.connect();
-
-		vTaskDelay(5000);
+	AsyncMqttClient &mqttclient = *((AsyncMqttClient*)mqtt);
+	while (!mqttclient.connected()) {
+	mqttclient.connect();
+	vTaskDelay(1000);
 	}
 	vTaskDelete(NULL);
 }
@@ -79,7 +89,7 @@ void Basecamp::MqttConnector(void * mqtt) {
 void Basecamp::MqttReconnect(AsyncMqttClient * mqtt) {
        DEBUG_PRINTLN("MQTT disconnected, reconnecting");
        while (WiFi.status() != WL_CONNECTED) {
-               delay(1000);
+	       delay(1000);
        }
        delay(1000);
        mqtt->connect();
