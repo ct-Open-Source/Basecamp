@@ -31,21 +31,21 @@ bool Basecamp::begin() {
 	int tmpstring_len = tmpstring.length()+1;
 	char mqtthost[tmpstring_len];
 	configuration.get("MQTTHost").toCharArray(mqtthost,tmpstring_len);
-		
+
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
 	Serial.println("cfg");
 	Serial.println(mqtthost);
 	Serial.println(mqttport);
 	Serial.println("cfg");
-	mqtt.setServer("openhab",mqttport);
+	mqtt.setServer(mqtthost,mqttport);
 
-	const char* mqttuser  = configuration.get("MQTTUser").c_str();
-	const char* mqttpass  = configuration.get("MQTTPass").c_str();
+	const char* mqttuser = configuration.get("MQTTUser").c_str();
+	const char* mqttpass = configuration.get("MQTTPass").c_str();
 	if(mqttuser != "") {
-	mqtt.setCredentials(
-			configuration.get("MQTTUser").c_str(),
-			configuration.get("MQTTPass").c_str()
-			);
+		mqtt.setCredentials(
+				configuration.get("MQTTUser").c_str(),
+				configuration.get("MQTTPass").c_str()
+				);
 	};
 	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
 			MqttReconnect(&mqtt);
@@ -80,19 +80,19 @@ bool Basecamp::begin() {
 void Basecamp::MqttConnector(void * mqtt) {
 	AsyncMqttClient &mqttclient = *((AsyncMqttClient*)mqtt);
 	while (!mqttclient.connected()) {
-	mqttclient.connect();
-	vTaskDelay(1000);
+		mqttclient.connect();
+		vTaskDelay(1000);
 	}
 	vTaskDelete(NULL);
 }
 
 void Basecamp::MqttReconnect(AsyncMqttClient * mqtt) {
-       DEBUG_PRINTLN("MQTT disconnected, reconnecting");
-       while (WiFi.status() != WL_CONNECTED) {
-	       delay(1000);
-       }
-       delay(1000);
-       mqtt->connect();
+	DEBUG_PRINTLN("MQTT disconnected, reconnecting");
+	while (WiFi.status() != WL_CONNECTED) {
+		delay(1000);
+	}
+	delay(1000);
+	mqtt->connect();
 }
 
 #endif
@@ -101,26 +101,39 @@ bool Basecamp::checkResetReason() {
 
 	preferences.begin("basecamp", false);
 	int reason = rtc_get_reset_reason(0);
+	DEBUG_PRINT("Reset reason: ");
+	DEBUG_PRINTLN(reason);
 	if (reason == 1 || reason == 16) {
 		unsigned int bootCounter = preferences.getUInt("bootcounter", 0);
 
-		DEBUG_PRINT("Times booted: ");
-		DEBUG_PRINTLN(bootCounter);
 		bootCounter++;
-		preferences.putUInt("bootcounter", bootCounter);
+		DEBUG_PRINT("Unsuccessful boots: ");
+		DEBUG_PRINTLN(bootCounter);
 
-		if (bootCounter > 4){
+		if (bootCounter > 3){
 			DEBUG_PRINTLN("Configuration forcibly reset.");
 			//configuration.reset();
 			configuration.set("WifiConfigured", "False");
 			configuration.save();
 			preferences.putUInt("bootcounter", 0);
 			preferences.end();
+			Serial.println("Resetting the WiFi configuration.");
 			ESP.restart();
+		} else if (bootCounter > 2 && configuration.get("WifiConfigured") == "False") {
+			Serial.println("Factory reset was forced.");
+			SPIFFS.format();
+			preferences.putUInt("bootcounter", 0);
+			preferences.end();
+			Serial.println("Rebooting.");
+			ESP.restart();
+		} else {
+			preferences.putUInt("bootcounter", bootCounter);
 		};
+
 	} else {
 		preferences.putUInt("bootcounter", 0);
 	};
+	preferences.end();
 };
 
 #ifndef BASECAMP_NOOTA

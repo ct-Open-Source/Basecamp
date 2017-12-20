@@ -59,7 +59,7 @@ void WifiControl::WiFiEvent(WiFiEvent_t event)
 {
 	Preferences preferences;
 	preferences.begin("basecamp", false);
-	unsigned int bootCounter = preferences.putUInt("bootcounter", 0);
+	unsigned int bootCounter = preferences.getUInt("bootcounter", 0);
 	DEBUG_PRINTF("[WiFi-event] event: %d\n", event);
 	switch(event) {
 		case SYSTEM_EVENT_STA_GOT_IP:
