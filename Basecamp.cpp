@@ -70,10 +70,11 @@ bool Basecamp::begin() {
 		web.addInterfaceElement("heading", "h1", "IoT Door Sensor","#wrapper");
 		web.setInterfaceElementAttribute("heading", "class", "fat-border");
 		web.addInterfaceElement("infotext1", "p", "Please finalize your configuration","#wrapper");
+		web.addInterfaceElement("saveform", "input", "Save","#save");
 	}
 #endif
 
-};
+}
 
 
 #ifndef BASECAMP_NOMQTT

@@ -7,7 +7,6 @@
 #include "WebServer.hpp"
 #include "debug.hpp"
 
-
 void WebServer::begin(Configuration &configuration) {
 
 
@@ -78,7 +77,7 @@ void WebServer::begin(Configuration &configuration) {
 
 		});
 	} else {
-		Serial.println("No config");
+		DEBUG_PRINTLN("No Config found");
 		server->on("/data.json" , HTTP_GET, [](AsyncWebServerRequest * request) {
 				AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", initconf_json_gz, initconf_json_gz_len);
 				response->addHeader("Content-Encoding", "gzip");
@@ -101,6 +100,7 @@ void WebServer::begin(Configuration &configuration) {
 			});
 
 	server->onNotFound([](AsyncWebServerRequest * request) {
+#ifdef DEBUG
 			Serial.printf("NOT_FOUND: ");
 			if (request->method() == HTTP_GET)
 			Serial.printf("GET");
@@ -143,7 +143,7 @@ void WebServer::begin(Configuration &configuration) {
 					Serial.printf("_GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
 				}
 			}
-
+#endif
 			request->send(404);
 
 	});

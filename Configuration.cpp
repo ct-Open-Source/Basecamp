@@ -17,7 +17,6 @@ bool Configuration::begin(String filename)
 bool Configuration::load() {
 	DEBUG_PRINTLN("Loading config file ");
 	DEBUG_PRINTLN(_jsonFile);
-
 	if (!SPIFFS.begin(true)) {
 		Serial.println("Could not access SPIFFS.");
 		return false;
@@ -28,7 +27,6 @@ bool Configuration::load() {
 
 	if (!configFile || configFile.isDirectory()) {
 		Serial.println("Failed to open config file");
-
 		return false;
 	}
 
@@ -37,14 +35,12 @@ bool Configuration::load() {
 
 	if (!_jsonData.success()) {
 		Serial.println("Failed to parse config file.");
-
 		return false;
 	};
-	
+
 	DEBUG_PRINTLN("converting config to map");
 	for (JsonObject::iterator it = _jsonData.begin(); it != _jsonData.end(); ++it)
 	{
-
 		set(it->key, it->value);
 	}
 
@@ -106,17 +102,19 @@ void Configuration::reset() {
 }
 
 bool Configuration::dump() {
+#ifdef DEBUG
 	for (const auto &p : configuration) {
 		Serial.print( "configuration[");
 		Serial.print(p.first);
 		Serial.print("] = ");
 		Serial.println(p.second);
 	};
+#endif
 }
 
 //void Configuration::CheckConfigStatus(void *) {
 	//if (_configurationTainted) {
-////		((Configuration*)configuration)->save();
+		////		((Configuration*)configuration)->save();
 		//_configurationTainted = false;
 	//}
 	//vTaskDelay(10000);

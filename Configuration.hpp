@@ -30,14 +30,14 @@ class Configuration {
     {
       bool operator()(String a, String b)
       {
-        return strcmp(a.c_str(), b.c_str()) < 0;
+	return strcmp(a.c_str(), b.c_str()) < 0;
       }
     };
 
     std::map<String, String, cmp_str> configuration;
 
   private:
-    //static void CheckConfigStatus(void *);
+    static void CheckConfigStatus(void *);
     String _jsonFile;
     bool _configurationTainted;
 

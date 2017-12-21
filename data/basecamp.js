@@ -89,15 +89,17 @@ function setMeta(data) {
 function collectConfiguration() {
 	var configurationData = new FormData();
 	configurationElements = document.body.querySelectorAll('*[data-config]');
-	console.log(configurationElements);
 	for (var i = configurationElements.length - 1; i >= 0; i--) {
 		var configurationKey = configurationElements[i].getAttribute("data-config");
 		var configurationValue = configurationElements[i].value;
+		if (configurationElements[i].hasAttribute("required") && configurationValue == "") {
+			alert("Please fill out all required values");
+			return;	
+		}
 		if (configurationValue.length > 0 && configurationKey.length > 0) { 
 			configurationData.set(configurationKey, configurationValue);
 		}
 	}
-	console.log(configurationData.entries());
 	var request = new XMLHttpRequest();
 	request.addEventListener("load", transferComplete);
 	request.addEventListener("error", transferFailed);
