@@ -94,8 +94,8 @@ bool Configuration::set(String key, String value) {
 String Configuration::get(String key) {
 	DEBUG_PRINTLN(key);
 	DEBUG_PRINTLN(configuration[key]);
-	String returnval = configuration[key];
-	return returnval;
+	
+	return configuration[key];
 }
 
 

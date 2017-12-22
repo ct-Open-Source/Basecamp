@@ -6,7 +6,7 @@
 
 #include "Basecamp.hpp"
 #include "debug.hpp"
-
+#include <HTTPClient.h>
 bool Basecamp::begin() {
 	Serial.begin(115200);
 	Serial.println("Basecamp V.0.0.1");
@@ -24,21 +24,40 @@ bool Basecamp::begin() {
 			configuration.get("WifiConfigured")
 		  );
 #endif
+	delay(5000);
 #ifndef BASECAMP_NOMQTT
+	HTTPClient http;
 	//mqtt.setSecure(configuration.get("MQTTHost").toInt());
 	//mqtt.setServerFingerprint(configuration.get("MQTTFingerprint").toInt());
-	String tmpstring = configuration.get("MQTTHost");
-	int tmpstring_len = tmpstring.length()+1;
-	char mqtthost[tmpstring_len];
-	configuration.get("MQTTHost").toCharArray(mqtthost,tmpstring_len);
+	//Serial.println(configuration.get("MQTTHost"));
+	//const char* mqtthost = configuration.get("MQTTHost").c_str();
+	//const char* httphost;
+        //sprintf(httphost);
+	//http.begin("http://"+mqtthost);
+	//Serial.println(mqtthost);
+        //int httpCode = http.GET();
 
+        //// httpCode will be negative on error
+        //if(httpCode > 0) {
+            //// HTTP header has been send and Server response header has been handled
+            //Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+            //// file found at server
+            //if(httpCode == HTTP_CODE_OK) {
+                //String payload = http.getString();
+                //Serial.println(payload);
+            //}
+        //} else {
+            //Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        //}
+	//const char* mqtthost = "mls-pc";
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
-	Serial.println("cfg");
+	const char* mqtthost = configuration.get("MQTTHost").c_str();
+	mqtt.setServer(mqtthost, mqttport);
 	Serial.println(mqtthost);
 	Serial.println(mqttport);
-	Serial.println("cfg");
-	mqtt.setServer(mqtthost,mqttport);
-
+	Serial.println(mqtthost);
+	Serial.println(mqttport);
 	const char* mqttuser = configuration.get("MQTTUser").c_str();
 	const char* mqttpass = configuration.get("MQTTPass").c_str();
 	if(mqttuser != "") {
@@ -48,10 +67,12 @@ bool Basecamp::begin() {
 				);
 	};
 	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
+			Serial.println((int)reason);
 			MqttReconnect(&mqtt);
 			});
 
 	xTaskCreatePinnedToCore(&MqttConnector, "MqttConnector", 4096, (void*)&mqtt,5,NULL,0);
+	mqtt.connect();
 #endif
 
 #ifndef BASECAMP_NOOTA
@@ -79,20 +100,37 @@ bool Basecamp::begin() {
 #ifndef BASECAMP_NOMQTT
 void Basecamp::MqttConnector(void * mqtt) {
 	AsyncMqttClient &mqttclient = *((AsyncMqttClient*)mqtt);
-	while (!mqttclient.connected()) {
-		mqttclient.connect();
-		vTaskDelay(1000);
+	while (1) {
+		if (!mqttclient.connected() && WiFi.status() == WL_CONNECTED) {
+	DEBUG_PRINTLN("MQTT disconnected, reconnecting");
+			mqttclient.connect();
+			vTaskDelay(1000);
+		} else if (WiFi.status() != WL_CONNECTED) {
+			mqttclient.disconnect();
+		}
 	}
 	vTaskDelete(NULL);
 }
 
 void Basecamp::MqttReconnect(AsyncMqttClient * mqtt) {
 	DEBUG_PRINTLN("MQTT disconnected, reconnecting");
-	while (WiFi.status() != WL_CONNECTED) {
-		delay(1000);
+	//while (WiFi.status() != WL_CONNECTED) {
+		//delay(1000);
+	//}
+	//vTaskDelay(1000);
+	//mqtt->connect();
+	//
+	while (1) {
+		if (!mqtt->connected() && WiFi.status() == WL_CONNECTED) {
+			DEBUG_PRINTLN("MQTT disconnected, reconnecting");
+			mqtt->connect();
+			vTaskDelay(2000);
+		} else if (WiFi.status() != WL_CONNECTED) {
+			mqtt->disconnect();
+		} else {
+			break;
+		}
 	}
-	delay(1000);
-	mqtt->connect();
 }
 
 #endif

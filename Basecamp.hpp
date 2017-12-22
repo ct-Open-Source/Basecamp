@@ -4,6 +4,7 @@
    Licensed under GPLv3. See LICENSE for details.
    */
 
+#define DEBUG 1
 #ifndef Basecamp_h
 #define Basecamp_h
 #include "debug.hpp"

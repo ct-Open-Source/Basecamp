@@ -30,7 +30,8 @@ class Configuration {
     {
       bool operator()(String a, String b)
       {
-        return strcmp(a.c_str(), b.c_str()) < 0;
+	return strcmp(a.c_str(), b.c_str()) < 0;
+	//return a.equals(b);
       }
     };
 
