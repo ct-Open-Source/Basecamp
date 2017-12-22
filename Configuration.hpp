@@ -38,7 +38,7 @@ class Configuration {
     std::map<String, String, cmp_str> configuration;
 
   private:
-    //static void CheckConfigStatus(void *);
+    static void CheckConfigStatus(void *);
     String _jsonFile;
     bool _configurationTainted;
 

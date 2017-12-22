@@ -3,10 +3,10 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
-
+//#define DEBUG 1
 #include "WifiControl.hpp"
-#include "Basecamp.hpp"
 #include "debug.hpp"
+#include "Basecamp.hpp"
 void WifiControl::begin(String essid, String password, String configured)
 {
 	DEBUG_PRINTLN("Connecting to Wifi");

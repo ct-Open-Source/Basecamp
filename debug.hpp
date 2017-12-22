@@ -7,7 +7,7 @@
 #ifndef debug_h
 #define debug_h
 
-#if DEBUG == 1
+#ifdef DEBUG
 #define DEBUG_PRINT(x)  Serial.print (x)
 #define DEBUG_PRINTLN(x)  Serial.println (x)
 #define DEBUG_PRINTF(x, y)  Serial.printf (x, y)

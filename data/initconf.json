@@ -21,27 +21,43 @@
 		},
 		{
 			"element": "input",
-			"description": "WIFI SSID",
+			"content": "Device Name",
+			"id": "devicename",
+			"parent": "#configform",
+			"attributes": { 
+				"value": "",
+				"name": "devicename",
+				"type": "text",
+				"data-config": "DeviceName",
+				"required": "required"
+			}
+
+		},
+		{
+			"element": "input",
+			"content": "WIFI SSID",
 			"id": "wifissid",
 			"parent": "#configform",
 			"attributes": { 
 				"value": "",
 				"name": "wifiessid",
 				"type": "text",
-				"data-config": "WifiEssid"
+				"data-config": "WifiEssid",
+				"required": "required"
 			}
 
 		},
 		{
 			"element": "input",
-			"description": "WIFI Password",
+			"content": "WIFI Password",
 			"id": "wifipassword",
 			"parent": "#configform",
 			"attributes": { 
 				"value": "",
 				"name": "wifipassword",
 				"type": "password",
-				"data-config": "WifiPassword"
+				"data-config": "WifiPassword",
+				"required": "required"
 			}
 
 		},
@@ -52,6 +68,35 @@
 				"value": "True",
 				"type": "hidden",
 				"data-config": "WifiConfigured"
+			}
+
+		},
+		{
+			"element": "input",
+			"content": "MQTT-Server",
+			"id": "mqttserver",
+			"parent": "#configform",
+			"attributes": { 
+				"value": "",
+				"name": "mqttserver",
+				"type": "text",
+				"data-config": "MQTTHost"
+			}
+
+		},
+		{
+			"element": "input",
+			"content": "MQTT-Port",
+			"id": "mqttport",
+			"parent": "#configform",
+			"attributes": { 
+				"value": "",
+				"name": "mqttport",
+				"type": "number",
+				"min": "1",
+				"max": "65535",
+				"step": "1",
+				"data-config": "MQTTPort"
 			}
 
 		},

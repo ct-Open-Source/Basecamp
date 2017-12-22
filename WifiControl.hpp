@@ -10,7 +10,6 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <Preferences.h>
-//#include <DNSServer.h>
 
 class WifiControl {
 	public:
