@@ -51,11 +51,11 @@ bool Basecamp::begin() {
 			MqttReconnect(&mqtt);
 			});
 
-	xTaskCreate(&MqttConnector, "MqttConnector", 4096, (void*)&mqtt,5,NULL);
+	xTaskCreatePinnedToCore(&MqttConnector, "MqttConnector", 4096, (void*)&mqtt,5,NULL,0);
 #endif
 
 #ifndef BASECAMP_NOOTA
-	xTaskCreate(&OTAHandling, "ArduinoOTATask", 4096, NULL, 5, NULL);
+	xTaskCreatePinnedToCore(&OTAHandling, "ArduinoOTATask", 4096, NULL, 5, NULL,0);
 #endif
 
 #ifndef BASECAMP_NOWEB
