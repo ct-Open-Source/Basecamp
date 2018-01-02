@@ -153,9 +153,20 @@ void WebServer::addInterfaceElement(String id, String element, String content, S
 	interfaceElement* newElement; 
 	newElement = new interfaceElement(id, element, content, parent);
 	newElement->setAttribute("configvariable", configvariable);
-	interfaceElements[id] = newElement;
+	interfaceElements[id.c_str()] = newElement;
 };
 
+//interfaceElement WebServer::getInterfaceElement(String id) {
+	//for (std::map< it =  interfaceElements.begin(); it != _interfaceElements.end(); ++it)
+	//{
+		////set(it->key, it->value);
+		//interfaceElement currentElement = it->value;
+		//if (currentElement.id == id) {
+			//return currentElement;
+		//}
+
+	//}
+//};
 void WebServer::setInterfaceElementAttribute(String id, String key, String value) {
-	interfaceElements[id]->setAttribute(key, value);
+	interfaceElements[id.c_str()]->setAttribute(key, value);
 };

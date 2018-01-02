@@ -74,12 +74,31 @@ function setAttributes(el, attrs) {
 }
 
 function buildSite (data) {
+	var selectedParent = "#wrapper";
+	console.log(data);
+	while (data.length > 0) {
+		var elementGroup = []
 
-	for(var i = 0;i < data.length; i++)
-	{
-		configureElement(data[i]);
+		for(var i = 0;i < data.length; i++)  {
+			if (data[i].parent == selectedParent) {	
+				elementGroup.push(data[i]);
+				data.splice(i,1);
+			}
+		}
+		for(var i = 0;i < elementGroup.length; i++)
+		{
+			configureElement(elementGroup[i]);
+		}
+		if (data.length > 0) {
+		selectedParent = data[0].parent;
+		}
 	}
 
+	//for(var i = 0;i < data.length; i++)
+	//{
+		//configureElement(data[i]);
+		//data.splice(i,1);
+	//}
 }
 
 function setMeta(data) {

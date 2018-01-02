@@ -54,10 +54,7 @@ bool Basecamp::begin() {
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
 	const char* mqtthost = configuration.get("MQTTHost").c_str();
 	mqtt.setServer(mqtthost, mqttport);
-	Serial.println(mqtthost);
-	Serial.println(mqttport);
-	Serial.println(mqtthost);
-	Serial.println(mqttport);
+
 	const char* mqttuser = configuration.get("MQTTUser").c_str();
 	const char* mqttpass = configuration.get("MQTTPass").c_str();
 	if(mqttuser != "") {
@@ -67,11 +64,10 @@ bool Basecamp::begin() {
 				);
 	};
 	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
-			Serial.println((int)reason);
 			MqttReconnect(&mqtt);
 			});
 
-	xTaskCreatePinnedToCore(&MqttConnector, "MqttConnector", 4096, (void*)&mqtt,5,NULL,0);
+	//xTaskCreatePinnedToCore(&MqttConnector, "MqttConnector", 4096, (void*)&mqtt,5,NULL,0);
 	mqtt.connect();
 #endif
 
@@ -102,10 +98,10 @@ bool Basecamp::begin() {
 void Basecamp::MqttConnector(void * mqtt) {
 	AsyncMqttClient &mqttclient = *((AsyncMqttClient*)mqtt);
 	while (1) {
+		delay(1000);
 		if (!mqttclient.connected() && WiFi.status() == WL_CONNECTED) {
 	DEBUG_PRINTLN("MQTT disconnected, reconnecting");
 			mqttclient.connect();
-			vTaskDelay(1000);
 		} else if (WiFi.status() != WL_CONNECTED) {
 			mqttclient.disconnect();
 		}

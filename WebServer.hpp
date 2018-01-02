@@ -38,7 +38,7 @@ class WebServer {
 			}
 		};
 
-		std::map<String, interfaceElement*, cmp_str> interfaceElements;
+		std::map<String, interfaceElement*> interfaceElements;
 	private:
 		static void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 		std::map<const char*, const char* > _URLList;
