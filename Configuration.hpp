@@ -25,6 +25,7 @@ class Configuration {
 
     bool set(String key, String value);
     String get(String key);
+    char* getCString(String key);
 
     struct cmp_str
     {
