@@ -3,13 +3,12 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
-#define DEBUG 1
 #include "Basecamp.hpp"
 #include "debug.hpp"
 
 bool Basecamp::begin() {
 	Serial.begin(115200);
-	Serial.println("Basecamp V.0.0.1");
+	Serial.println("Basecamp V.0.1.0");
 	configuration.begin("/basecamp.json");
 	if (!configuration.load()) {
 		DEBUG_PRINTLN("Configuration is broken. Resetting.");
@@ -58,12 +57,16 @@ bool Basecamp::begin() {
 	if (configuration.get("WifiConfigured")) {
 		web.addInterfaceElement("heading", "h1", configuration.get("DeviceName"),"#wrapper");
 		web.setInterfaceElementAttribute("heading", "class", "fat-border");
-		web.addInterfaceElement("infotext1", "p", "Please finalize your configuration","#wrapper");
+		web.addInterfaceElement("infotext1", "p", "Configure your device with the following options:","#wrapper");
 		web.addInterfaceElement("configform", "form", "","#wrapper");
 		web.setInterfaceElementAttribute("configform", "action", "saveConfig");
+		web.addInterfaceElement("DeviceName", "input", "Device name","#configform" , "DeviceName");
 		web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
 		web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
 		web.setInterfaceElementAttribute("WifiPassword", "type", "password");
+		web.addInterfaceElement("MQTTHost", "input", "MQTT Host:","#configform" , "MQTTHost");
+		web.addInterfaceElement("MQTTPort", "input", "MQTT Port:","#configform" , "MQTTPort");
+		web.setInterfaceElementAttribute("MQTTPort", "type", "number");
 		web.addInterfaceElement("saveform", "input", " ","#configform");
 		web.setInterfaceElementAttribute("saveform", "type", "button");
 		web.setInterfaceElementAttribute("saveform", "value", "Save");

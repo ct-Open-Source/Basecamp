@@ -48,6 +48,7 @@ void WebServer::begin(Configuration &configuration) {
 				DynamicJsonBuffer _jsonBuffer;
 				JsonObject& _jsonData = response->getRoot();
 				JsonObject& meta = _jsonData.createNestedObject("meta");
+				meta["title"] = _jsonBuffer.strdup(configuration.getCString("DeviceName"));
 				JsonArray& elements = _jsonData.createNestedArray("elements");
 
 
@@ -58,14 +59,24 @@ void WebServer::begin(Configuration &configuration) {
 					element["content"] = _jsonBuffer.strdup(interfaceElement->content);
 					element["parent"] = _jsonBuffer.strdup(interfaceElement->parent);
 					JsonObject& attributes = element.createNestedObject("attributes");
-				
 					for (auto const& x : interfaceElement->attributes){
+						
 						attributes[_jsonBuffer.strdup(x.first)] = _jsonBuffer.strdup(x.second);
 					}
+					if(interfaceElement->getAttribute("data-config") != "") {
+
+						if (interfaceElement->getAttribute("type")=="password") {
+							attributes[_jsonBuffer.strdup("placeholder")] = "Password unchanged";
+							attributes[_jsonBuffer.strdup("value")] = "";
+						} else {
+
+							attributes[_jsonBuffer.strdup("value")] = _jsonBuffer.strdup(configuration.get(interfaceElement->getAttribute("data-config")));
+						}
+					}
+				};
 #ifdef DEBUG
 					_jsonData.prettyPrintTo(Serial);
 #endif
-				};
 				response->setLength();	
 				request->send(response);
 		});
@@ -82,7 +93,9 @@ void WebServer::begin(Configuration &configuration) {
 			for(int i=0;i<params;i++){
 				AsyncWebParameter* p = request->getParam(i);
 				if(p->isPost()){
-				configuration.set(p->name().c_str(), p->value().c_str());
+				if(p->value().c_str() != "") {
+					configuration.set(p->name().c_str(), p->value().c_str());
+					}
 				} 
 			}
 			configuration.save();
@@ -144,6 +157,9 @@ void WebServer::begin(Configuration &configuration) {
 }
 void WebServer::addInterfaceElement(String id, String element, String content, String parent, String configvariable) {
 	interfaceElements.push_back(new interfaceElement(id, element, content, parent));
+	if (configvariable != "") {
+		setInterfaceElementAttribute(id, "data-config", configvariable);
+	}
 };
 
 interfaceElement* WebServer::getInterfaceElement(String id) {

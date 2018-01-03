@@ -29,7 +29,8 @@ label {
 	display:block;
 }
 
-input[type=text], input[type=password], input[type=number] {
+
+input[type=text], input[type=password], input[type=number], input:not([type]) {
 	display:block;
 	margin-bottom:1em;
 	width:100%;
@@ -66,4 +67,17 @@ input[type=button]:hover, input[type=submit]:hover, button, a.button:hover {
 .warning {
 	color: #F00;
 	font-weight:bold;
+}
+
+#configform {
+	display:flex;
+	flex-wrap: wrap;
+}
+
+#configform > * {
+	flex: 1 100%;
+}
+
+#labelforsaveform {
+	order: 100;
 }
