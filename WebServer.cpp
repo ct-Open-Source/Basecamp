@@ -45,33 +45,32 @@ void WebServer::begin(Configuration &configuration) {
 	if (configuration.get("WifiConfigured") == "True") {
 		server->on("/data.json" , HTTP_GET, [&configuration, this](AsyncWebServerRequest * request) {
 				AsyncJsonResponse * response = new AsyncJsonResponse();
-				//AsyncResponseStream *response = request->beginResponseStream("text/json");
 				DynamicJsonBuffer _jsonBuffer;
 				JsonObject& _jsonData = response->getRoot();
-				//JsonObject& _jsonData = _jsonBuffer.createObject();
 				JsonObject& meta = _jsonData.createNestedObject("meta");
 				JsonArray& elements = _jsonData.createNestedArray("elements");
-				for (auto const& x : interfaceElements)
-				{
-					JsonObject& element = elements.createNestedObject();
-					element["element"] = _jsonBuffer.strdup(x.second->element);
-					element["id"] = _jsonBuffer.strdup(x.second->id);
-					element["content"] = _jsonBuffer.strdup(x.second->content);
-					element["parent"] = _jsonBuffer.strdup(x.second->parent);
-					JsonObject& attributes = element.createNestedObject("attributes");
-					for (auto const& y : x.second->attributes) {
-						attributes[_jsonBuffer.strdup(y.first)] = _jsonBuffer.strdup(y.second);
-					}
-					//if (attributes["configvariable"] != "" && attributes["type"] != "password") {
-						//attributes["value"] = _jsonBuffer.strdup(configuration.get(attributes["configvariable"]));
-					//};
-					_jsonData.prettyPrintTo(Serial);
-					//if (attributes["type"] == "password") {
-						//attributes["placeholder"] = "      ";
-					//};
-				};
 
-				_jsonData.prettyPrintTo(Serial);
+					
+	for (auto interfaceElement : interfaceElements) {
+					JsonObject& element = elements.createNestedObject();
+					element["element"] = _jsonBuffer.strdup(interfaceElement->element);
+					element["id"] = _jsonBuffer.strdup(interfaceElement->id);
+					element["content"] = _jsonBuffer.strdup(interfaceElement->content);
+					element["parent"] = _jsonBuffer.strdup(interfaceElement->parent);
+					JsonObject& attributes = element.createNestedObject("attributes");
+					for (auto const& x : interfaceElement->attributes){
+						attributes[_jsonBuffer.strdup(x.first)] = _jsonBuffer.strdup(x.second);
+					}
+					if (attributes["configvariable"] != "" && attributes["type"] != "password") {
+						attributes["value"] = _jsonBuffer.strdup(configuration.get(attributes["configvariable"]));
+					};
+#ifdef DEBUG 1
+					_jsonData.prettyPrintTo(Serial);
+#endif
+					if (attributes["type"] == "password") {
+						attributes["placeholder"] = "      ";
+					};
+				};
 				response->setLength();	
 				request->send(response);
 
@@ -95,7 +94,7 @@ void WebServer::begin(Configuration &configuration) {
 			configuration.save();
 			request->send(201);
 
-			delay(5000);
+			delay(2000);
 			esp_restart();
 			});
 
@@ -150,23 +149,19 @@ void WebServer::begin(Configuration &configuration) {
 
 }
 void WebServer::addInterfaceElement(String id, String element, String content, String parent, String configvariable) {
-	interfaceElement* newElement; 
-	newElement = new interfaceElement(id, element, content, parent);
-	newElement->setAttribute("configvariable", configvariable);
-	interfaceElements[id.c_str()] = newElement;
+	interfaceElements.push_back(new interfaceElement(id, element, content, parent));
 };
 
-//interfaceElement WebServer::getInterfaceElement(String id) {
-	//for (std::map< it =  interfaceElements.begin(); it != _interfaceElements.end(); ++it)
-	//{
-		////set(it->key, it->value);
-		//interfaceElement currentElement = it->value;
-		//if (currentElement.id == id) {
-			//return currentElement;
-		//}
+interfaceElement* WebServer::getInterfaceElement(String id) {
 
-	//}
-//};
+	for (auto element : interfaceElements) {
+		if (element->id == id) {
+			return element;
+		}
+	}
+};
+
 void WebServer::setInterfaceElementAttribute(String id, String key, String value) {
-	interfaceElements[id.c_str()]->setAttribute(key, value);
+	interfaceElement* element = getInterfaceElement(id);
+	element->setAttribute(key,value);
 };

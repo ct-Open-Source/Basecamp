@@ -83,6 +83,7 @@ function buildSite (data) {
 			if (data[i].parent == selectedParent) {	
 				elementGroup.push(data[i]);
 				data.splice(i,1);
+				break;
 			}
 		}
 		for(var i = 0;i < elementGroup.length; i++)

@@ -11,6 +11,8 @@
 #include "data.hpp"
 #include "debug.hpp"
 #include "map"
+#include "unordered_map"
+#include "vector"
 #include <SPIFFS.h>
 #include <ESPmDNS.h>
 #include "Configuration.hpp"
@@ -27,8 +29,9 @@ class WebServer {
 		AsyncEventSource *events;
 		void begin(Configuration &configuration);
 		bool addURL(const char* url, const char* content, const char* mimetype);
-		void addInterfaceElement(String id, String element, String content, String parent, String configvariable = "");
+		void addInterfaceElement(String id, String element, String content, String parent = "#configform", String configvariable = "");
 		void setInterfaceElementAttribute(String id, String key, String value);
+		interfaceElement* getInterfaceElement(String id);
 
 		struct cmp_str
 		{
@@ -38,19 +41,20 @@ class WebServer {
 			}
 		};
 
-		std::map<String, interfaceElement*> interfaceElements;
+		//std::map<String, interfaceElement*> interfaceElements;
+		//interfaceElement interfaceElements[64];
+		std::vector<interfaceElement*> interfaceElements;
+		
 	private:
 		static void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 		std::map<const char*, const char* > _URLList;
 		bool handleFileRead(char* path);
 		char* getContentType(char* filename);
-
+		int _interfaceElementCounter = 0;
 		static std::map<String, String, cmp_str> _interfaceMeta;
 		int _typeof(String a){ return 0; };
 		int _typeof(int a){ return 1; };
 		int _typeof(std::map<String, String, cmp_str> a){ return 2; };
-
-
 };
 
 #endif

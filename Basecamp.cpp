@@ -29,28 +29,7 @@ bool Basecamp::begin() {
 	HTTPClient http;
 	//mqtt.setSecure(configuration.get("MQTTHost").toInt());
 	//mqtt.setServerFingerprint(configuration.get("MQTTFingerprint").toInt());
-	//Serial.println(configuration.get("MQTTHost"));
-	//const char* mqtthost = configuration.get("MQTTHost").c_str();
-	//const char* httphost;
-        //sprintf(httphost);
-	//http.begin("http://"+mqtthost);
-	//Serial.println(mqtthost);
-        //int httpCode = http.GET();
 
-        //// httpCode will be negative on error
-        //if(httpCode > 0) {
-            //// HTTP header has been send and Server response header has been handled
-            //Serial.printf("[HTTP] GET... code: %d\n", httpCode);
-
-            //// file found at server
-            //if(httpCode == HTTP_CODE_OK) {
-                //String payload = http.getString();
-                //Serial.println(payload);
-            //}
-        //} else {
-            //Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
-        //}
-	//const char* mqtthost = "mls-pc";
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
 	const char* mqtthost = configuration.get("MQTTHost").c_str();
 	mqtt.setServer(mqtthost, mqttport);
@@ -67,7 +46,6 @@ bool Basecamp::begin() {
 			MqttReconnect(&mqtt);
 			});
 
-	//xTaskCreatePinnedToCore(&MqttConnector, "MqttConnector", 4096, (void*)&mqtt,5,NULL,0);
 	mqtt.connect();
 #endif
 
@@ -79,15 +57,18 @@ bool Basecamp::begin() {
 	web.begin(configuration);
 
 	if (configuration.get("WifiConfigured")) {
+		web.addInterfaceElement("heading", "h1", "IoT Door Sensor","#wrapper");
+		web.setInterfaceElementAttribute("heading", "class", "fat-border");
+		web.addInterfaceElement("infotext1", "p", "Please finalize your configuration","#wrapper");
 		web.addInterfaceElement("configform", "form", "","#wrapper");
 		web.setInterfaceElementAttribute("configform", "action", "saveConfig");
 		web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
 		web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
 		web.setInterfaceElementAttribute("WifiPassword", "type", "password");
-		web.addInterfaceElement("heading", "h1", "IoT Door Sensor","#wrapper");
-		web.setInterfaceElementAttribute("heading", "class", "fat-border");
-		web.addInterfaceElement("infotext1", "p", "Please finalize your configuration","#wrapper");
-		web.addInterfaceElement("saveform", "input", "Save","#save");
+		web.addInterfaceElement("saveform", "input", "","#configform");
+		web.setInterfaceElementAttribute("saveform", "type", "button");
+		web.setInterfaceElementAttribute("saveform", "value", "Save");
+		web.setInterfaceElementAttribute("saveform", "onclick", "collectConfiguration()");
 	}
 #endif
 
@@ -95,28 +76,11 @@ bool Basecamp::begin() {
 
 
 #ifndef BASECAMP_NOMQTT
-void Basecamp::MqttConnector(void * mqtt) {
-	AsyncMqttClient &mqttclient = *((AsyncMqttClient*)mqtt);
-	while (1) {
-		delay(1000);
-		if (!mqttclient.connected() && WiFi.status() == WL_CONNECTED) {
-	DEBUG_PRINTLN("MQTT disconnected, reconnecting");
-			mqttclient.connect();
-		} else if (WiFi.status() != WL_CONNECTED) {
-			mqttclient.disconnect();
-		}
-	}
-	vTaskDelete(NULL);
-}
+
 
 void Basecamp::MqttReconnect(AsyncMqttClient * mqtt) {
 	DEBUG_PRINTLN("MQTT disconnected, reconnecting");
-	//while (WiFi.status() != WL_CONNECTED) {
-		//delay(1000);
-	//}
-	//vTaskDelay(1000);
-	//mqtt->connect();
-	//
+
 	while (1) {
 		if (!mqtt->connected() && WiFi.status() == WL_CONNECTED) {
 			DEBUG_PRINTLN("MQTT disconnected, reconnecting");
@@ -147,7 +111,6 @@ bool Basecamp::checkResetReason() {
 
 		if (bootCounter > 3){
 			DEBUG_PRINTLN("Configuration forcibly reset.");
-			//configuration.reset();
 			configuration.set("WifiConfigured", "False");
 			configuration.save();
 			preferences.putUInt("bootcounter", 0);
