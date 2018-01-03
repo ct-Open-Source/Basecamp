@@ -26,13 +26,12 @@ bool Basecamp::begin() {
 #endif
 	delay(5000);
 #ifndef BASECAMP_NOMQTT
-	HTTPClient http;
 	//mqtt.setSecure(configuration.get("MQTTHost").toInt());
 	//mqtt.setServerFingerprint(configuration.get("MQTTFingerprint").toInt());
 
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
 	char* mqtthost = configuration.getCString("MQTTHost");
-	char* mqttuser = configuration.get("MQTTPort").toInt();
+	char* mqttuser = configuration.get("MQTTPort");
 	char* mqttpass = configuration.getCString("MQTTHost");
 	mqtt.setServer(mqtthost, mqttport);
 	if(mqttuser != "") {
@@ -41,6 +40,9 @@ bool Basecamp::begin() {
 
 	mqtt.connect();
 	free(mqtthost);
+	free(mqttport);
+	free(mqttuser);
+	free(mqttpass);
 	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
 			MqttReconnect(&mqtt);
 			});
