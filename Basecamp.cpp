@@ -3,10 +3,10 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
-
+#define DEBUG 1
 #include "Basecamp.hpp"
 #include "debug.hpp"
-#include <HTTPClient.h>
+
 bool Basecamp::begin() {
 	Serial.begin(115200);
 	Serial.println("Basecamp V.0.0.1");
@@ -31,22 +31,20 @@ bool Basecamp::begin() {
 	//mqtt.setServerFingerprint(configuration.get("MQTTFingerprint").toInt());
 
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
-	const char* mqtthost = configuration.get("MQTTHost").c_str();
+	char* mqtthost = configuration.getCString("MQTTHost");
+	char* mqttuser = configuration.get("MQTTPort").toInt();
+	char* mqttpass = configuration.getCString("MQTTHost");
 	mqtt.setServer(mqtthost, mqttport);
-
-	const char* mqttuser = configuration.get("MQTTUser").c_str();
-	const char* mqttpass = configuration.get("MQTTPass").c_str();
 	if(mqttuser != "") {
-		mqtt.setCredentials(
-				configuration.get("MQTTUser").c_str(),
-				configuration.get("MQTTPass").c_str()
-				);
+		mqtt.setCredentials(mqttuser,mqttpass);
 	};
+
+	mqtt.connect();
+	free(mqtthost);
 	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
 			MqttReconnect(&mqtt);
 			});
 
-	mqtt.connect();
 #endif
 
 #ifndef BASECAMP_NOOTA
@@ -76,16 +74,11 @@ bool Basecamp::begin() {
 
 
 #ifndef BASECAMP_NOMQTT
-
-
 void Basecamp::MqttReconnect(AsyncMqttClient * mqtt) {
-	DEBUG_PRINTLN("MQTT disconnected, reconnecting");
-
 	while (1) {
-		if (!mqtt->connected() && WiFi.status() == WL_CONNECTED) {
-			DEBUG_PRINTLN("MQTT disconnected, reconnecting");
+		if (mqtt->connected() != 1 && WiFi.status() == WL_CONNECTED) {
+			DEBUG_PRINTLN("Callback: MQTT disconnected, reconnecting");
 			mqtt->connect();
-			vTaskDelay(2000);
 		} else if (WiFi.status() != WL_CONNECTED) {
 			mqtt->disconnect();
 		} else {

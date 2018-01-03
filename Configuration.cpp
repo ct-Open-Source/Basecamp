@@ -3,7 +3,7 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
-
+#define DEBUG 1
 #include "Configuration.hpp"
 #include "debug.hpp"
 
@@ -94,6 +94,11 @@ String Configuration::get(String key) {
 	return configuration[key];
 }
 
+char* Configuration::getCString(String key) {
+	char *newCString = (char*) malloc(configuration[key].length()+1);
+	strcpy(newCString, configuration[key].c_str());
+	return newCString;
+}
 
 void Configuration::reset() {
 	configuration.clear();
