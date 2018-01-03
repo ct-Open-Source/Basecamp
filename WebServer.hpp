@@ -41,8 +41,6 @@ class WebServer {
 			}
 		};
 
-		//std::map<String, interfaceElement*> interfaceElements;
-		//interfaceElement interfaceElements[64];
 		std::vector<interfaceElement*> interfaceElements;
 		
 	private:

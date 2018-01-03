@@ -48,7 +48,10 @@ bool Basecamp::begin() {
 #endif
 
 #ifndef BASECAMP_NOOTA
-	xTaskCreatePinnedToCore(&OTAHandling, "ArduinoOTATask", 4096, NULL, 5, NULL,0);
+	if(configuration.get("OTAActive") != "false") {
+		char* OTAPass = configuration.getCString("OTAPass");	
+		xTaskCreatePinnedToCore(&OTAHandling, "ArduinoOTATask", 4096, (void*)&OTAPass, 5, NULL,0);
+	}
 #endif
 
 #ifndef BASECAMP_NOWEB
@@ -57,16 +60,22 @@ bool Basecamp::begin() {
 	if (configuration.get("WifiConfigured")) {
 		web.addInterfaceElement("heading", "h1", configuration.get("DeviceName"),"#wrapper");
 		web.setInterfaceElementAttribute("heading", "class", "fat-border");
+
 		web.addInterfaceElement("infotext1", "p", "Configure your device with the following options:","#wrapper");
+
 		web.addInterfaceElement("configform", "form", "","#wrapper");
 		web.setInterfaceElementAttribute("configform", "action", "saveConfig");
+
 		web.addInterfaceElement("DeviceName", "input", "Device name","#configform" , "DeviceName");
+
 		web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
 		web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
 		web.setInterfaceElementAttribute("WifiPassword", "type", "password");
+
 		web.addInterfaceElement("MQTTHost", "input", "MQTT Host:","#configform" , "MQTTHost");
 		web.addInterfaceElement("MQTTPort", "input", "MQTT Port:","#configform" , "MQTTPort");
 		web.setInterfaceElementAttribute("MQTTPort", "type", "number");
+
 		web.addInterfaceElement("saveform", "input", " ","#configform");
 		web.setInterfaceElementAttribute("saveform", "type", "button");
 		web.setInterfaceElementAttribute("saveform", "value", "Save");
@@ -132,7 +141,13 @@ bool Basecamp::checkResetReason() {
 };
 
 #ifndef BASECAMP_NOOTA
-void Basecamp::OTAHandling(void *) {
+void Basecamp::OTAHandling(void * OTAPass) {
+	
+	char* password = *((char**)OTAPass);
+	if(password != "") { 
+		ArduinoOTA.setPassword(password);
+	}
+
 	ArduinoOTA
 		.onStart([]() {
 				String type;
