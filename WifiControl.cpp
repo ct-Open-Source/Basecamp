@@ -21,7 +21,7 @@ void WifiControl::begin(String essid, String password, String configured)
 		DEBUG_PRINTLN(_wifiEssid);
 
 		WiFi.begin ( _wifiEssid.c_str(), _wifiPassword.c_str());
-		WiFi.setAutoConnect ( true );                                             // Autoconnect to last known Wifi on startup
+		WiFi.setAutoConnect ( true );                                  
 		WiFi.setAutoReconnect ( true );
 	} else {
 
@@ -31,7 +31,6 @@ void WifiControl::begin(String essid, String password, String configured)
 		WiFi.mode(WIFI_AP_STA);
 		WiFi.softAP("ESP32");
 		
-		//xTaskCreate(&DNSTask, "DNSTask", 4096, NULL, 5, NULL);
 
 	}
 }
@@ -42,16 +41,6 @@ int WifiControl::status() {
 }
 IPAddress WifiControl::getIP() {
 	return WiFi.localIP();
-}
-
-void WifiControl::DNSTask(void *) {
-	//DNSServer dnsServer;
-	//IPAddress apIP(192, 168, 4, 1);
-	//dnsServer.start(53, "*", apIP);
-	while (1) {
-		//dnsServer.processNextRequest();
-		vTaskDelay(100);
-	}
 }
 
 void WifiControl::WiFiEvent(WiFiEvent_t event)

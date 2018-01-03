@@ -10,7 +10,6 @@ bool Configuration::begin(String filename)
 {
 	_jsonFile = filename;
 
-	//xTaskCreate(&CheckConfigStatus, "CheckConfigStatusTask", 1024, NULL, 5, NULL);
 }
 
 bool Configuration::load() {
@@ -116,11 +115,4 @@ bool Configuration::dump() {
 #endif
 }
 
-//void Configuration::CheckConfigStatus(void *) {
-	//if (_configurationTainted) {
-		////		((Configuration*)configuration)->save();
-		//_configurationTainted = false;
-	//}
-	//vTaskDelay(10000);
 
-//}
