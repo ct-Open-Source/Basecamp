@@ -50,30 +50,24 @@ void WebServer::begin(Configuration &configuration) {
 				JsonObject& meta = _jsonData.createNestedObject("meta");
 				JsonArray& elements = _jsonData.createNestedArray("elements");
 
-					
-	for (auto interfaceElement : interfaceElements) {
+
+				for (auto const& interfaceElement : interfaceElements) {
 					JsonObject& element = elements.createNestedObject();
 					element["element"] = _jsonBuffer.strdup(interfaceElement->element);
 					element["id"] = _jsonBuffer.strdup(interfaceElement->id);
 					element["content"] = _jsonBuffer.strdup(interfaceElement->content);
 					element["parent"] = _jsonBuffer.strdup(interfaceElement->parent);
 					JsonObject& attributes = element.createNestedObject("attributes");
+				
 					for (auto const& x : interfaceElement->attributes){
 						attributes[_jsonBuffer.strdup(x.first)] = _jsonBuffer.strdup(x.second);
 					}
-					if (attributes["configvariable"] != "" && attributes["type"] != "password") {
-						attributes["value"] = _jsonBuffer.strdup(configuration.get(attributes["configvariable"]));
-					};
-#ifdef DEBUG 1
+#ifdef DEBUG
 					_jsonData.prettyPrintTo(Serial);
 #endif
-					if (attributes["type"] == "password") {
-						attributes["placeholder"] = "      ";
-					};
 				};
 				response->setLength();	
 				request->send(response);
-
 		});
 	} else {
 		DEBUG_PRINTLN("No Config found");

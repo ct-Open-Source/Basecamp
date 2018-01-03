@@ -56,7 +56,7 @@ bool Basecamp::begin() {
 	web.begin(configuration);
 
 	if (configuration.get("WifiConfigured")) {
-		web.addInterfaceElement("heading", "h1", "IoT Door Sensor","#wrapper");
+		web.addInterfaceElement("heading", "h1", configuration.get("DeviceName"),"#wrapper");
 		web.setInterfaceElementAttribute("heading", "class", "fat-border");
 		web.addInterfaceElement("infotext1", "p", "Please finalize your configuration","#wrapper");
 		web.addInterfaceElement("configform", "form", "","#wrapper");
@@ -64,7 +64,7 @@ bool Basecamp::begin() {
 		web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
 		web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
 		web.setInterfaceElementAttribute("WifiPassword", "type", "password");
-		web.addInterfaceElement("saveform", "input", "","#configform");
+		web.addInterfaceElement("saveform", "input", " ","#configform");
 		web.setInterfaceElementAttribute("saveform", "type", "button");
 		web.setInterfaceElementAttribute("saveform", "value", "Save");
 		web.setInterfaceElementAttribute("saveform", "onclick", "collectConfiguration()");
