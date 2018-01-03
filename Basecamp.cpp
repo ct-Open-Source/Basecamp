@@ -3,10 +3,11 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
-
+#define DEBUG 1
 #include "Basecamp.hpp"
 #include "debug.hpp"
 #include <HTTPClient.h>
+
 bool Basecamp::begin() {
 	Serial.begin(115200);
 	Serial.println("Basecamp V.0.0.1");
@@ -52,12 +53,8 @@ bool Basecamp::begin() {
         //}
 	//const char* mqtthost = "mls-pc";
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
-	const char* mqtthost = configuration.get("MQTTHost").c_str();
+	char* mqtthost = configuration.getCString("MQTTHost");
 	mqtt.setServer(mqtthost, mqttport);
-	Serial.println(mqtthost);
-	Serial.println(mqttport);
-	Serial.println(mqtthost);
-	Serial.println(mqttport);
 	const char* mqttuser = configuration.get("MQTTUser").c_str();
 	const char* mqttpass = configuration.get("MQTTPass").c_str();
 	if(mqttuser != "") {
@@ -66,13 +63,15 @@ bool Basecamp::begin() {
 				configuration.get("MQTTPass").c_str()
 				);
 	};
+	
+	mqtt.connect();
+	free(mqtthost);
+	//delay(250);
 	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
-			Serial.println((int)reason);
 			MqttReconnect(&mqtt);
 			});
 
-	xTaskCreatePinnedToCore(&MqttConnector, "MqttConnector", 4096, (void*)&mqtt,5,NULL,0);
-	mqtt.connect();
+	//xTaskCreatePinnedToCore(&MqttConnector, "MqttConnector", 4096, (void*)&mqtt,5,NULL,0);
 #endif
 
 #ifndef BASECAMP_NOOTA
@@ -102,30 +101,19 @@ bool Basecamp::begin() {
 void Basecamp::MqttConnector(void * mqtt) {
 	AsyncMqttClient &mqttclient = *((AsyncMqttClient*)mqtt);
 	while (1) {
-		if (!mqttclient.connected() && WiFi.status() == WL_CONNECTED) {
-	DEBUG_PRINTLN("MQTT disconnected, reconnecting");
+		vTaskDelay(1000);
+		if (mqttclient.connected() != 1 && WiFi.status() == WL_CONNECTED) {
+			DEBUG_PRINTLN("Thread: MQTT disconnected, reconnecting");
 			mqttclient.connect();
-			vTaskDelay(1000);
-		} else if (WiFi.status() != WL_CONNECTED) {
-			mqttclient.disconnect();
-		}
-	}
+		} 	}
 	vTaskDelete(NULL);
 }
 
 void Basecamp::MqttReconnect(AsyncMqttClient * mqtt) {
-	DEBUG_PRINTLN("MQTT disconnected, reconnecting");
-	//while (WiFi.status() != WL_CONNECTED) {
-		//delay(1000);
-	//}
-	//vTaskDelay(1000);
-	//mqtt->connect();
-	//
 	while (1) {
-		if (!mqtt->connected() && WiFi.status() == WL_CONNECTED) {
-			DEBUG_PRINTLN("MQTT disconnected, reconnecting");
+		if (mqtt->connected() != 1 && WiFi.status() == WL_CONNECTED) {
+			DEBUG_PRINTLN("Callback: MQTT disconnected, reconnecting");
 			mqtt->connect();
-			vTaskDelay(2000);
 		} else if (WiFi.status() != WL_CONNECTED) {
 			mqtt->disconnect();
 		} else {
