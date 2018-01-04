@@ -102,7 +102,7 @@
 		},
 		{
 			"element": "input",
-			"id": "formsubmit",
+			"id": "saveform",
 			"parent": "#configform",
 			"attributes": {
 				"type":"button",
