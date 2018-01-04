@@ -35,7 +35,7 @@ class Basecamp {
 		Preferences preferences;
 		bool begin();
 		bool checkResetReason();
-		char* hostname;
+		String hostname;
 		struct taskParms {
 			char* parm1;
 			const char* parm2;
@@ -58,6 +58,6 @@ class Basecamp {
 		static void OTAHandling(void *);
 #endif
 	private:
-		char* _generateHostname();
+		String _generateHostname();
 };
 #endif

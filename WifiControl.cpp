@@ -6,7 +6,7 @@
 #include "WifiControl.hpp"
 #include "debug.hpp"
 #include "Basecamp.hpp"
-void WifiControl::begin(String essid, String password, String configured, const char* hostname)
+void WifiControl::begin(String essid, String password, String configured, String hostname)
 {
 	DEBUG_PRINTLN("Connecting to Wifi");
 
@@ -21,8 +21,7 @@ void WifiControl::begin(String essid, String password, String configured, const 
 		DEBUG_PRINTLN(_wifiEssid);
 
 		WiFi.begin ( _wifiEssid.c_str(), _wifiPassword.c_str());
-		Serial.println(hostname);
-		WiFi.setHostname(hostname);
+		WiFi.setHostname(hostname.c_str());
 		WiFi.setAutoConnect ( true );                                  
 		WiFi.setAutoReconnect ( true );
 	} else {
@@ -62,6 +61,8 @@ void WifiControl::WiFiEvent(WiFiEvent_t event)
 			break;
 		case SYSTEM_EVENT_STA_DISCONNECTED:
 			Serial.println("WiFi lost connection");
+			delay(50);
+			WiFi.reconnect();
 			break;
 	}
 }
