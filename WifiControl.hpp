@@ -16,7 +16,7 @@ class WifiControl {
 		WifiControl(){};
 		bool connect();
 		bool disconnect();
-		void begin(String essid, String password = "", String configured = "False");
+		void begin(String essid, String password = "", String configured = "False", const char* hostname = "BasecampDevice");
 		IPAddress getIP();
 		int status();
 

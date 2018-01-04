@@ -4,7 +4,6 @@
    Licensed under GPLv3. See LICENSE for details.
    */
 
-#define DEBUG 1
 #ifndef Basecamp_h
 #define Basecamp_h
 #include "debug.hpp"
@@ -36,6 +35,11 @@ class Basecamp {
 		Preferences preferences;
 		bool begin();
 		bool checkResetReason();
+		char* hostname;
+		struct taskParms {
+			char* parm1;
+			const char* parm2;
+		};
 #ifndef BASECAMP_NOWIFI
 		WifiControl wifi;
 #endif
@@ -53,6 +57,7 @@ class Basecamp {
 #ifndef BASECAMP_NOOTA
 		static void OTAHandling(void *);
 #endif
-
+	private:
+		char* _generateHostname();
 };
 #endif

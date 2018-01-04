@@ -6,6 +6,28 @@
 #include "Basecamp.hpp"
 #include "debug.hpp"
 
+char* Basecamp::_generateHostname() {
+	char clean_hostname[64];
+	configuration.get("DeviceName").toCharArray(clean_hostname, 64);
+	if (clean_hostname == "") {
+		return "BasecampDevice";
+	}
+	int i=0;
+	char c;
+	while (clean_hostname[i]) {
+		c=clean_hostname[i];
+		if (isalnum(c)) { 
+			clean_hostname[i]=tolower(c);
+		} else {
+			clean_hostname[i]= '-';
+		};
+		i++;
+	};
+	DEBUG_PRINTLN(clean_hostname);
+	Serial.println(clean_hostname);
+	return clean_hostname; 
+};
+
 bool Basecamp::begin() {
 	Serial.begin(115200);
 	Serial.println("Basecamp V.0.1.0");
@@ -14,20 +36,21 @@ bool Basecamp::begin() {
 		DEBUG_PRINTLN("Configuration is broken. Resetting.");
 		configuration.reset();
 	};
+	hostname = _generateHostname();
+	Serial.println(hostname);
 	checkResetReason();
 
 #ifndef BASECAMP_NOWIFI
+
 	wifi.begin(
 			configuration.get("WifiEssid"),
 			configuration.get("WifiPassword"),
-			configuration.get("WifiConfigured")
+			configuration.get("WifiConfigured"),
+			hostname
 		  );
 #endif
-	delay(5000);
-#ifndef BASECAMP_NOMQTT
-	//mqtt.setSecure(configuration.get("MQTTHost").toInt());
-	//mqtt.setServerFingerprint(configuration.get("MQTTFingerprint").toInt());
 
+#ifndef BASECAMP_NOMQTT
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
 	char* mqtthost = configuration.getCString("MQTTHost");
 	char* mqttuser = configuration.getCString("MQTTUser");
@@ -44,13 +67,14 @@ bool Basecamp::begin() {
 	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
 			MqttReconnect(&mqtt);
 			});
-
 #endif
 
 #ifndef BASECAMP_NOOTA
 	if(configuration.get("OTAActive") != "false") {
-		char* OTAPass = configuration.getCString("OTAPass");	
-		xTaskCreatePinnedToCore(&OTAHandling, "ArduinoOTATask", 4096, (void*)&OTAPass, 5, NULL,0);
+		struct taskParms OTAParams[1];
+		OTAParams[0].parm1 = configuration.getCString("OTAPass");
+		OTAParams[0].parm2 = hostname;
+		xTaskCreatePinnedToCore(&OTAHandling, "ArduinoOTATask", 4096, (void*)&OTAParams[0], 5, NULL,0);
 	}
 #endif
 
@@ -141,13 +165,21 @@ bool Basecamp::checkResetReason() {
 };
 
 #ifndef BASECAMP_NOOTA
-void Basecamp::OTAHandling(void * OTAPass) {
+void Basecamp::OTAHandling(void * OTAParams) {
+	//ArduinoOTA.setHostname(hostname);	
 	
-	char* password = *((char**)OTAPass);
-	if(password != "") { 
-		ArduinoOTA.setPassword(password);
-	}
+	//char* password = *((char**)OTAParams);
+	//if(password != "") { 
+		//ArduinoOTA.setPassword(password);
+	//}
 
+	struct taskParms *params;
+	params = (struct taskParms *) OTAParams;
+	
+	if(params->parm1 != "") { 
+		ArduinoOTA.setPassword(params->parm1);
+	}
+	ArduinoOTA.setHostname(params->parm2);	
 	ArduinoOTA
 		.onStart([]() {
 				String type;
