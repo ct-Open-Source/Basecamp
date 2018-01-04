@@ -13,34 +13,34 @@
 #include "map"
 
 class Configuration {
-  public:
-    Configuration() {};
-    ~Configuration() {};
+	public:
+		Configuration() {};
+		~Configuration() {};
 
-    bool begin(String filename);
-    bool load();
-    bool save();
-    bool dump();
-    void reset();
+		bool begin(String filename);
+		bool load();
+		bool save();
+		bool dump();
+		void reset();
 
-    bool set(String key, String value);
-    String get(String key);
-    char* getCString(String key);
+		bool set(String key, String value);
+		String get(String key);
+		char* getCString(String key);
 
-    struct cmp_str
-    {
-      bool operator()(String a, String b)
-      {
-	return strcmp(a.c_str(), b.c_str()) < 0;
-      }
-    };
+		struct cmp_str
+		{
+			bool operator()(String a, String b)
+			{
+				return strcmp(a.c_str(), b.c_str()) < 0;
+			}
+		};
 
-    std::map<String, String, cmp_str> configuration;
+		std::map<String, String, cmp_str> configuration;
 
-  private:
-    static void CheckConfigStatus(void *);
-    String _jsonFile;
-    bool _configurationTainted;
+	private:
+		static void CheckConfigStatus(void *);
+		String _jsonFile;
+		bool _configurationTainted;
 
 };
 

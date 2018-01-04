@@ -29,5 +29,4 @@ class WifiControl {
 		static void WifiConnector(void *);
 };
 
-
 #endif

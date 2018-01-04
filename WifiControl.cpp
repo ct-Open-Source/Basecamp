@@ -14,7 +14,7 @@ void WifiControl::begin(String essid, String password, String configured, String
 	String _wifiEssid = essid;
 	String _wifiPassword = password;
 
-		WiFi.onEvent(WiFiEvent);
+	WiFi.onEvent(WiFiEvent);
 	if (_wifiConfigured == "True") {
 		DEBUG_PRINTLN("Wifi is configured");
 		DEBUG_PRINT("Connecting to ");
@@ -31,7 +31,7 @@ void WifiControl::begin(String essid, String password, String configured, String
 
 		WiFi.mode(WIFI_AP_STA);
 		WiFi.softAP("ESP32");
-		
+
 
 	}
 	delay(1000);

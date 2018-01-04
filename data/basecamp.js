@@ -91,14 +91,14 @@ function buildSite (data) {
 			configureElement(elementGroup[i]);
 		}
 		if (data.length > 0) {
-		selectedParent = data[0].parent;
+			selectedParent = data[0].parent;
 		}
 	}
 
 	//for(var i = 0;i < data.length; i++)
 	//{
-		//configureElement(data[i]);
-		//data.splice(i,1);
+	//configureElement(data[i]);
+	//data.splice(i,1);
 	//}
 }
 
