@@ -1,0 +1,35 @@
+{
+    "name": "Basecamp",
+    "keywords": "esp32, basecamp, ct, home automation,",
+    "description": "A basic IoT library for the ESP32. This library eases the building of ESP32 firmwares for IoT projects. It takes care of basic tasks like WiFi management, generation of a webinterface, connecting to an MQTT broker and storing configuration data.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/merlinschumacher/Basecamp.git"
+    },
+    "authors": [{
+        "name": "Merlin Schumacher",
+        "email": "mls@ct.de",
+        "maintainer": true
+    }],
+    "dependencies": [{
+            "name": "ESPAsyncWebServer",
+            "frameworks": "arduino"
+        },
+        {
+            "name": "ArduinoJSON",
+            "frameworks": "arduino"
+        },
+        {
+            "name": "AsyncMqttClient",
+            "platforms": "espressif32"
+        },
+        {
+            "name": "AsyncTCP",
+            "platforms": "espressif32"
+        }
+    ],
+    "version": "0.1.2",
+    "frameworks": "arduino",
+    "platforms": "espressif32",
+    "license": "GPL-3.0-only"
+}
