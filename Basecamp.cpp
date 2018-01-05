@@ -41,7 +41,7 @@ bool Basecamp::begin() {
 			hostname
 		  );
 #endif
-
+delay(5000);
 #ifndef BASECAMP_NOMQTT
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
 	char* mqtthost = configuration.getCString("MQTTHost");
