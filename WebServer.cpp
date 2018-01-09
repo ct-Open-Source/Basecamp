@@ -8,8 +8,6 @@
 #include "debug.hpp"
 
 void WebServer::begin(Configuration &configuration) {
-
-
 	SPIFFS.begin();
 	server = new AsyncWebServer(80);
 	events = new AsyncEventSource("/events");
@@ -37,7 +35,7 @@ void WebServer::begin(Configuration &configuration) {
 			});
 
 	server->on("/basecamp.js" , HTTP_GET, [](AsyncWebServerRequest * request) {
-			AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", basecamp_js_gz, basecamp_js_gz_len);
+			AsyncWebServerResponse *response = request->beginResponse_P(200, "text/js", basecamp_js_gz, basecamp_js_gz_len);
 			response->addHeader("Content-Encoding", "gzip");
 			request->send(response);
 			});
@@ -83,7 +81,7 @@ void WebServer::begin(Configuration &configuration) {
 	} else {
 		DEBUG_PRINTLN("No Config found");
 		server->on("/data.json" , HTTP_GET, [](AsyncWebServerRequest * request) {
-				AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", initconf_json_gz, initconf_json_gz_len);
+				AsyncWebServerResponse *response = request->beginResponse_P(200, "application/json", initconf_json_gz, initconf_json_gz_len);
 				response->addHeader("Content-Encoding", "gzip");
 				request->send(response);
 				});
@@ -91,19 +89,19 @@ void WebServer::begin(Configuration &configuration) {
 	server->on("/submitconfig", HTTP_POST, [&configuration](AsyncWebServerRequest * request) {
 			int params = request->params();
 			for(int i=0;i<params;i++){
-			AsyncWebParameter* p = request->getParam(i);
-			if(p->isPost()){
-			if(p->value().c_str() != "") {
-			configuration.set(p->name().c_str(), p->value().c_str());
-			}
-			} 
+				AsyncWebParameter* p = request->getParam(i);
+				if(p->isPost()){
+					if(p->value().c_str() != "") {
+						configuration.set(p->name().c_str(), p->value().c_str());
+					}
+				} 
 			}
 			configuration.save();
 			request->send(201);
 
 			delay(2000);
 			esp_restart();
-			});
+	});
 
 	server->onNotFound([](AsyncWebServerRequest * request) {
 #ifdef DEBUG
