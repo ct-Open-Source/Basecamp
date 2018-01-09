@@ -29,7 +29,7 @@ class interfaceElement {
 		String content;
 		String parent;
 		std::map<String, String, cmp_str> attributes;
-		bool setAttribute(String key, String value) {
+		void setAttribute(String key, String value) {
 			attributes[key] = value;
 		};
 
