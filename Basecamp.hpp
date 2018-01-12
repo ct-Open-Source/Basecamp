@@ -10,7 +10,7 @@
 #include "Configuration.hpp"
 #include <Preferences.h>
 #include <rom/rtc.h>
-
+#include <esp_wifi.h>
 #ifndef BASECAMP_NOWIFI
 #include "WifiControl.hpp"
 #endif
@@ -41,6 +41,7 @@ class Basecamp {
 			const char* parm2;
 		};
 #ifndef BASECAMP_NOWIFI
+		String mac;
 		WifiControl wifi;
 #endif
 
@@ -58,5 +59,6 @@ class Basecamp {
 #endif
 	private:
 		String _generateHostname();
+		String _generateMac();
 };
 #endif

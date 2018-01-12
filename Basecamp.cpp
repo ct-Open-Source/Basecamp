@@ -32,6 +32,7 @@ bool Basecamp::begin() {
 		configuration.reset();
 	};
 	hostname = _generateHostname();
+	DEBUG_PRINTLN(hostname);
 	checkResetReason();
 
 #ifndef BASECAMP_NOWIFI
@@ -42,6 +43,9 @@ bool Basecamp::begin() {
 			configuration.get("WifiConfigured"),
 			hostname
 		  );
+
+	mac = _generateMac();
+	DEBUG_PRINTLN(mac);
 #endif
 #ifndef BASECAMP_NOMQTT
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
@@ -93,6 +97,9 @@ bool Basecamp::begin() {
 		web.setInterfaceElementAttribute("saveform", "type", "button");
 		web.setInterfaceElementAttribute("saveform", "value", "Save");
 		web.setInterfaceElementAttribute("saveform", "onclick", "collectConfiguration()");
+		
+		String infotext2 = "This device has the MAC-Address: " + mac;
+		web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
 	}
 #endif
 
@@ -208,3 +215,16 @@ void Basecamp::OTAHandling(void * OTAParams) {
 	}
 };
 #endif
+
+String Basecamp::_generateMac() {
+	byte rawMac[6];
+	WiFi.macAddress(rawMac);
+	String mac;
+	for (int i = 0; i < 6; i++) {
+		mac += (String(rawMac[i], HEX));
+		if (i < 5) {
+			mac+=":";
+		}
+	}
+	return mac; 
+}
