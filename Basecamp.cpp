@@ -3,8 +3,6 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
-#define DEBUG 1
-
 #include "Basecamp.hpp"
 #include "debug.hpp"
 
@@ -25,7 +23,8 @@ String Basecamp::_generateHostname() {
 
 bool Basecamp::begin() {
 	Serial.begin(115200);
-	Serial.println("Basecamp V.0.1.5");
+	Serial.print("Basecamp V.");
+	Serial.println(version);
 	configuration.begin("/basecamp.json");
 	if (!configuration.load()) {
 		DEBUG_PRINTLN("Configuration is broken. Resetting.");
@@ -103,6 +102,7 @@ bool Basecamp::begin() {
 	}
 #endif
 
+	Serial.println(showSystemInfo());
 }
 
 
@@ -227,4 +227,10 @@ String Basecamp::_generateMac() {
 		}
 	}
 	return mac; 
+}
+
+String Basecamp::showSystemInfo() {
+	String Info = "";
+	Info += "MAC-Address: " + mac;
+	return Info;
 }

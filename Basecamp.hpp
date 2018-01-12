@@ -31,10 +31,12 @@ class Basecamp {
 	public:
 		Basecamp() {};
 		~Basecamp() {};
+		String version = "0.1.5";
 		Configuration configuration;
 		Preferences preferences;
 		bool begin();
 		bool checkResetReason();
+		String showSystemInfo();
 		String hostname;
 		struct taskParms {
 			char* parm1;
