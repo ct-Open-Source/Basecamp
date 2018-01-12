@@ -10,6 +10,9 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <Preferences.h>
+extern "C" {
+	#include "freertos/timers.h"
+}
 
 class WifiControl {
 	public:
@@ -19,14 +22,11 @@ class WifiControl {
 		void begin(String essid, String password = "", String configured = "False", String hostname = "BasecampDevice");
 		IPAddress getIP();
 		int status();
-
 		static void WiFiEvent(WiFiEvent_t event);
 	private:
 		String _wifiEssid;
 		String _wifiPassword;
 		String _ap;
-		static void DNSTask(void *);
-		static void WifiConnector(void *);
 };
 
 #endif

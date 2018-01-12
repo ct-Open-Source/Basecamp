@@ -3,6 +3,8 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
+#define DEBUG 1
+
 #include "Basecamp.hpp"
 #include "debug.hpp"
 
@@ -41,24 +43,19 @@ bool Basecamp::begin() {
 			hostname
 		  );
 #endif
-delay(5000);
 #ifndef BASECAMP_NOMQTT
 	uint16_t mqttport = configuration.get("MQTTPort").toInt();
 	char* mqtthost = configuration.getCString("MQTTHost");
 	char* mqttuser = configuration.getCString("MQTTUser");
 	char* mqttpass = configuration.getCString("MQTTPass");
+	mqtt.setClientId(hostname.c_str());
 	mqtt.setServer(mqtthost, mqttport);
 	if(mqttuser != "") {
 		mqtt.setCredentials(mqttuser,mqttpass);
 	};
+	
+	xTaskCreatePinnedToCore(&MqttHandling, "MqttTask", 4096, (void*) &mqtt, 5, NULL,0);
 
-	mqtt.connect();
-	free(mqtthost);
-	free(mqttuser);
-	free(mqttpass);
-	mqtt.onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
-			MqttReconnect(&mqtt);
-			});
 #endif
 
 #ifndef BASECAMP_NOOTA
@@ -103,18 +100,30 @@ delay(5000);
 
 
 #ifndef BASECAMP_NOMQTT
-void Basecamp::MqttReconnect(AsyncMqttClient * mqtt) {
-	while (1) {
-		if (mqtt->connected() != 1 && WiFi.status() == WL_CONNECTED) {
-			DEBUG_PRINTLN("Callback: MQTT disconnected, reconnecting");
-			mqtt->connect();
-		} else if (WiFi.status() != WL_CONNECTED) {
-			mqtt->disconnect();
-		} else {
-			break;
+
+void Basecamp::MqttHandling(void * mqttPointer) {
+	bool mqttIsConnecting = false;
+	int loopCount = 0;
+	AsyncMqttClient * mqtt = (AsyncMqttClient *) mqttPointer;
+	while(1) {
+		if (loopCount == 50 && mqtt->connected() != 1) {
+			mqttIsConnecting = false;
+			mqtt->disconnect(true);
 		}
+		if (!mqttIsConnecting) {
+			if(mqtt->connected() != 1) {
+				if (WiFi.status() == WL_CONNECTED) {
+					mqtt->connect();
+					mqttIsConnecting == true;
+				} else {
+					mqtt->disconnect();
+				}
+			}
+		}
+		loopCount++;
+		vTaskDelay(100);
 	}
-}
+};
 #endif
 
 bool Basecamp::checkResetReason() {

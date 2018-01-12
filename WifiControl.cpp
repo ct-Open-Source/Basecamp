@@ -20,10 +20,10 @@ void WifiControl::begin(String essid, String password, String configured, String
 		DEBUG_PRINT("Connecting to ");
 		DEBUG_PRINTLN(_wifiEssid);
 
-		WiFi.begin ( _wifiEssid.c_str(), _wifiPassword.c_str());
+		WiFi.begin (_wifiEssid.c_str(), _wifiPassword.c_str());
 		WiFi.setHostname(hostname.c_str());
-		WiFi.setAutoConnect ( true );                                  
-		WiFi.setAutoReconnect ( true );
+		//WiFi.setAutoConnect ( true );                                  
+		//WiFi.setAutoReconnect ( true );
 	} else {
 
 		DEBUG_PRINTLN("Wifi is NOT configured");
@@ -34,7 +34,6 @@ void WifiControl::begin(String essid, String password, String configured, String
 
 
 	}
-	delay(1000);
 }
 
 int WifiControl::status() {
@@ -55,16 +54,14 @@ void WifiControl::WiFiEvent(WiFiEvent_t event)
 		case SYSTEM_EVENT_STA_GOT_IP:
 			DEBUG_PRINT("Wifi IP address: ");
 			DEBUG_PRINTLN(WiFi.localIP());
-
 			preferences.putUInt("bootcounter", 0);
-			preferences.end();
 			break;
 		case SYSTEM_EVENT_STA_DISCONNECTED:
-			Serial.println("WiFi lost connection");
-			delay(50);
+			DEBUG_PRINTLN("WiFi lost connection");
 			WiFi.reconnect();
 			break;
 	}
 }
+
 
 

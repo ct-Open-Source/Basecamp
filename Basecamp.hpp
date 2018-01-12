@@ -46,8 +46,7 @@ class Basecamp {
 
 #ifndef BASECAMP_NOMQTT
 		AsyncMqttClient mqtt;
-		void MqttReconnect(AsyncMqttClient * mqtt);
-		static void MqttConnector(void * mqtt);
+		static void MqttHandling(void *);
 #endif
 
 #ifndef BASECAMP_NOWEB
