@@ -40,68 +40,60 @@ void WebServer::begin(Configuration &configuration) {
 			request->send(response);
 			});
 
-	if (configuration.get("WifiConfigured") == "True") {
-		server->on("/data.json" , HTTP_GET, [&configuration, this](AsyncWebServerRequest * request) {
-				AsyncJsonResponse * response = new AsyncJsonResponse();
-				DynamicJsonBuffer _jsonBuffer;
-				JsonObject& _jsonData = response->getRoot();
-				JsonObject& meta = _jsonData.createNestedObject("meta");
-				meta["title"] = _jsonBuffer.strdup(configuration.getCString("DeviceName"));
-				JsonArray& elements = _jsonData.createNestedArray("elements");
+	server->on("/data.json" , HTTP_GET, [&configuration, this](AsyncWebServerRequest * request) {
+			AsyncJsonResponse * response = new AsyncJsonResponse();
+			DynamicJsonBuffer _jsonBuffer;
+			JsonObject& _jsonData = response->getRoot();
+			JsonObject& meta = _jsonData.createNestedObject("meta");
+			meta["title"] = _jsonBuffer.strdup(configuration.getCString("DeviceName"));
+			JsonArray& elements = _jsonData.createNestedArray("elements");
 
 
-				for (auto const& interfaceElement : interfaceElements) {
-				JsonObject& element = elements.createNestedObject();
-				element["element"] = _jsonBuffer.strdup(interfaceElement->element);
-				element["id"] = _jsonBuffer.strdup(interfaceElement->id);
-				element["content"] = _jsonBuffer.strdup(interfaceElement->content);
-				element["parent"] = _jsonBuffer.strdup(interfaceElement->parent);
-				JsonObject& attributes = element.createNestedObject("attributes");
-				for (auto const& x : interfaceElement->attributes){
+			for (auto const& interfaceElement : interfaceElements) {
+			JsonObject& element = elements.createNestedObject();
+			element["element"] = _jsonBuffer.strdup(interfaceElement->element);
+			element["id"] = _jsonBuffer.strdup(interfaceElement->id);
+			element["content"] = _jsonBuffer.strdup(interfaceElement->content);
+			element["parent"] = _jsonBuffer.strdup(interfaceElement->parent);
+			JsonObject& attributes = element.createNestedObject("attributes");
+			for (auto const& x : interfaceElement->attributes){
 
-				attributes[_jsonBuffer.strdup(x.first)] = _jsonBuffer.strdup(x.second);
+			attributes[_jsonBuffer.strdup(x.first)] = _jsonBuffer.strdup(x.second);
+			}
+			if(interfaceElement->getAttribute("data-config") != "") {
+
+				if (interfaceElement->getAttribute("type")=="password") {
+					attributes[_jsonBuffer.strdup("placeholder")] = "Password unchanged";
+					attributes[_jsonBuffer.strdup("value")] = "";
+				} else {
+
+					attributes[_jsonBuffer.strdup("value")] = _jsonBuffer.strdup(configuration.get(interfaceElement->getAttribute("data-config")));
 				}
-				if(interfaceElement->getAttribute("data-config") != "") {
-
-					if (interfaceElement->getAttribute("type")=="password") {
-						attributes[_jsonBuffer.strdup("placeholder")] = "Password unchanged";
-						attributes[_jsonBuffer.strdup("value")] = "";
-					} else {
-
-						attributes[_jsonBuffer.strdup("value")] = _jsonBuffer.strdup(configuration.get(interfaceElement->getAttribute("data-config")));
-					}
-				}
-				};
+			}
+			};
 #ifdef DEBUG
-				_jsonData.prettyPrintTo(Serial);
+			_jsonData.prettyPrintTo(Serial);
 #endif
-				response->setLength();	
-				request->send(response);
-		});
-	} else {
-		DEBUG_PRINTLN("No Config found");
-		server->on("/data.json" , HTTP_GET, [](AsyncWebServerRequest * request) {
-				AsyncWebServerResponse *response = request->beginResponse_P(200, "application/json", initconf_json_gz, initconf_json_gz_len);
-				response->addHeader("Content-Encoding", "gzip");
-				request->send(response);
-				});
-	}
+			response->setLength();	
+			request->send(response);
+	});
+
 	server->on("/submitconfig", HTTP_POST, [&configuration](AsyncWebServerRequest * request) {
 			int params = request->params();
 			for(int i=0;i<params;i++){
-				AsyncWebParameter* p = request->getParam(i);
-				if(p->isPost()){
-					if(p->value().c_str() != "") {
-						configuration.set(p->name().c_str(), p->value().c_str());
-					}
-				} 
+			AsyncWebParameter* p = request->getParam(i);
+			if(p->isPost()){
+			if(p->value().c_str() != "") {
+			configuration.set(p->name().c_str(), p->value().c_str());
+			}
+			} 
 			}
 			configuration.save();
 			request->send(201);
 
 			delay(2000);
 			esp_restart();
-	});
+			});
 
 	server->onNotFound([](AsyncWebServerRequest * request) {
 #ifdef DEBUG
