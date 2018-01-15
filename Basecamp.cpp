@@ -14,7 +14,7 @@ String Basecamp::_generateHostname() {
 	clean_hostname.toLowerCase();
 	for (int i = 0; i <= clean_hostname.length(); i++) {
 		if (!isalnum(clean_hostname.charAt(i))) {
-				clean_hostname.setCharAt(i,'-');
+			clean_hostname.setCharAt(i,'-');
 		};
 	};
 	DEBUG_PRINTLN(clean_hostname);
@@ -47,18 +47,19 @@ bool Basecamp::begin() {
 	DEBUG_PRINTLN(mac);
 #endif
 #ifndef BASECAMP_NOMQTT
-	uint16_t mqttport = configuration.get("MQTTPort").toInt();
-	char* mqtthost = configuration.getCString("MQTTHost");
-	char* mqttuser = configuration.getCString("MQTTUser");
-	char* mqttpass = configuration.getCString("MQTTPass");
-	mqtt.setClientId(hostname.c_str());
-	mqtt.setServer(mqtthost, mqttport);
-	if(mqttuser != "") {
-		mqtt.setCredentials(mqttuser,mqttpass);
-	};
-	
-	xTaskCreatePinnedToCore(&MqttHandling, "MqttTask", 4096, (void*) &mqtt, 5, NULL,0);
+	if (configuration.get("MQTTActive") != "false") {
+		uint16_t mqttport = configuration.get("MQTTPort").toInt();
+		char* mqtthost = configuration.getCString("MQTTHost");
+		char* mqttuser = configuration.getCString("MQTTUser");
+		char* mqttpass = configuration.getCString("MQTTPass");
+		mqtt.setClientId(hostname.c_str());
+		mqtt.setServer(mqtthost, mqttport);
+		if(mqttuser != "") {
+			mqtt.setCredentials(mqttuser,mqttpass);
+		};
 
+		xTaskCreatePinnedToCore(&MqttHandling, "MqttTask", 4096, (void*) &mqtt, 5, NULL,0);
+	};
 #endif
 
 #ifndef BASECAMP_NOOTA
@@ -73,33 +74,36 @@ bool Basecamp::begin() {
 #ifndef BASECAMP_NOWEB
 	web.begin(configuration);
 
-	if (configuration.get("WifiConfigured")) {
-		web.addInterfaceElement("heading", "h1", configuration.get("DeviceName"),"#wrapper");
-		web.setInterfaceElementAttribute("heading", "class", "fat-border");
+	//if (configuration.get("WifiConfigured")) {
+	web.addInterfaceElement("heading", "h1", configuration.get("DeviceName"),"#wrapper");
+	web.setInterfaceElementAttribute("heading", "class", "fat-border");
 
-		web.addInterfaceElement("infotext1", "p", "Configure your device with the following options:","#wrapper");
+	web.addInterfaceElement("infotext1", "p", "Configure your device with the following options:","#wrapper");
 
-		web.addInterfaceElement("configform", "form", "","#wrapper");
-		web.setInterfaceElementAttribute("configform", "action", "saveConfig");
+	web.addInterfaceElement("configform", "form", "","#wrapper");
+	web.setInterfaceElementAttribute("configform", "action", "saveConfig");
 
-		web.addInterfaceElement("DeviceName", "input", "Device name","#configform" , "DeviceName");
+	web.addInterfaceElement("DeviceName", "input", "Device name","#configform" , "DeviceName");
 
-		web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
-		web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
-		web.setInterfaceElementAttribute("WifiPassword", "type", "password");
-
+	web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
+	web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
+	web.setInterfaceElementAttribute("WifiPassword", "type", "password");
+	if (configuration.get("MQTTActive") != "false") {
 		web.addInterfaceElement("MQTTHost", "input", "MQTT Host:","#configform" , "MQTTHost");
 		web.addInterfaceElement("MQTTPort", "input", "MQTT Port:","#configform" , "MQTTPort");
 		web.setInterfaceElementAttribute("MQTTPort", "type", "number");
-
-		web.addInterfaceElement("saveform", "input", " ","#configform");
-		web.setInterfaceElementAttribute("saveform", "type", "button");
-		web.setInterfaceElementAttribute("saveform", "value", "Save");
-		web.setInterfaceElementAttribute("saveform", "onclick", "collectConfiguration()");
-		
-		String infotext2 = "This device has the MAC-Address: " + mac;
-		web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
+		web.addInterfaceElement("MQTTUser", "input", "MQTT Username:","#configform" , "MQTTUser");
+		web.addInterfaceElement("MQTTPass", "input", "MQTT Password:","#configform" , "MQTTPass");
+		web.setInterfaceElementAttribute("MQTTPass", "type", "password");
 	}
+	web.addInterfaceElement("saveform", "input", " ","#configform");
+	web.setInterfaceElementAttribute("saveform", "type", "button");
+	web.setInterfaceElementAttribute("saveform", "value", "Save");
+	web.setInterfaceElementAttribute("saveform", "onclick", "collectConfiguration()");
+
+	String infotext2 = "This device has the MAC-Address: " + mac;
+	web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
+	//}
 #endif
 
 	Serial.println(showSystemInfo());
@@ -109,27 +113,28 @@ bool Basecamp::begin() {
 #ifndef BASECAMP_NOMQTT
 
 void Basecamp::MqttHandling(void * mqttPointer) {
-	bool mqttIsConnecting = false;
-	int loopCount = 0;
-	AsyncMqttClient * mqtt = (AsyncMqttClient *) mqttPointer;
-	while(1) {
-		if (loopCount == 50 && mqtt->connected() != 1) {
-			mqttIsConnecting = false;
-			mqtt->disconnect(true);
-		}
-		if (!mqttIsConnecting) {
-			if(mqtt->connected() != 1) {
-				if (WiFi.status() == WL_CONNECTED) {
-					mqtt->connect();
-					mqttIsConnecting == true;
-				} else {
-					mqtt->disconnect();
+
+		bool mqttIsConnecting = false;
+		int loopCount = 0;
+		AsyncMqttClient * mqtt = (AsyncMqttClient *) mqttPointer;
+		while(1) {
+			if (loopCount == 50 && mqtt->connected() != 1) {
+				mqttIsConnecting = false;
+				mqtt->disconnect(true);
+			}
+			if (!mqttIsConnecting) {
+				if(mqtt->connected() != 1) {
+					if (WiFi.status() == WL_CONNECTED) {
+						mqtt->connect();
+						mqttIsConnecting == true;
+					} else {
+						mqtt->disconnect();
+					}
 				}
 			}
+			loopCount++;
+			vTaskDelay(100);
 		}
-		loopCount++;
-		vTaskDelay(100);
-	}
 };
 #endif
 
