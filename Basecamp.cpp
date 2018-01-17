@@ -74,7 +74,6 @@ bool Basecamp::begin() {
 #ifndef BASECAMP_NOWEB
 	web.begin(configuration);
 
-	//if (configuration.get("WifiConfigured")) {
 	web.addInterfaceElement("heading", "h1", configuration.get("DeviceName"),"#wrapper");
 	web.setInterfaceElementAttribute("heading", "class", "fat-border");
 
@@ -88,6 +87,9 @@ bool Basecamp::begin() {
 	web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
 	web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
 	web.setInterfaceElementAttribute("WifiPassword", "type", "password");
+	web.addInterfaceElement("WifiConfigured", "input", "", "#configform", "WifiConfigured");
+	web.setInterfaceElementAttribute("WifiConfigured", "type", "hidden");
+	web.setInterfaceElementAttribute("WifiConfigured", "value", "true");
 	if (configuration.get("MQTTActive") != "false") {
 		web.addInterfaceElement("MQTTHost", "input", "MQTT Host:","#configform" , "MQTTHost");
 		web.addInterfaceElement("MQTTPort", "input", "MQTT Port:","#configform" , "MQTTPort");
@@ -103,7 +105,6 @@ bool Basecamp::begin() {
 
 	String infotext2 = "This device has the MAC-Address: " + mac;
 	web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
-	//}
 #endif
 
 	Serial.println(showSystemInfo());
