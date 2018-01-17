@@ -185,10 +185,10 @@ void Basecamp::OTAHandling(void * OTAParams) {
 	struct taskParms *params;
 	params = (struct taskParms *) OTAParams;
 
-	if(params->parm1 != "") { 
+	if (strlen(params->parm1) != 0) { 
 		ArduinoOTA.setPassword(params->parm1);
 	}
-	ArduinoOTA.setHostname(params->parm2);	
+	ArduinoOTA.setHostname(params->parm2);
 	ArduinoOTA
 		.onStart([]() {
 				String type;
