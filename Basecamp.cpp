@@ -129,7 +129,7 @@ void Basecamp::MqttHandling(void * mqttPointer) {
 				if(mqtt->connected() != 1) {
 					if (WiFi.status() == WL_CONNECTED) {
 						mqtt->connect();
-						mqttIsConnecting == true;
+						mqttIsConnecting = true;
 					} else {
 						mqtt->disconnect();
 					}
