@@ -54,7 +54,7 @@ bool Basecamp::begin() {
 		char* mqttpass = configuration.getCString("MQTTPass");
 		mqtt.setClientId(hostname.c_str());
 		mqtt.setServer(mqtthost, mqttport);
-		if(mqttuser != "") {
+		if (strlen(mqttuser) != 0) {
 			mqtt.setCredentials(mqttuser,mqttpass);
 		};
 
@@ -107,6 +107,9 @@ bool Basecamp::begin() {
 #endif
 
 	Serial.println(showSystemInfo());
+	
+	// TODO: Evaluate = What the heck is this for if never used?
+	return true;
 }
 
 
