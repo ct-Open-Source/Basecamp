@@ -177,6 +177,9 @@ bool Basecamp::checkResetReason() {
 		preferences.putUInt("bootcounter", 0);
 	};
 	preferences.end();
+	
+	// TODO: Evaluate: What is the result for if never used?
+	return true;
 };
 
 #ifndef BASECAMP_NOOTA
