@@ -9,7 +9,9 @@
 bool Configuration::begin(String filename)
 {
 	_jsonFile = filename;
-
+	
+	// TODO: What is this result used for if never assigned?
+	return true;
 }
 
 bool Configuration::load() {
@@ -83,6 +85,9 @@ bool Configuration::set(String key, String value) {
 	DEBUG_PRINTLN(configuration[key]);
 	configuration[key] = value;
 	_configurationTainted = true;
+	
+	// TODO: Again an unset return code. Check if its used or makes sense.
+	return true;
 }
 
 String Configuration::get(String key) {
