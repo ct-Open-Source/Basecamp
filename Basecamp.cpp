@@ -23,8 +23,7 @@ String Basecamp::_generateHostname() {
 
 bool Basecamp::begin() {
 	Serial.begin(115200);
-	Serial.print("Basecamp V.0.1.6");
-	Serial.println(version);
+	Serial.println("Basecamp V.0.1.6");
 	configuration.begin("/basecamp.json");
 	if (!configuration.load()) {
 		DEBUG_PRINTLN("Configuration is broken. Resetting.");
