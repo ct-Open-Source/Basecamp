@@ -12,7 +12,7 @@
         "maintainer": true
     }],
     "dependencies": [{
-            "name": "ESPAsyncWebServer",
+            "name": "ESP Async WebServer",
             "frameworks": "arduino"
         },
         {
@@ -28,7 +28,7 @@
             "platforms": "espressif32"
         }
     ],
-    "version": "0.1.5",
+    "version": "0.1.6",
     "frameworks": "arduino",
     "platforms": "espressif32",
     "license": "GPL-3.0-only"

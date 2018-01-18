@@ -8,26 +8,21 @@ jsonData = "data.json";
 
 function load() {
 	console.log('Basecamp loaded');
-	fetch(jsonData)
-		.then(
-			function(response) {
-				if (response.status !== 200) {
-					console.log('Looks like there was a problem. Status Code: ' +
-						response.status);
-					addElementToDom("h1","error","Could not load configuration: "+response.status, {"style": "color:red"});
-					return;
-				}
-
-				response.json().then(function(data) {
-					buildSite(data.elements);
-					setMeta(data.meta);
-				});
-			}
-		)
-		.catch(function(err) {
-			console.log('Fetch Error :-S', err);
-			addElementToDom("h1","error","Could not load configuration", {"style": "color:red"});
-		});
+	var request = new XMLHttpRequest();
+	function transferComplete() {
+			        var data = JSON.parse(this.responseText);
+				buildSite(data.elements);
+				setMeta(data.meta);
+		}; 
+	function transferFailed(evt) {
+			console.log('Looks like there was a problem. Status Code: ' + request.status);
+			addElementToDom("h1","error","Could not load configuration: " + request.status, {"style": "color:red"});
+			return;
+		};
+	request.addEventListener("load", transferComplete);
+	request.addEventListener("error", transferFailed);
+	request.open("GET", jsonData);
+	request.send();
 
 };
 
@@ -51,7 +46,9 @@ function configureElement(element) {
 	}
 }
 
-function addElementToDom (elementType, elementID, elementContent, elementAttributes = {}, parentSelector) { 
+function addElementToDom (elementType, elementID, elementContent) { 
+	var elementAttributes = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+	var parentSelector = arguments[4];
 	var newElement = document.createElement(elementType); 
 	if (elementContent) {
 		var newContent = document.createTextNode(elementContent); 
@@ -95,11 +92,6 @@ function buildSite (data) {
 		}
 	}
 
-	//for(var i = 0;i < data.length; i++)
-	//{
-	//configureElement(data[i]);
-	//data.splice(i,1);
-	//}
 }
 
 function setMeta(data) {
@@ -107,6 +99,7 @@ function setMeta(data) {
 }
 
 function collectConfiguration() {
+	document.getElementById("WifiConfigured").value="True";
 	var configurationData = new FormData();
 	configurationElements = document.body.querySelectorAll('*[data-config]');
 	for (var i = configurationElements.length - 1; i >= 0; i--) {
@@ -117,7 +110,7 @@ function collectConfiguration() {
 			return;	
 		}
 		if (configurationValue.length > 0 && configurationKey.length > 0) { 
-			configurationData.set(configurationKey, configurationValue);
+			configurationData.append(configurationKey, configurationValue);
 		}
 	}
 	var request = new XMLHttpRequest();
