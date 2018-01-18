@@ -45,7 +45,7 @@ void WebServer::begin(Configuration &configuration) {
 			DynamicJsonBuffer _jsonBuffer;
 			JsonObject& _jsonData = response->getRoot();
 			JsonObject& meta = _jsonData.createNestedObject("meta");
-			meta["title"] = _jsonBuffer.strdup(configuration.get("DeviceName").c_str());
+			meta["title"] = configuration.get("DeviceName");
 			JsonArray& elements = _jsonData.createNestedArray("elements");
 
 // FIXME: WHAT the hell is all this strdup for array-accessor?

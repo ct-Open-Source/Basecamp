@@ -10,9 +10,9 @@ void WifiControl::begin(String essid, String password, String configured, String
 {
 	DEBUG_PRINTLN("Connecting to Wifi");
 
-	String _wifiConfigured = configured;
-	String _wifiEssid = essid;
-	String _wifiPassword = password;
+	String _wifiConfigured = std::move(configured);
+	String _wifiEssid = std::move(essid);
+	String _wifiPassword = std::move(password);
 
 	WiFi.onEvent(WiFiEvent);
 	if (_wifiConfigured == "True") {
@@ -20,7 +20,7 @@ void WifiControl::begin(String essid, String password, String configured, String
 		DEBUG_PRINT("Connecting to ");
 		DEBUG_PRINTLN(_wifiEssid);
 
-		WiFi.begin (_wifiEssid.c_str(), _wifiPassword.c_str());
+		WiFi.begin(_wifiEssid.c_str(), _wifiPassword.c_str());
 		WiFi.setHostname(hostname.c_str());
 		//WiFi.setAutoConnect ( true );
 		//WiFi.setAutoReconnect ( true );
