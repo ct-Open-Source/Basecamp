@@ -45,9 +45,10 @@ void WebServer::begin(Configuration &configuration) {
 			DynamicJsonBuffer _jsonBuffer;
 			JsonObject& _jsonData = response->getRoot();
 			JsonObject& meta = _jsonData.createNestedObject("meta");
-			meta["title"] = _jsonBuffer.strdup(configuration.getCString("DeviceName"));
+			meta["title"] = _jsonBuffer.strdup(configuration.get("DeviceName").c_str());
 			JsonArray& elements = _jsonData.createNestedArray("elements");
 
+// FIXME: WHAT the hell is all this strdup for array-accessor?
 
 			for (auto const& interfaceElement : interfaceElements) {
 			JsonObject& element = elements.createNestedObject();
@@ -74,7 +75,7 @@ void WebServer::begin(Configuration &configuration) {
 #ifdef DEBUG
 			_jsonData.prettyPrintTo(Serial);
 #endif
-			response->setLength();	
+			response->setLength();
 			request->send(response);
 	});
 
@@ -83,10 +84,10 @@ void WebServer::begin(Configuration &configuration) {
 			for(int i=0;i<params;i++){
 			AsyncWebParameter* p = request->getParam(i);
 			if(p->isPost()){
-			if(p->value().c_str() != "") {
-			configuration.set(p->name().c_str(), p->value().c_str());
+				if(p->value().length() != 0) {
+					configuration.set(p->name().c_str(), p->value().c_str());
 			}
-			} 
+			}
 			}
 			configuration.save();
 			request->send(201);
@@ -153,12 +154,14 @@ void WebServer::addInterfaceElement(String id, String element, String content, S
 };
 
 interfaceElement* WebServer::getInterfaceElement(String id) {
-
 	for (auto element : interfaceElements) {
 		if (element->id == id) {
 			return element;
 		}
 	}
+
+	// TODO: Yes? What now?
+	return nullptr;
 };
 
 void WebServer::setInterfaceElementAttribute(String id, String key, String value) {

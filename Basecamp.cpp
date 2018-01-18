@@ -18,10 +18,11 @@ String Basecamp::_generateHostname() {
 		};
 	};
 	DEBUG_PRINTLN(clean_hostname);
-	return clean_hostname; 
+	return clean_hostname;
 };
 
 bool Basecamp::begin() {
+	// TODO: Magic!
 	Serial.begin(115200);
 	Serial.print("Basecamp V.");
 	Serial.println(version);
@@ -48,16 +49,18 @@ bool Basecamp::begin() {
 #endif
 #ifndef BASECAMP_NOMQTT
 	if (configuration.get("MQTTActive") != "false") {
-		uint16_t mqttport = configuration.get("MQTTPort").toInt();
-		char* mqtthost = configuration.getCString("MQTTHost");
-		char* mqttuser = configuration.getCString("MQTTUser");
-		char* mqttpass = configuration.getCString("MQTTPass");
+		auto &mqtthost = configuration.get("MQTTHost");
+		auto &mqttuser = configuration.get("MQTTUser");
+		auto &mqttpass = configuration.get("MQTTPass");
 		mqtt.setClientId(hostname.c_str());
-		mqtt.setServer(mqtthost, mqttport);
-		if (strlen(mqttuser) != 0) {
-			mqtt.setCredentials(mqttuser,mqttpass);
+		// FIXME: It this is empty -> defaults?
+		auto mqttport = configuration.get("MQTTPort").toInt();
+		mqtt.setServer(mqtthost.c_str(), mqttport);
+		if (mqttuser.length() != 0) {
+			mqtt.setCredentials(mqttuser.c_str(), mqttpass.c_str());
 		};
 
+		// TODO: Magic 5, 4096
 		xTaskCreatePinnedToCore(&MqttHandling, "MqttTask", 4096, (void*) &mqtt, 5, NULL,0);
 	};
 #endif
@@ -65,8 +68,10 @@ bool Basecamp::begin() {
 #ifndef BASECAMP_NOOTA
 	if(configuration.get("OTAActive") != "false") {
 		struct taskParms OTAParams[1];
-		OTAParams[0].parm1 = configuration.getCString("OTAPass");
+		// TODO: How long do these params have to be living?
+		OTAParams[0].parm1 = configuration.get("OTAPass").c_str();
 		OTAParams[0].parm2 = hostname.c_str();
+		// TODO: Magic 5, 4096
 		xTaskCreatePinnedToCore(&OTAHandling, "ArduinoOTATask", 4096, (void*)&OTAParams[0], 5, NULL,0);
 	}
 #endif
@@ -107,7 +112,7 @@ bool Basecamp::begin() {
 #endif
 
 	Serial.println(showSystemInfo());
-	
+
 	// TODO: Evaluate = What the heck is this for if never used?
 	return true;
 }
@@ -115,6 +120,8 @@ bool Basecamp::begin() {
 
 #ifndef BASECAMP_NOMQTT
 
+// TODO: void*(!!!1!!!!2111ELF!)
+// What happens if this pointer is deallocated? Wham!
 void Basecamp::MqttHandling(void * mqttPointer) {
 
 		bool mqttIsConnecting = false;
@@ -177,7 +184,7 @@ bool Basecamp::checkResetReason() {
 		preferences.putUInt("bootcounter", 0);
 	};
 	preferences.end();
-	
+
 	// TODO: Evaluate: What is the result for if never used?
 	return true;
 };
@@ -188,7 +195,7 @@ void Basecamp::OTAHandling(void * OTAParams) {
 	struct taskParms *params;
 	params = (struct taskParms *) OTAParams;
 
-	if (strlen(params->parm1) != 0) { 
+	if (strlen(params->parm1) != 0) {
 		ArduinoOTA.setPassword(params->parm1);
 	}
 	ArduinoOTA.setHostname(params->parm2);
@@ -237,7 +244,7 @@ String Basecamp::_generateMac() {
 			mac+=":";
 		}
 	}
-	return mac; 
+	return mac;
 }
 
 String Basecamp::showSystemInfo() {

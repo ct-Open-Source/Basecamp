@@ -39,7 +39,7 @@ class Basecamp {
 		String showSystemInfo();
 		String hostname;
 		struct taskParms {
-			char* parm1;
+			const char* parm1;
 			const char* parm2;
 		};
 #ifndef BASECAMP_NOWIFI
@@ -48,6 +48,7 @@ class Basecamp {
 #endif
 
 #ifndef BASECAMP_NOMQTT
+	// TODO: NO! Not public - make a publish() something function!
 		AsyncMqttClient mqtt;
 		static void MqttHandling(void *);
 #endif

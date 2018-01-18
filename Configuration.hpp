@@ -20,12 +20,11 @@ class Configuration {
 		bool begin(String filename);
 		bool load();
 		bool save();
-		bool dump();
+		void dump();
 		void reset();
 
 		bool set(String key, String value);
-		String get(String key);
-		char* getCString(String key);
+		const String& get(String key); ///< TODO: const
 
 		struct cmp_str
 		{
@@ -40,7 +39,7 @@ class Configuration {
 	private:
 		static void CheckConfigStatus(void *);
 		String _jsonFile;
-		bool _configurationTainted;
+		bool _configurationTainted = false;
 
 };
 

@@ -8,8 +8,8 @@
 
 bool Configuration::begin(String filename)
 {
-	_jsonFile = filename;
-	
+	_jsonFile = std::move(filename);
+
 	// TODO: What is this result used for if never assigned?
 	return true;
 }
@@ -85,22 +85,16 @@ bool Configuration::set(String key, String value) {
 	DEBUG_PRINTLN(configuration[key]);
 	configuration[key] = value;
 	_configurationTainted = true;
-	
+
 	// TODO: Again an unset return code. Check if its used or makes sense.
 	return true;
 }
 
-String Configuration::get(String key) {
+const String &Configuration::get(String key) {
 	DEBUG_PRINTLN(key);
 	DEBUG_PRINTLN(configuration[key]);
 
 	return configuration[key];
-}
-
-char* Configuration::getCString(String key) {
-	char *newCString = (char*) malloc(configuration[key].length()+1);
-	strcpy(newCString, configuration[key].c_str());
-	return newCString;
 }
 
 void Configuration::reset() {
@@ -109,7 +103,7 @@ void Configuration::reset() {
 	this->load();
 }
 
-bool Configuration::dump() {
+void Configuration::dump() {
 #ifdef DEBUG
 	for (const auto &p : configuration) {
 		Serial.print( "configuration[");
