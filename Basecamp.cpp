@@ -3,6 +3,9 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
+#include <sstream>
+#include <iomanip>
+
 #include "Basecamp.hpp"
 #include "debug.hpp"
 
@@ -237,13 +240,15 @@ void Basecamp::OTAHandling(void * OTAParams) {
 String Basecamp::_generateMac() {
 	byte rawMac[6];
 	WiFi.macAddress(rawMac);
-	String mac;
-	for (int i = 0; i < 6; i++) {
-		mac += (String(rawMac[i], HEX));
-		if (i < 5) {
-			mac+=":";
+	std::ostringstream stream;
+	for (unsigned int i = 0; i < 6; i++) {
+		if (i != 0) {
+			stream << ":";
 		}
+		stream << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(rawMac[i]);
 	}
+
+	String mac{stream.str().c_str()};
 	return mac;
 }
 
