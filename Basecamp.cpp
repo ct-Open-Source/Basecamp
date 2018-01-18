@@ -248,7 +248,7 @@ String Basecamp::_generateMac() {
 }
 
 String Basecamp::showSystemInfo() {
-	String Info = "";
-	Info += "MAC-Address: " + mac;
+	String Info{"MAC-Address: "};
+	Info +=  mac;
 	return Info;
 }
