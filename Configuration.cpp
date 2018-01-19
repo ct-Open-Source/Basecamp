@@ -38,10 +38,8 @@ bool Configuration::load() {
 		return false;
 	};
 
-	DEBUG_PRINTLN("converting config to map");
-	for (JsonObject::iterator it = _jsonData.begin(); it != _jsonData.end(); ++it)
-	{
-		set(it->key, it->value);
+	for (const auto& configItem : _jsonData) {
+		set(configItem.key, configItem.value);
 	}
 
 	configFile.close();
