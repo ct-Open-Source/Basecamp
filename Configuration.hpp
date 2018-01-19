@@ -6,11 +6,14 @@
 
 #ifndef Configuration_h
 #define Configuration_h
+
+#include <sstream>
+#include <map>
+
 #include <ArduinoJson.h>
 #include <FS.h>
 #include <SPIFFS.h>
 #include "debug.hpp"
-#include "map"
 
 class Configuration {
 	public:
@@ -23,11 +26,11 @@ class Configuration {
 		void reset();
 
 		bool set(String key, String value);
-		const String& get(String key); ///< TODO: const
+		const String& get(String key) const;
 
 		struct cmp_str
 		{
-			bool operator()(String a, String b)
+			bool operator()(const String &a, const String &b) const
 			{
 				return strcmp(a.c_str(), b.c_str()) < 0;
 			}
@@ -39,7 +42,7 @@ class Configuration {
 		static void CheckConfigStatus(void *);
 		String _jsonFile;
 		bool _configurationTainted = false;
-
+		String noResult_ = {};
 };
 
 #endif

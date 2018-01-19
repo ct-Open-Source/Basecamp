@@ -85,11 +85,19 @@ bool Configuration::set(String key, String value) {
 	return true;
 }
 
-const String &Configuration::get(String key) {
-	DEBUG_PRINTLN(key);
-	DEBUG_PRINTLN(configuration[key]);
+const String &Configuration::get(String key) const {
+	auto found = configuration.find(key);
+	std::ostringstream debug;
+	if (found != configuration.end()) {
+		debug << "Config value for " << key << ": " << found->second;
+		DEBUG_PRINTLN(debug.str().c_str());
+		return found->second;
+	}
 
-	return configuration[key];
+	// Default: if not set, we just return an empty String. TODO: Throw?
+	debug << "No config value for " << key;
+	DEBUG_PRINTLN(debug.str().c_str());
+	return noResult_;
 }
 
 void Configuration::reset() {
