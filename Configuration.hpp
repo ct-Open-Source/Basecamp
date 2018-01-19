@@ -25,7 +25,7 @@ class Configuration {
 		void dump();
 		void reset();
 
-		bool set(String key, String value);
+		void set(String key, String value);
 		const String& get(String key) const;
 
 		struct cmp_str

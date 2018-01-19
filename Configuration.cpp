@@ -75,15 +75,17 @@ bool Configuration::save() {
 }
 
 
-bool Configuration::set(String key, String value) {
+void Configuration::set(String key, String value) {
 	std::ostringstream debug;
 	debug << "Settting " << key.c_str() << " to " << value.c_str() << "(was " << get(key).c_str() << ")";
 	DEBUG_PRINTLN(debug.str().c_str());
-	configuration[key] = value;
-	_configurationTainted = true;
 
-	// TODO: Again an unset return code. Check if its used or makes sense.
-	return true;
+	if (get(key) != value) {
+		_configurationTainted = true;
+		configuration[key] = value;
+	} else {
+		DEBUG_PRINTLN("Cowardly refusing to overwrite existing value with itself");
+	}
 }
 
 const String &Configuration::get(String key) const {
