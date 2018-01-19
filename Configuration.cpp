@@ -62,7 +62,7 @@ bool Configuration::save() {
 
 	for (auto const& x : configuration)
 	{
-		_jsonData.set(_jsonBuffer.strdup(x.first), _jsonBuffer.strdup(x.second));
+		_jsonData.set(x.first, String{x.second});
 	}
 
 	_jsonData.printTo(configFile);
