@@ -30,9 +30,7 @@ void WifiControl::begin(String essid, String password, String configured, String
 		DEBUG_PRINTLN("Starting Wifi AP");
 
 		WiFi.mode(WIFI_AP_STA);
-		WiFi.softAP("ESP32");
-
-
+		WiFi.softAP("ESP32"); ///< TODO: Add MAC
 	}
 }
 

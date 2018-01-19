@@ -60,7 +60,9 @@ class Basecamp {
 		static void OTAHandling(void *);
 #endif
 	private:
+		// TODO: Functionname is misleading
 		String _generateHostname();
+		// TODO: Functionname is misleading
 		String _generateMac();
 };
 #endif

@@ -56,12 +56,16 @@ bool Basecamp::begin() {
 #endif
 #ifndef BASECAMP_NOMQTT
 	if (configuration.get("MQTTActive") != "false") {
-		auto &mqtthost = configuration.get("MQTTHost");
-		auto &mqttuser = configuration.get("MQTTUser");
-		auto &mqttpass = configuration.get("MQTTPass");
+		const auto &mqtthost = configuration.get("MQTTHost");
+		const auto &mqttuser = configuration.get("MQTTUser");
+		const auto &mqttpass = configuration.get("MQTTPass");
+		// INFO: that library just copies the pointer to the hostname. As long as nobody
+		// modifies the config, this may work. What a crap.
 		mqtt.setClientId(hostname.c_str());
 		// FIXME: It this is empty -> defaults?
 		auto mqttport = configuration.get("MQTTPort").toInt();
+		// INFO: that library just copies the pointer to the hostname. As long as nobody
+		// modifies the config, this may work. What a crap.
 		mqtt.setServer(mqtthost.c_str(), mqttport);
 		if (mqttuser.length() != 0) {
 			mqtt.setCredentials(mqttuser.c_str(), mqttpass.c_str());
@@ -130,12 +134,13 @@ bool Basecamp::begin() {
 
 // TODO: void*(!!!1!!!!2111ELF!)
 // What happens if this pointer is deallocated? Wham!
-void Basecamp::MqttHandling(void * mqttPointer) {
-
+void Basecamp::MqttHandling(void * mqttPointer)
+{
 		bool mqttIsConnecting = false;
 		int loopCount = 0;
-		AsyncMqttClient * mqtt = (AsyncMqttClient *) mqttPointer;
+		AsyncMqttClient *mqtt = (AsyncMqttClient *)mqttPointer;
 		while(1) {
+			// TODO: What is the sense behind these magics?
 			if (loopCount == 50 && mqtt->connected() != 1) {
 				mqttIsConnecting = false;
 				mqtt->disconnect(true);
@@ -162,6 +167,7 @@ bool Basecamp::checkResetReason() {
 	int reason = rtc_get_reset_reason(0);
 	DEBUG_PRINT("Reset reason: ");
 	DEBUG_PRINTLN(reason);
+	// TODO: Magics
 	if (reason == 1 || reason == 16) {
 		unsigned int bootCounter = preferences.getUInt("bootcounter", 0);
 
@@ -199,6 +205,8 @@ bool Basecamp::checkResetReason() {
 
 #ifndef BASECAMP_NOOTA
 void Basecamp::OTAHandling(void * OTAParams) {
+	DEBUG_PRINTLN(__func__);
+
 
 	struct taskParms *params;
 	params = (struct taskParms *) OTAParams;

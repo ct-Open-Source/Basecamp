@@ -76,8 +76,9 @@ bool Configuration::save() {
 
 
 bool Configuration::set(String key, String value) {
-	DEBUG_PRINTLN(key);
-	DEBUG_PRINTLN(configuration[key]);
+	std::ostringstream debug;
+	debug << "Settting " << key.c_str() << " to " << value.c_str() << "(was " << get(key).c_str() << ")";
+	DEBUG_PRINTLN(debug.str().c_str());
 	configuration[key] = value;
 	_configurationTainted = true;
 
