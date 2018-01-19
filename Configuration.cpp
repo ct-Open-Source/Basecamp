@@ -87,16 +87,15 @@ bool Configuration::set(String key, String value) {
 
 const String &Configuration::get(String key) const {
 	auto found = configuration.find(key);
-	std::ostringstream debug;
 	if (found != configuration.end()) {
-		debug << "Config value for " << key << ": " << found->second;
+		std::ostringstream debug;
+		debug << "Config value for " << key.c_str() << ": " << found->second.c_str();
 		DEBUG_PRINTLN(debug.str().c_str());
+
 		return found->second;
 	}
 
 	// Default: if not set, we just return an empty String. TODO: Throw?
-	debug << "No config value for " << key;
-	DEBUG_PRINTLN(debug.str().c_str());
 	return noResult_;
 }
 
