@@ -9,6 +9,8 @@
 #include <Arduino.h>
 #include "map"
 
+
+// FIXME: I nterfaceElement
 class interfaceElement {
 	public:
 		interfaceElement(String p_id, String p_element, String p_content, String p_parent) {
@@ -19,11 +21,18 @@ class interfaceElement {
 		};
 		struct cmp_str
 		{
-			bool operator()(String a, String b)
+			bool operator()(const String &a, const String &b) const
 			{
 				return strcmp(a.c_str(), b.c_str()) < 0;
 			}
 		};
+
+		const String& getId() const
+		{
+			return id;
+		}
+
+		// FIXME: GETTER and SETTER!
 		String element;
 		String id;
 		String content;
@@ -33,8 +42,15 @@ class interfaceElement {
 			attributes[key] = value;
 		};
 
-		String getAttribute(String key) {
-			return attributes[key];
+// FIXME: Refs const param!
+		String getAttribute(String key) const {
+			auto found = attributes.find(key);
+			if (found != attributes.end()) {
+				return found->second;
+			}
+
+			// TODO: Say something
+			return {""};
 		}
 };
 #endif

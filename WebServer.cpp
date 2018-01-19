@@ -3,9 +3,16 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
+#include <algorithm>
+#include <stdexcept>
 
 #include "WebServer.hpp"
 #include "debug.hpp"
+
+WebServer::WebServer()
+{
+
+}
 
 void WebServer::begin(Configuration &configuration) {
 	SPIFFS.begin();
@@ -48,29 +55,28 @@ void WebServer::begin(Configuration &configuration) {
 			meta["title"] = configuration.get("DeviceName");
 			JsonArray& elements = _jsonData.createNestedArray("elements");
 
-// FIXME: WHAT the hell is all this strdup for array-accessor?
+			for (const auto &interfaceElement : interfaceElements) {
+				JsonObject& element = elements.createNestedObject();
+				element["element"] = _jsonBuffer.strdup(interfaceElement.element);
+				element["id"] = _jsonBuffer.strdup(interfaceElement.id);
+				element["content"] = _jsonBuffer.strdup(interfaceElement.content);
+				element["parent"] = _jsonBuffer.strdup(interfaceElement.parent);
+				JsonObject &attributes = element.createNestedObject("attributes");
+				for (const auto &attribute : interfaceElement.attributes)
+				{
 
-			for (auto const& interfaceElement : interfaceElements) {
-			JsonObject& element = elements.createNestedObject();
-			element["element"] = _jsonBuffer.strdup(interfaceElement->element);
-			element["id"] = _jsonBuffer.strdup(interfaceElement->id);
-			element["content"] = _jsonBuffer.strdup(interfaceElement->content);
-			element["parent"] = _jsonBuffer.strdup(interfaceElement->parent);
-			JsonObject& attributes = element.createNestedObject("attributes");
-			for (auto const& x : interfaceElement->attributes){
-
-			attributes[_jsonBuffer.strdup(x.first)] = _jsonBuffer.strdup(x.second);
-			}
-			if(interfaceElement->getAttribute("data-config") != "") {
-
-				if (interfaceElement->getAttribute("type")=="password") {
-					attributes[_jsonBuffer.strdup("placeholder")] = "Password unchanged";
-					attributes[_jsonBuffer.strdup("value")] = "";
-				} else {
-
-					attributes[_jsonBuffer.strdup("value")] = _jsonBuffer.strdup(configuration.get(interfaceElement->getAttribute("data-config")));
+					attributes[attribute.first] = String{attribute.second};
 				}
-			}
+
+				if (interfaceElement.getAttribute("data-config").length() != 0) {
+
+					if (interfaceElement.getAttribute("type")=="password") {
+						attributes["placeholder"] = "Password unchanged";
+						attributes["value"] = "";
+					} else {
+						attributes["value"] = String{configuration.get(interfaceElement.getAttribute("data-config"))};
+					}
+				}
 			};
 #ifdef DEBUG
 			_jsonData.prettyPrintTo(Serial);
@@ -144,27 +150,21 @@ void WebServer::begin(Configuration &configuration) {
 			request->send(404);
 
 	});
-
 }
-void WebServer::addInterfaceElement(String id, String element, String content, String parent, String configvariable) {
-	interfaceElements.push_back(new interfaceElement(id, element, content, parent));
-	if (configvariable != "") {
-		setInterfaceElementAttribute(id, "data-config", configvariable);
-	}
-};
 
-interfaceElement* WebServer::getInterfaceElement(String id) {
-	for (auto element : interfaceElements) {
-		if (element->id == id) {
-			return element;
+void WebServer::addInterfaceElement(String id, String element, String content, String parent, String configvariable) {
+	interfaceElements.emplace_back(std::move(id), std::move(element), std::move(content), std::move(parent));
+	if (configvariable.length() != 0) {
+		setInterfaceElementAttribute(id, "data-config", std::move(configvariable));
+	}
+}
+
+void WebServer::setInterfaceElementAttribute(const String &id, const String &key, String value)
+{
+	for (auto &element : interfaceElements) {
+		if (element.getId() == id) {
+			element.setAttribute(key, std::move(value));
+			return;
 		}
 	}
-
-	// TODO: Yes? What now?
-	return nullptr;
-};
-
-void WebServer::setInterfaceElementAttribute(String id, String key, String value) {
-	interfaceElement* element = getInterfaceElement(id);
-	element->setAttribute(key,value);
-};
+}

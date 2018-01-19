@@ -22,16 +22,15 @@
 
 class WebServer {
 	public:
-		WebServer() {}
-		~WebServer() {}
+		WebServer();
+		~WebServer() = default;
 		AsyncWebServer *server;
 		AsyncWebSocket *ws;
 		AsyncEventSource *events;
 		void begin(Configuration &configuration);
 		bool addURL(const char* url, const char* content, const char* mimetype);
 		void addInterfaceElement(String id, String element, String content, String parent = "#configform", String configvariable = "");
-		void setInterfaceElementAttribute(String id, String key, String value);
-		interfaceElement* getInterfaceElement(String id);
+		void setInterfaceElementAttribute(const String &id, const String &key, String value);
 
 		struct cmp_str
 		{
@@ -41,7 +40,8 @@ class WebServer {
 			}
 		};
 
-		std::vector<interfaceElement*> interfaceElements;
+		// TODO: Move to private
+		std::vector<interfaceElement> interfaceElements;
 
 	private:
 		static void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
