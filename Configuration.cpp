@@ -17,8 +17,7 @@ bool Configuration::load() {
 	if (!SPIFFS.begin(true)) {
 		Serial.println("Could not access SPIFFS.");
 		return false;
-
-	};
+	}
 
 	File configFile = SPIFFS.open(_jsonFile, "r");
 
@@ -33,7 +32,7 @@ bool Configuration::load() {
 	if (!_jsonData.success()) {
 		Serial.println("Failed to parse config file.");
 		return false;
-	};
+	}
 
 	for (const auto& configItem : _jsonData) {
 		set(configItem.key, configItem.value);
@@ -50,17 +49,17 @@ bool Configuration::save() {
 	if (!configFile) {
 		Serial.println("Failed to open config file for writing");
 		return false;
-	};
+	}
 
 	if (configuration.empty())
 	{
 		Serial.println("Configuration empty");
-	};
+	}
 
 	DynamicJsonBuffer _jsonBuffer;
-	JsonObject& _jsonData = _jsonBuffer.createObject();
+	JsonObject &_jsonData = _jsonBuffer.createObject();
 
-	for (auto const& x : configuration)
+	for (const auto& x : configuration)
 	{
 		_jsonData.set(x.first, String{x.second});
 	}
@@ -115,6 +114,6 @@ void Configuration::dump() {
 		Serial.print(p.first);
 		Serial.print("] = ");
 		Serial.println(p.second);
-	};
+	}
 #endif
 }
