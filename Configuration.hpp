@@ -14,10 +14,9 @@
 
 class Configuration {
 	public:
-		Configuration() {};
-		~Configuration() {};
+		explicit Configuration(String filename);
+		~Configuration() = default;
 
-		bool begin(String filename);
 		bool load();
 		bool save();
 		void dump();

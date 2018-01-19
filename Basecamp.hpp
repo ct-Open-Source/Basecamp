@@ -29,8 +29,8 @@
 
 class Basecamp {
 	public:
-		Basecamp() {};
-		~Basecamp() {};
+		Basecamp();
+		~Basecamp() = default;
 		Configuration configuration;
 		Preferences preferences;
 		bool begin();

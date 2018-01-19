@@ -6,12 +6,9 @@
 #include "Configuration.hpp"
 #include "debug.hpp"
 
-bool Configuration::begin(String filename)
+Configuration::Configuration(String filename)
+	: _jsonFile(std::move(filename))
 {
-	_jsonFile = std::move(filename);
-
-	// TODO: What is this result used for if never assigned?
-	return true;
 }
 
 bool Configuration::load() {

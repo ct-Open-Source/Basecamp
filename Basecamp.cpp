@@ -9,6 +9,12 @@
 #include "Basecamp.hpp"
 #include "debug.hpp"
 
+Basecamp::Basecamp()
+	: configuration(String{"/basecamp.json"})
+{
+
+}
+
 String Basecamp::_generateHostname() {
 	String clean_hostname =	configuration.get("DeviceName");
 	if (clean_hostname == "") {
@@ -28,7 +34,6 @@ bool Basecamp::begin() {
 	// TODO: Magic!
 	Serial.begin(115200);
 	Serial.println("Basecamp V.0.1.6");
-	configuration.begin("/basecamp.json");
 	if (!configuration.load()) {
 		DEBUG_PRINTLN("Configuration is broken. Resetting.");
 		configuration.reset();
