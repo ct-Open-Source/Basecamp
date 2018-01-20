@@ -35,14 +35,12 @@ void WebServer::begin(Configuration &configuration) {
 
 	if (!MDNS.begin("esp32")) {
 		Serial.println("Error setting up MDNS responder!");
-		while(1) {
-			// FIXME: Why should we do this?
-			delay(1000);
-		}
+		// TODO: Discuss if we need to do something or just cowardly ignore
+		// that there is no running mDNS in this "setup" stage - which we
+		// necessarily do not really need...
+	} else {
+		MDNS.addService("http", "tcp", 80);
 	}
-
-	// TODO: Again 80?
-	MDNS.addService("http", "tcp", 80);
 
 	server.on("/" , HTTP_GET, [](AsyncWebServerRequest * request)
 	{
