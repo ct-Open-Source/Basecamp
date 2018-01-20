@@ -157,6 +157,7 @@ void WebServer::begin(Configuration &configuration) {
 // TODO: Operator <<
 void WebServer::debugPrintRequest(AsyncWebServerRequest *request)
 {
+#ifdef DEBUG
 		/**
 		 That AsyncWebServer code uses some strange bit-consstructs instead of enum
 		 class. Also no const getter. As I refuse to bring that code to 21st century,
@@ -212,6 +213,7 @@ void WebServer::debugPrintRequest(AsyncWebServerRequest *request)
 		}
 
 		Serial.println(output.str().c_str());
+#endif
 }
 
 void WebServer::addInterfaceElement(String id, String element, String content, String parent, String configvariable) {
