@@ -44,7 +44,6 @@ void WebServer::begin(Configuration &configuration) {
 
 	server.on("/" , HTTP_GET, [](AsyncWebServerRequest * request)
 	{
-		  DEBUG_PRINTLN("GET /");
 			AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_htm_gz, index_htm_gz_len);
 			response->addHeader("Content-Encoding", "gzip");
 			request->send(response);
@@ -52,7 +51,6 @@ void WebServer::begin(Configuration &configuration) {
 
 	server.on("/basecamp.css" , HTTP_GET, [](AsyncWebServerRequest * request)
 	{
-			DEBUG_PRINTLN("GET css");
 			AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", basecamp_css_gz, basecamp_css_gz_len);
 			response->addHeader("Content-Encoding", "gzip");
 			request->send(response);
@@ -60,7 +58,6 @@ void WebServer::begin(Configuration &configuration) {
 
 	server.on("/basecamp.js" , HTTP_GET, [](AsyncWebServerRequest * request)
 	{
-			DEBUG_PRINTLN("GET js");
 			AsyncWebServerResponse *response = request->beginResponse_P(200, "text/js", basecamp_js_gz, basecamp_js_gz_len);
 			response->addHeader("Content-Encoding", "gzip");
 			request->send(response);
@@ -68,9 +65,6 @@ void WebServer::begin(Configuration &configuration) {
 
 	server.on("/data.json" , HTTP_GET, [&configuration, this](AsyncWebServerRequest * request)
 	{
-			DEBUG_PRINTLN("GET json");
-		  debugPrintRequest(request);
-
 			AsyncJsonResponse *response = new AsyncJsonResponse();
 			DynamicJsonBuffer _jsonBuffer;
 
@@ -108,8 +102,8 @@ void WebServer::begin(Configuration &configuration) {
 			_jsonData.prettyPrintTo(Serial);
 #endif
 			response->setLength();
-			// NOTE: AsyncServer.send(ptr* foo) deletes foo after async send.
-			// As this is not documented in the header: thanks for nothing.
+			// NOTE: AsyncServer.send(ptr* foo) deletes `response` after async send.
+			// As this is not documented in the header there: thanks for nothing.
 			request->send(response);
 	});
 
@@ -122,8 +116,6 @@ void WebServer::begin(Configuration &configuration) {
 			}
 			debugPrintRequest(request);
 
-			// TODO: What type is params? iterate
-			// FIXME: Template that with the debugOut
 			for (int i = 0; i < request->params(); i++)
 			{
 				AsyncWebParameter *webParameter = request->getParam(i);
@@ -133,7 +125,6 @@ void WebServer::begin(Configuration &configuration) {
 				}
 			}
 
-// FIXME: RE-ENABLE!
 			configuration.save();
 			request->send(201);
 
@@ -152,7 +143,6 @@ void WebServer::begin(Configuration &configuration) {
 	});
 }
 
-// TODO: Operator <<
 void WebServer::debugPrintRequest(AsyncWebServerRequest *request)
 {
 #ifdef DEBUG
@@ -186,35 +176,30 @@ void WebServer::debugPrintRequest(AsyncWebServerRequest *request)
 		output << "Content-Length: " << request->contentLength() << std::endl;
 		output << "Content-Type: " << request->contentType().c_str() << std::endl;
 
-		// TODO: Is there an iterator on the "LinkedList" from that crap library?
 		output << "Headers: " << std::endl;
 		for (int i = 0; i < request->headers(); i++) {
 				auto *header = request->getHeader(i);
-//				output << "\t" << header->name().c_str() << ": " << header->value().c_str() << std::endl;
 				output << "\t";
 				debugPrint(output, header);
 				output << std::endl;
 		}
 
-		// TODO: dto params(). BTW - what should "params" represent in a http request in this object?
 		output << "Parameters: " << std::endl;
 		for (int i = 0; i < request->params(); i++) {
 				auto *parameter = request->getParam(i);
 				output << "\t";
-				// TODO: What is isFile()?
 				if (parameter->isFile()) {
-					output << "FileSize: " << parameter->size() << std::endl << "\t\t";
+					output << "This is a file. FileSize: " << parameter->size() << std::endl << "\t\t";
 				}
 				debugPrint(output, parameter);
 				output << std::endl;
-				//parameter->name().c_str() << ": " << parameter->value().c_str() << std::endl;
 		}
 
 		Serial.println(output.str().c_str());
 #endif
 }
 
-void WebServer::addInterfaceElement(String id, String element, String content, String parent, String configvariable) {
+void WebServer::addInterfaceElement(const String &id, String element, String content, String parent, String configvariable) {
 	interfaceElements.emplace_back(id, std::move(element), std::move(content), std::move(parent));
 	if (configvariable.length() != 0) {
 		setInterfaceElementAttribute(id, "data-config", std::move(configvariable));

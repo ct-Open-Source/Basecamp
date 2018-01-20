@@ -47,7 +47,8 @@ class Basecamp {
 #endif
 
 #ifndef BASECAMP_NOMQTT
-	// TODO: NO! Not public - make a publish() something function!
+	  // TODO: Move this to private and offer a public "mqttPublish" function (or similar)
+		// so the logic of AsyncMqttClient must not be known to users of Basecamp.
 		AsyncMqttClient mqtt;
 		static void MqttHandling(void *);
 #endif

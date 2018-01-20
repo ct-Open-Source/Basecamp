@@ -9,16 +9,17 @@
 #include <Arduino.h>
 #include "map"
 
-
-// FIXME: I nterfaceElement
-class interfaceElement {
+// TODO: Discuss if this could not be modified to a struct as there is no
+// real programatically-wise logic inside this clas.
+class InterfaceElement {
 	public:
-		interfaceElement(String p_id, String p_element, String p_content, String p_parent) {
-			element = p_element;
-			id = p_id;
-			content = p_content;
-			parent = p_parent;
+		InterfaceElement(String p_id, String p_element, String p_content, String p_parent) {
+			element = std::move(p_element);
+			id = std::move(p_id);
+			content = std::move(p_content);
+			parent = std::move(p_parent);
 		};
+
 		struct cmp_str
 		{
 			bool operator()(const String &a, const String &b) const
@@ -32,24 +33,26 @@ class interfaceElement {
 			return id;
 		}
 
-		// FIXME: GETTER and SETTER!
 		String element;
 		String id;
 		String content;
 		String parent;
 		std::map<String, String, cmp_str> attributes;
+
 		void setAttribute(String key, String value) {
 			attributes[key] = value;
 		};
 
-// FIXME: Refs const param!
-		String getAttribute(String key) const {
+		// Return value for `key` or "" if `key` is not found.
+		String getAttribute(const String &key) const {
 			auto found = attributes.find(key);
 			if (found != attributes.end()) {
 				return found->second;
 			}
 
-			// TODO: Say something
+			// TODO: What shall we really return if not found?
+			// As we are not allowed to throw, maybe we shall change this function
+			// to something like `getOr(const String &key, String default = "")`?
 			return {""};
 		}
 };

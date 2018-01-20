@@ -24,12 +24,10 @@ class WebServer {
 	public:
 		WebServer();
 		~WebServer() = default;
-		// TODO: Private
-		AsyncEventSource events;
-		AsyncWebServer server;
+
 		void begin(Configuration &configuration);
 		bool addURL(const char* url, const char* content, const char* mimetype);
-		void addInterfaceElement(String id, String element, String content, String parent = "#configform", String configvariable = "");
+		void addInterfaceElement(const String &id, String element, String content, String parent = "#configform", String configvariable = "");
 
 		// Sets "key" to "value" in element with id "id" if exists.
 		void setInterfaceElementAttribute(const String &id, const String &key, String value);
@@ -41,9 +39,6 @@ class WebServer {
 				return strcmp(a.c_str(), b.c_str()) < 0;
 			}
 		};
-
-		// TODO: Move to private
-		std::vector<interfaceElement> interfaceElements;
 
 	private:
 		static void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
@@ -59,6 +54,10 @@ class WebServer {
 		int _typeof(String a){ return 0; };
 		int _typeof(int a){ return 1; };
 		int _typeof(std::map<String, String, cmp_str> a){ return 2; };
+
+		AsyncEventSource events;
+		AsyncWebServer server;
+		std::vector<InterfaceElement> interfaceElements;
 };
 
 #endif
