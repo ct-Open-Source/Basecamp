@@ -83,7 +83,7 @@ void Configuration::set(String key, String value) {
 		_configurationTainted = true;
 		configuration[key] = value;
 	} else {
-		DEBUG_PRINTLN("Cowardly refusing to overwrite existing value with itself");
+		DEBUG_PRINTLN("Cowardly refusing to overwrite existing key with the same value");
 	}
 }
 
