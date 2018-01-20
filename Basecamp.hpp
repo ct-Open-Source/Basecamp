@@ -34,7 +34,7 @@ class Basecamp {
 		Configuration configuration;
 		Preferences preferences;
 		bool begin();
-		bool checkResetReason();
+		void checkResetReason();
 		String showSystemInfo();
 		String hostname;
 		struct taskParms {

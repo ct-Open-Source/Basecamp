@@ -9,13 +9,19 @@
 #include "Basecamp.hpp"
 #include "debug.hpp"
 
+namespace {
+	const constexpr uint16_t defaultThreadStackSize = 4096;
+	const constexpr UBaseType_t defaultThreadPriority = 5;
+}
+
 Basecamp::Basecamp()
 	: configuration(String{"/basecamp.json"})
 {
 
 }
 
-String Basecamp::_generateHostname() {
+String Basecamp::_generateHostname()
+{
 	String clean_hostname =	configuration.get("DeviceName");
 	if (clean_hostname == "") {
 		return "basecamp-device";
@@ -30,8 +36,8 @@ String Basecamp::_generateHostname() {
 	return clean_hostname;
 };
 
-bool Basecamp::begin() {
-	// TODO: Magic!
+bool Basecamp::begin()
+{
 	Serial.begin(115200);
 	Serial.println("Basecamp V.0.1.6");
 	if (!configuration.load()) {
@@ -60,19 +66,19 @@ bool Basecamp::begin() {
 		const auto &mqttuser = configuration.get("MQTTUser");
 		const auto &mqttpass = configuration.get("MQTTPass");
 		// INFO: that library just copies the pointer to the hostname. As long as nobody
-		// modifies the config, this may work. What a crap.
+		// modifies the config, this may work.
 		mqtt.setClientId(hostname.c_str());
 		// FIXME: It this is empty -> defaults?
 		auto mqttport = configuration.get("MQTTPort").toInt();
 		// INFO: that library just copies the pointer to the hostname. As long as nobody
-		// modifies the config, this may work. What a crap.
+		// modifies the config, this may work.
 		mqtt.setServer(mqtthost.c_str(), mqttport);
 		if (mqttuser.length() != 0) {
 			mqtt.setCredentials(mqttuser.c_str(), mqttpass.c_str());
 		};
 
-		// TODO: Magic 5, 4096
-		xTaskCreatePinnedToCore(&MqttHandling, "MqttTask", 4096, (void*) &mqtt, 5, NULL,0);
+		xTaskCreatePinnedToCore(&MqttHandling, "MqttTask", defaultThreadStackSize,
+				(void *)&mqtt, defaultThreadPriority, NULL, 0);
 	};
 #endif
 
@@ -82,8 +88,9 @@ bool Basecamp::begin() {
 		// TODO: How long do these params have to be living?
 		OTAParams[0].parm1 = configuration.get("OTAPass").c_str();
 		OTAParams[0].parm2 = hostname.c_str();
-		// TODO: Magic 5, 4096
-		xTaskCreatePinnedToCore(&OTAHandling, "ArduinoOTATask", 4096, (void*)&OTAParams[0], 5, NULL,0);
+
+		xTaskCreatePinnedToCore(&OTAHandling, "ArduinoOTATask", defaultThreadStackSize,
+				(void *)&OTAParams[0], defaultThreadPriority, NULL, 0);
 	}
 #endif
 
@@ -125,16 +132,14 @@ bool Basecamp::begin() {
 
 	Serial.println(showSystemInfo());
 
-	// TODO: Evaluate = What the heck is this for if never used?
+	// TODO: only return true if everything setup up correctly
 	return true;
 }
 
-
 #ifndef BASECAMP_NOMQTT
 
-// TODO: void*(!!!1!!!!2111ELF!)
-// What happens if this pointer is deallocated? Wham!
-void Basecamp::MqttHandling(void * mqttPointer)
+// TODO: Think about making void* the real corresponding type
+void Basecamp::MqttHandling(void *mqttPointer)
 {
 		bool mqttIsConnecting = false;
 		int loopCount = 0;
@@ -161,8 +166,8 @@ void Basecamp::MqttHandling(void * mqttPointer)
 };
 #endif
 
-bool Basecamp::checkResetReason() {
-
+void Basecamp::checkResetReason()
+{
 	preferences.begin("basecamp", false);
 	int reason = rtc_get_reset_reason(0);
 	DEBUG_PRINT("Reset reason: ");
@@ -198,9 +203,6 @@ bool Basecamp::checkResetReason() {
 		preferences.putUInt("bootcounter", 0);
 	};
 	preferences.end();
-
-	// TODO: Evaluate: What is the result for if never used?
-	return true;
 };
 
 #ifndef BASECAMP_NOOTA
