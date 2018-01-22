@@ -21,6 +21,7 @@ class WifiControl {
 		bool disconnect();
 		void begin(String essid, String password = "", String configured = "False", String hostname = "BasecampDevice");
 		IPAddress getIP();
+		IPAddress getSoftAPIP();
 		int status();
 		static void WiFiEvent(WiFiEvent_t event);
 	private:

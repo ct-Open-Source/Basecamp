@@ -43,6 +43,9 @@ int WifiControl::status() {
 IPAddress WifiControl::getIP() {
 	return WiFi.localIP();
 }
+IPAddress WifiControl::getSoftAPIP() {
+	return WiFi.softAPIP();
+}
 
 void WifiControl::WiFiEvent(WiFiEvent_t event)
 {

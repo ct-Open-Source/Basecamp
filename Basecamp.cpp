@@ -104,6 +104,10 @@ bool Basecamp::begin() {
 
 	String infotext2 = "This device has the MAC-Address: " + mac;
 	web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
+
+	if(configuration.get("WifiConfigured") != "True"){
+    dnsServer.start(53, "*", wifi.getSoftAPIP());
+	}
 #endif
 
 	Serial.println(showSystemInfo());
