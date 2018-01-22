@@ -19,6 +19,7 @@
 #include <AsyncJson.h>
 #include <ArduinoJson.h>
 #include "WebInterface.hpp"
+#include "CaptiveRequestHandler.hpp"
 
 class WebServer {
 	public:

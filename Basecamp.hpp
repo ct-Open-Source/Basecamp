@@ -16,6 +16,7 @@
 #endif
 
 #ifndef BASECAMP_NOWEB
+#include <DNSServer.h>
 #include "WebServer.hpp"
 #endif
 
@@ -52,6 +53,7 @@ class Basecamp {
 #endif
 
 #ifndef BASECAMP_NOWEB
+		DNSServer dnsServer;
 		WebServer web;
 #endif
 
