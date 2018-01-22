@@ -19,7 +19,9 @@
 #include <AsyncJson.h>
 #include <ArduinoJson.h>
 #include "WebInterface.hpp"
+#ifdef DNSServer_h
 #include "CaptiveRequestHandler.hpp"
+#endif
 
 class WebServer {
 	public:

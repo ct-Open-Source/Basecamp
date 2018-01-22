@@ -11,7 +11,9 @@ void WebServer::begin(Configuration &configuration) {
 	SPIFFS.begin();
 	server = new AsyncWebServer(80);
 	events = new AsyncEventSource("/events");
+#ifdef DNSServer_h
 	server->addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+#endif
 	server->addHandler(events);
 	server->begin();
 

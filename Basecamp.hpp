@@ -14,9 +14,10 @@
 #ifndef BASECAMP_NOWIFI
 #include "WifiControl.hpp"
 #endif
-
 #ifndef BASECAMP_NOWEB
+
 #include <DNSServer.h>
+
 #include "WebServer.hpp"
 #endif
 
@@ -53,7 +54,11 @@ class Basecamp {
 #endif
 
 #ifndef BASECAMP_NOWEB
+
+#ifdef DNSServer_h
 		DNSServer dnsServer;
+		static void DnsHandling(void *);
+#endif
 		WebServer web;
 #endif
 

@@ -104,10 +104,13 @@ bool Basecamp::begin() {
 
 	String infotext2 = "This device has the MAC-Address: " + mac;
 	web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
-
+#ifdef DNSServer_h
 	if(configuration.get("WifiConfigured") != "True"){
-    dnsServer.start(53, "*", wifi.getSoftAPIP());
+
+    		dnsServer.start(53, "*", wifi.getSoftAPIP());
 	}
+	xTaskCreatePinnedToCore(&DnsHandling, "DNSTask", 4096, (void*) &dnsServer, 5, NULL,0);
+	#endif
 #endif
 
 	Serial.println(showSystemInfo());
@@ -142,6 +145,16 @@ void Basecamp::MqttHandling(void * mqttPointer) {
 };
 #endif
 
+#ifdef DNSServer_h
+void Basecamp::DnsHandling(void * dnsServerPointer) {
+
+		DNSServer * dnsServer = (DNSServer *) dnsServerPointer;
+		while(1) {
+			dnsServer->processNextRequest();
+			vTaskDelay(100);
+		}
+};
+#endif
 bool Basecamp::checkResetReason() {
 
 	preferences.begin("basecamp", false);
