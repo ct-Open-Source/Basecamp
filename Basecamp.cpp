@@ -3,10 +3,24 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
+
+#include <iomanip>
 #include "Basecamp.hpp"
 #include "debug.hpp"
 
-String Basecamp::_generateHostname() {
+namespace {
+	const constexpr uint16_t defaultThreadStackSize = 3072;
+	const constexpr UBaseType_t defaultThreadPriority = 0;
+}
+
+Basecamp::Basecamp()
+	: configuration(String{"/basecamp.json"})
+{
+
+}
+
+String Basecamp::_generateHostname()
+{
 	String clean_hostname =	configuration.get("DeviceName");
 	if (clean_hostname == "") {
 		return "basecamp-device";
@@ -18,13 +32,13 @@ String Basecamp::_generateHostname() {
 		};
 	};
 	DEBUG_PRINTLN(clean_hostname);
-	return clean_hostname; 
+	return clean_hostname;
 };
 
-bool Basecamp::begin() {
+bool Basecamp::begin()
+{
 	Serial.begin(115200);
 	Serial.println("Basecamp V.0.1.6");
-	configuration.begin("/basecamp.json");
 	if (!configuration.load()) {
 		DEBUG_PRINTLN("Configuration is broken. Resetting.");
 		configuration.reset();
@@ -47,26 +61,35 @@ bool Basecamp::begin() {
 #endif
 #ifndef BASECAMP_NOMQTT
 	if (configuration.get("MQTTActive") != "false") {
-		uint16_t mqttport = configuration.get("MQTTPort").toInt();
-		char* mqtthost = configuration.getCString("MQTTHost");
-		char* mqttuser = configuration.getCString("MQTTUser");
-		char* mqttpass = configuration.getCString("MQTTPass");
+		const auto &mqtthost = configuration.get("MQTTHost");
+		const auto &mqttuser = configuration.get("MQTTUser");
+		const auto &mqttpass = configuration.get("MQTTPass");
+		// INFO: that library just copies the pointer to the hostname. As long as nobody
+		// modifies the config, this may work.
 		mqtt.setClientId(hostname.c_str());
-		mqtt.setServer(mqtthost, mqttport);
-		if(mqttuser != "") {
-			mqtt.setCredentials(mqttuser,mqttpass);
+		// FIXME: It this is empty -> defaults?
+		auto mqttport = configuration.get("MQTTPort").toInt();
+		// INFO: that library just copies the pointer to the hostname. As long as nobody
+		// modifies the config, this may work.
+		mqtt.setServer(mqtthost.c_str(), mqttport);
+		if (mqttuser.length() != 0) {
+			mqtt.setCredentials(mqttuser.c_str(), mqttpass.c_str());
 		};
 
-		xTaskCreatePinnedToCore(&MqttHandling, "MqttTask", 4096, (void*) &mqtt, 5, NULL,0);
+		xTaskCreatePinnedToCore(&MqttHandling, "MqttTask", defaultThreadStackSize,
+				(void *)&mqtt, defaultThreadPriority, NULL, 0);
 	};
 #endif
 
 #ifndef BASECAMP_NOOTA
 	if(configuration.get("OTAActive") != "false") {
 		struct taskParms OTAParams[1];
-		OTAParams[0].parm1 = configuration.getCString("OTAPass");
+		// TODO: How long do these params have to be living?
+		OTAParams[0].parm1 = configuration.get("OTAPass").c_str();
 		OTAParams[0].parm2 = hostname.c_str();
-		xTaskCreatePinnedToCore(&OTAHandling, "ArduinoOTATask", 4096, (void*)&OTAParams[0], 5, NULL,0);
+
+		xTaskCreatePinnedToCore(&OTAHandling, "ArduinoOTATask", defaultThreadStackSize,
+				(void *)&OTAParams[0], defaultThreadPriority, NULL, 0);
 	}
 #endif
 
@@ -114,17 +137,21 @@ bool Basecamp::begin() {
 #endif
 
 	Serial.println(showSystemInfo());
-}
 
+	// TODO: only return true if everything setup up correctly
+	return true;
+}
 
 #ifndef BASECAMP_NOMQTT
 
-void Basecamp::MqttHandling(void * mqttPointer) {
-
+// TODO: Think about making void* the real corresponding type
+void Basecamp::MqttHandling(void *mqttPointer)
+{
 		bool mqttIsConnecting = false;
 		int loopCount = 0;
-		AsyncMqttClient * mqtt = (AsyncMqttClient *) mqttPointer;
+		AsyncMqttClient *mqtt = (AsyncMqttClient *)mqttPointer;
 		while(1) {
+			// TODO: What is the sense behind these magics?
 			if (loopCount == 50 && mqtt->connected() != 1) {
 				mqttIsConnecting = false;
 				mqtt->disconnect(true);
@@ -133,7 +160,7 @@ void Basecamp::MqttHandling(void * mqttPointer) {
 				if(mqtt->connected() != 1) {
 					if (WiFi.status() == WL_CONNECTED) {
 						mqtt->connect();
-						mqttIsConnecting == true;
+						mqttIsConnecting = true;
 					} else {
 						mqtt->disconnect();
 					}
@@ -155,12 +182,13 @@ void Basecamp::DnsHandling(void * dnsServerPointer) {
 		}
 };
 #endif
-bool Basecamp::checkResetReason() {
-
+void Basecamp::checkResetReason()
+{
 	preferences.begin("basecamp", false);
 	int reason = rtc_get_reset_reason(0);
 	DEBUG_PRINT("Reset reason: ");
 	DEBUG_PRINTLN(reason);
+	// TODO: Magics
 	if (reason == 1 || reason == 16) {
 		unsigned int bootCounter = preferences.getUInt("bootcounter", 0);
 
@@ -195,14 +223,16 @@ bool Basecamp::checkResetReason() {
 
 #ifndef BASECAMP_NOOTA
 void Basecamp::OTAHandling(void * OTAParams) {
+	DEBUG_PRINTLN(__func__);
+
 
 	struct taskParms *params;
 	params = (struct taskParms *) OTAParams;
 
-	if(params->parm1 != "") { 
+	if (strlen(params->parm1) != 0) {
 		ArduinoOTA.setPassword(params->parm1);
 	}
-	ArduinoOTA.setHostname(params->parm2);	
+	ArduinoOTA.setHostname(params->parm2);
 	ArduinoOTA
 		.onStart([]() {
 				String type;
@@ -241,18 +271,20 @@ void Basecamp::OTAHandling(void * OTAParams) {
 String Basecamp::_generateMac() {
 	byte rawMac[6];
 	WiFi.macAddress(rawMac);
-	String mac;
-	for (int i = 0; i < 6; i++) {
-		mac += (String(rawMac[i], HEX));
-		if (i < 5) {
-			mac+=":";
+	std::ostringstream stream;
+	for (unsigned int i = 0; i < 6; i++) {
+		if (i != 0) {
+			stream << ":";
 		}
+		stream << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(rawMac[i]);
 	}
-	return mac; 
+
+	String mac{stream.str().c_str()};
+	return mac;
 }
 
 String Basecamp::showSystemInfo() {
-	String Info = "";
-	Info += "MAC-Address: " + mac;
+	String Info{"MAC-Address: "};
+	Info +=  mac;
 	return Info;
 }
