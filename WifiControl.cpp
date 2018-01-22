@@ -10,9 +10,9 @@ void WifiControl::begin(String essid, String password, String configured, String
 {
 	DEBUG_PRINTLN("Connecting to Wifi");
 
-	String _wifiConfigured = configured;
-	String _wifiEssid = essid;
-	String _wifiPassword = password;
+	String _wifiConfigured = std::move(configured);
+	String _wifiEssid = std::move(essid);
+	String _wifiPassword = std::move(password);
 
 	WiFi.onEvent(WiFiEvent);
 	if (_wifiConfigured == "True") {
@@ -20,9 +20,9 @@ void WifiControl::begin(String essid, String password, String configured, String
 		DEBUG_PRINT("Connecting to ");
 		DEBUG_PRINTLN(_wifiEssid);
 
-		WiFi.begin (_wifiEssid.c_str(), _wifiPassword.c_str());
+		WiFi.begin(_wifiEssid.c_str(), _wifiPassword.c_str());
 		WiFi.setHostname(hostname.c_str());
-		//WiFi.setAutoConnect ( true );                                  
+		//WiFi.setAutoConnect ( true );
 		//WiFi.setAutoReconnect ( true );
 	} else {
 
@@ -30,9 +30,7 @@ void WifiControl::begin(String essid, String password, String configured, String
 		DEBUG_PRINTLN("Starting Wifi AP");
 
 		WiFi.mode(WIFI_AP_STA);
-		WiFi.softAP("ESP32");
-
-
+		WiFi.softAP("ESP32"); ///< TODO: Add MAC
 	}
 }
 
@@ -52,6 +50,8 @@ void WifiControl::WiFiEvent(WiFiEvent_t event)
 	Preferences preferences;
 	preferences.begin("basecamp", false);
 	unsigned int bootCounter = preferences.getUInt("bootcounter", 0);
+	// In case somebody wants to know this..
+	DEBUG_PRINTF("[WiFi-event] event. Bootcounter is %d\n", bootCounter);
 	DEBUG_PRINTF("[WiFi-event] event: %d\n", event);
 	switch(event) {
 		case SYSTEM_EVENT_STA_GOT_IP:
@@ -63,8 +63,8 @@ void WifiControl::WiFiEvent(WiFiEvent_t event)
 			DEBUG_PRINTLN("WiFi lost connection");
 			WiFi.reconnect();
 			break;
+		default:
+			// TODO: Default = do nothing
+			break;
 	}
 }
-
-
-

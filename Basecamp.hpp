@@ -10,7 +10,6 @@
 #include "Configuration.hpp"
 #include <Preferences.h>
 #include <rom/rtc.h>
-#include <esp_wifi.h>
 #ifndef BASECAMP_NOWIFI
 #include "WifiControl.hpp"
 #endif
@@ -31,16 +30,16 @@
 
 class Basecamp {
 	public:
-		Basecamp() {};
-		~Basecamp() {};
+		Basecamp();
+		~Basecamp() = default;
 		Configuration configuration;
 		Preferences preferences;
 		bool begin();
-		bool checkResetReason();
+		void checkResetReason();
 		String showSystemInfo();
 		String hostname;
 		struct taskParms {
-			char* parm1;
+			const char* parm1;
 			const char* parm2;
 		};
 #ifndef BASECAMP_NOWIFI
@@ -66,7 +65,9 @@ class Basecamp {
 		static void OTAHandling(void *);
 #endif
 	private:
+		// TODO: Functionname is misleading
 		String _generateHostname();
+		// TODO: Functionname is misleading
 		String _generateMac();
 };
 #endif

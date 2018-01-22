@@ -6,10 +6,9 @@
 #include "Configuration.hpp"
 #include "debug.hpp"
 
-bool Configuration::begin(String filename)
+Configuration::Configuration(String filename)
+	: _jsonFile(std::move(filename))
 {
-	_jsonFile = filename;
-
 }
 
 bool Configuration::load() {
@@ -18,8 +17,7 @@ bool Configuration::load() {
 	if (!SPIFFS.begin(true)) {
 		Serial.println("Could not access SPIFFS.");
 		return false;
-
-	};
+	}
 
 	File configFile = SPIFFS.open(_jsonFile, "r");
 
@@ -34,12 +32,10 @@ bool Configuration::load() {
 	if (!_jsonData.success()) {
 		Serial.println("Failed to parse config file.");
 		return false;
-	};
+	}
 
-	DEBUG_PRINTLN("converting config to map");
-	for (JsonObject::iterator it = _jsonData.begin(); it != _jsonData.end(); ++it)
-	{
-		set(it->key, it->value);
+	for (const auto& configItem : _jsonData) {
+		set(configItem.key, configItem.value);
 	}
 
 	configFile.close();
@@ -53,19 +49,19 @@ bool Configuration::save() {
 	if (!configFile) {
 		Serial.println("Failed to open config file for writing");
 		return false;
-	};
+	}
 
 	if (configuration.empty())
 	{
 		Serial.println("Configuration empty");
-	};
+	}
 
 	DynamicJsonBuffer _jsonBuffer;
-	JsonObject& _jsonData = _jsonBuffer.createObject();
+	JsonObject &_jsonData = _jsonBuffer.createObject();
 
-	for (auto const& x : configuration)
+	for (const auto& x : configuration)
 	{
-		_jsonData.set(_jsonBuffer.strdup(x.first), _jsonBuffer.strdup(x.second));
+		_jsonData.set(x.first, String{x.second});
 	}
 
 	_jsonData.printTo(configFile);
@@ -78,24 +74,31 @@ bool Configuration::save() {
 }
 
 
-bool Configuration::set(String key, String value) {
-	DEBUG_PRINTLN(key);
-	DEBUG_PRINTLN(configuration[key]);
-	configuration[key] = value;
-	_configurationTainted = true;
+void Configuration::set(String key, String value) {
+	std::ostringstream debug;
+	debug << "Settting " << key.c_str() << " to " << value.c_str() << "(was " << get(key).c_str() << ")";
+	DEBUG_PRINTLN(debug.str().c_str());
+
+	if (get(key) != value) {
+		_configurationTainted = true;
+		configuration[key] = value;
+	} else {
+		DEBUG_PRINTLN("Cowardly refusing to overwrite existing key with the same value");
+	}
 }
 
-String Configuration::get(String key) {
-	DEBUG_PRINTLN(key);
-	DEBUG_PRINTLN(configuration[key]);
+const String &Configuration::get(String key) const {
+	auto found = configuration.find(key);
+	if (found != configuration.end()) {
+		std::ostringstream debug;
+		debug << "Config value for " << key.c_str() << ": " << found->second.c_str();
+		DEBUG_PRINTLN(debug.str().c_str());
 
-	return configuration[key];
-}
+		return found->second;
+	}
 
-char* Configuration::getCString(String key) {
-	char *newCString = (char*) malloc(configuration[key].length()+1);
-	strcpy(newCString, configuration[key].c_str());
-	return newCString;
+	// Default: if not set, we just return an empty String. TODO: Throw?
+	return noResult_;
 }
 
 void Configuration::reset() {
@@ -104,13 +107,13 @@ void Configuration::reset() {
 	this->load();
 }
 
-bool Configuration::dump() {
+void Configuration::dump() {
 #ifdef DEBUG
 	for (const auto &p : configuration) {
 		Serial.print( "configuration[");
 		Serial.print(p.first);
 		Serial.print("] = ");
 		Serial.println(p.second);
-	};
+	}
 #endif
 }

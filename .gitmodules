@@ -1,0 +1,12 @@
+[submodule "external/AsyncTCP"]
+	path = external/AsyncTCP
+	url = https://github.com/me-no-dev/AsyncTCP
+[submodule "external/ESPAsyncWebServer"]
+	path = external/ESPAsyncWebServer
+	url = https://github.com/me-no-dev/ESPAsyncWebServer
+[submodule "external/ArduinoJson"]
+	path = external/ArduinoJson
+	url = https://github.com/bblanchon/ArduinoJson
+[submodule "external/async-mqtt-client"]
+	path = external/async-mqtt-client
+	url = https://github.com/marvinroger/async-mqtt-client

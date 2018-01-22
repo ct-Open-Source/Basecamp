@@ -10,9 +10,6 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <Preferences.h>
-extern "C" {
-	#include "freertos/timers.h"
-}
 
 class WifiControl {
 	public:
