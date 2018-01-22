@@ -16,7 +16,7 @@
             "frameworks": "arduino"
         },
         {
-            "name": "ArduinoJSON",
+            "name": "ArduinoJson",
             "frameworks": "arduino"
         },
         {
