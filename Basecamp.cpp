@@ -56,8 +56,11 @@ bool Basecamp::begin()
 			hostname
 		  );
 
-	mac = _generateMac();
-	DEBUG_PRINTLN(mac);
+	// Get Mac-Address in form aa::bb::cc:...
+	mac = wifi.getSoftwareMacAddress(":");
+	macHardware = wifi.getHardwareMacAddress(":");
+
+	DEBUG_PRINTLN(showSystemInfo());
 #endif
 #ifndef BASECAMP_NOMQTT
 	if (configuration.get("MQTTActive") != "false") {
@@ -268,23 +271,10 @@ void Basecamp::OTAHandling(void * OTAParams) {
 };
 #endif
 
-String Basecamp::_generateMac() {
-	byte rawMac[6];
-	WiFi.macAddress(rawMac);
-	std::ostringstream stream;
-	for (unsigned int i = 0; i < 6; i++) {
-		if (i != 0) {
-			stream << ":";
-		}
-		stream << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(rawMac[i]);
-	}
-
-	String mac{stream.str().c_str()};
-	return mac;
-}
-
 String Basecamp::showSystemInfo() {
-	String Info{"MAC-Address: "};
-	Info +=  mac;
-	return Info;
+	std::ostringstream info;
+	info << "MAC-Address: " << mac.c_str();
+	info << ", Hardware MAC: " << macHardware.c_str();
+
+	return {info.str().c_str()};
 }

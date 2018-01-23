@@ -44,6 +44,7 @@ class Basecamp {
 		};
 #ifndef BASECAMP_NOWIFI
 		String mac;
+		String macHardware;
 		WifiControl wifi;
 #endif
 
@@ -67,7 +68,5 @@ class Basecamp {
 	private:
 		// TODO: Functionname is misleading
 		String _generateHostname();
-		// TODO: Functionname is misleading
-		String _generateMac();
 };
 #endif
