@@ -30,10 +30,10 @@ String Basecamp::_generateHostname()
 	if (clean_hostname == "") {
 		return "basecamp-device";
 	}
-	
+
 	// Transform device name to lower case
 	clean_hostname.toLowerCase();
-	
+
 	// Replace all non-alphanumeric characters in hostname to minus symbols
 	for (int i = 0; i <= clean_hostname.length(); i++) {
 		if (!isalnum(clean_hostname.charAt(i))) {
@@ -41,7 +41,7 @@ String Basecamp::_generateHostname()
 		};
 	};
 	DEBUG_PRINTLN(clean_hostname);
-	
+
 	// return cleaned hostname String
 	return clean_hostname;
 };
@@ -56,20 +56,20 @@ bool Basecamp::begin()
 	Serial.begin(115200);
 	// Display a simple lifesign
 	Serial.println("Basecamp V.0.1.6");
-	
+
 	// Load configuration from internal flash storage.
 	// If configuration.load() fails, reset the configuration
 	if (!configuration.load()) {
 		DEBUG_PRINTLN("Configuration is broken. Resetting.");
 		configuration.reset();
 	};
-	
+
 	// Get a cleaned version of the device name.
-	// It is used as a hostname for DHCP and ArduinoOTA. 
+	// It is used as a hostname for DHCP and ArduinoOTA.
 	hostname = _generateHostname();
 	DEBUG_PRINTLN(hostname);
 
-	// Have checkResetReason() control if the device configuration 
+	// Have checkResetReason() control if the device configuration
 	// should be reset or not.
 	checkResetReason();
 
@@ -83,8 +83,8 @@ bool Basecamp::begin()
 			hostname // The system hostname to use for DHCP
 		  );
 	// Get WiFI MAC
-	mac = _generateMac();
-	DEBUG_PRINTLN(mac);
+	mac = wifi.getSoftwareMacAddress(":");
+	DEBUG_PRINTLN(showSystemInfo().c_str());
 #endif
 #ifndef BASECAMP_NOMQTT
 	// Check if MQTT has been disabled by the user
@@ -123,7 +123,7 @@ bool Basecamp::begin()
 		// TODO: How long do these params have to be living?
 		// Set OTA password
 		OTAParams[0].parm1 = configuration.get("OTAPass").c_str();
-		// Set OTA hostname 
+		// Set OTA hostname
 		OTAParams[0].parm2 = hostname.c_str();
 
 		// Create a task that takes care of OTA update handling.
@@ -160,7 +160,7 @@ bool Basecamp::begin()
 	web.setInterfaceElementAttribute("WifiConfigured", "type", "hidden");
 	web.setInterfaceElementAttribute("WifiConfigured", "value", "true");
 
-	// Add input fields for MQTT configurations if it hasn't been disabled 
+	// Add input fields for MQTT configurations if it hasn't been disabled
 	if (configuration.get("MQTTActive") != "false") {
 		web.addInterfaceElement("MQTTHost", "input", "MQTT Host:","#configform" , "MQTTHost");
 		web.addInterfaceElement("MQTTPort", "input", "MQTT Port:","#configform" , "MQTTPort");
@@ -174,7 +174,7 @@ bool Basecamp::begin()
 	web.setInterfaceElementAttribute("saveform", "type", "button");
 	web.setInterfaceElementAttribute("saveform", "value", "Save");
 	web.setInterfaceElementAttribute("saveform", "onclick", "collectConfiguration()");
-	
+
 	// Show the devices MAC in the Webinterface
 	String infotext2 = "This device has the MAC-Address: " + mac;
 	web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
@@ -197,7 +197,7 @@ bool Basecamp::begin()
 //This is a task that checks if the MQTT client is still connected or not. If not it automatically reconnect.
 // TODO: Think about making void* the real corresponding type
 void Basecamp::MqttHandling(void *mqttPointer)
-{		
+{
 		// is set to true, when a connection attempt is already running. Paralell connection attempts
 		// seem to mess up the async-mqtt-client library.
 		bool mqttIsConnecting = false;
@@ -229,7 +229,7 @@ void Basecamp::MqttHandling(void *mqttPointer)
 #ifdef DNSServer_h
 // This is a task that handles DNS requests from clients
 void Basecamp::DnsHandling(void * dnsServerPointer) {
-		
+
 		DNSServer * dnsServer = (DNSServer *) dnsServerPointer;
 		while(1) {
 			// handle each request
@@ -241,14 +241,14 @@ void Basecamp::DnsHandling(void * dnsServerPointer) {
 
 
 // This function checks the reset reason returned by the ESP and resets the configuration if neccessary.
-// It counts all system reboots that occured by power cycles or button resets. 
-// If the ESP32 receives an IP the boot counts as successful and the counter will be reset by Basecamps 
+// It counts all system reboots that occured by power cycles or button resets.
+// If the ESP32 receives an IP the boot counts as successful and the counter will be reset by Basecamps
 // WiFi management.
 void Basecamp::checkResetReason()
 {
 	// Instead of the internal flash it uses the somewhat limited, but sufficient preferences storage
 	preferences.begin("basecamp", false);
-	// Get the reset reason for the current boot 
+	// Get the reset reason for the current boot
 	int reason = rtc_get_reset_reason(0);
 	DEBUG_PRINT("Reset reason: ");
 	DEBUG_PRINTLN(reason);
@@ -277,7 +277,7 @@ void Basecamp::checkResetReason()
 			Serial.println("Resetting the WiFi configuration.");
 			// Reboot
 			ESP.restart();
-			
+
 			// If the WiFi is unconfigured and the device is rebooted twice format the internal flash storage
 		} else if (bootCounter > 2 && configuration.get("WifiConfigured") == "False") {
 			Serial.println("Factory reset was forced.");
@@ -363,27 +363,12 @@ void Basecamp::OTAHandling(void * OTAParams) {
 };
 #endif
 
-// This function converts the ESPs WiFi MAC to HEX string 
-String Basecamp::_generateMac() {
-	// create a 6 byte buffer for the mac
-	byte rawMac[6];
-	// get the WiFi mac. Note: WiFi must be initialized to get the MAC
-	WiFi.macAddress(rawMac);
-	std::ostringstream stream;
-	for (unsigned int i = 0; i < 6; i++) {
-		if (i != 0) {
-			stream << ":";
-		}
-		stream << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(rawMac[i]);
-	}
-
-	String mac{stream.str().c_str()};
-	return mac;
-}
 // This shows basic information about the system. Currently only the mac
 // TODO: expand infos
 String Basecamp::showSystemInfo() {
-	String Info{"MAC-Address: "};
-	Info +=  mac;
-	return Info;
+	std::ostringstream info;
+	info << "MAC-Address: " << mac.c_str();
+	info << ", Hardware MAC: " << wifi.getHardwareMacAddress(":").c_str();
+
+	return {info.str().c_str()};
 }

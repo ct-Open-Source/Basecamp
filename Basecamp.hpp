@@ -67,7 +67,5 @@ class Basecamp {
 	private:
 		// TODO: Functionname is misleading
 		String _generateHostname();
-		// TODO: Functionname is misleading
-		String _generateMac();
 };
 #endif

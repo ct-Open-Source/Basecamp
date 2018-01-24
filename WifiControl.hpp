@@ -21,10 +21,19 @@ class WifiControl {
 		IPAddress getSoftAPIP();
 		int status();
 		static void WiFiEvent(WiFiEvent_t event);
+
+		/*
+			Returns the MAC Address of the wifi adapter in hexadecimal form, optionally delimited
+			by a given delimiter which is inserted between every hex-representation.
+			e.G. getMacAddress(":") would return "aa:bb:cc:..."
+		*/
+		String getHardwareMacAddress(const String& delimiter = {});
+		String getSoftwareMacAddress(const String& delimiter = {});
 	private:
 		String _wifiEssid;
 		String _wifiPassword;
 		String _ap;
+		String _wifiAPName;
 };
 
 #endif
