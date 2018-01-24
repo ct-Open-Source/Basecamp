@@ -3,16 +3,21 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
+
+#include <iomanip>
+
 #include "WifiControl.hpp"
 #include "debug.hpp"
 #include "Basecamp.hpp"
+
 void WifiControl::begin(String essid, String password, String configured, String hostname)
 {
 	DEBUG_PRINTLN("Connecting to Wifi");
 
 	String _wifiConfigured = std::move(configured);
-	String _wifiEssid = std::move(essid);
-	String _wifiPassword = std::move(password);
+	_wifiEssid = std::move(essid);
+	_wifiPassword = std::move(password);
+	 _wifiAPName = "ESP32_" + getHardwareMacAddress();
 
 	WiFi.onEvent(WiFiEvent);
 	if (_wifiConfigured == "True") {
@@ -27,10 +32,10 @@ void WifiControl::begin(String essid, String password, String configured, String
 	} else {
 
 		DEBUG_PRINTLN("Wifi is NOT configured");
-		DEBUG_PRINTLN("Starting Wifi AP");
+		DEBUG_PRINTF("Starting Wifi AP '%s'", _wifiAPName);
 
 		WiFi.mode(WIFI_AP_STA);
-		WiFi.softAP("ESP32"); ///< TODO: Add MAC
+		WiFi.softAP(_wifiAPName.c_str());
 	}
 }
 
@@ -64,7 +69,40 @@ void WifiControl::WiFiEvent(WiFiEvent_t event)
 			WiFi.reconnect();
 			break;
 		default:
-			// TODO: Default = do nothing
+			// INFO: Default = do nothing
 			break;
 	}
+}
+
+namespace {
+	template <typename BYTES>
+	String format6Bytes(const BYTES &bytes, const String& delimiter)
+	{
+		std::ostringstream stream;
+		for (unsigned int i = 0; i < 6; i++) {
+			if (i != 0 && delimiter.length() > 0) {
+				stream << delimiter.c_str();
+			}
+			stream << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(bytes[i]);
+		}
+
+		String mac{stream.str().c_str()};
+		return mac;
+	}
+}
+
+// TODO: This will return the default mac, not a manually set one
+// See https://github.com/espressif/esp-idf/blob/master/components/esp32/include/esp_system.h
+String WifiControl::getHardwareMacAddress(const String& delimiter)
+{
+	uint8_t rawMac[6];
+	esp_efuse_mac_get_default(rawMac);
+	return format6Bytes(rawMac, delimiter);
+}
+
+String WifiControl::getSoftwareMacAddress(const String& delimiter)
+{
+	uint8_t rawMac[6];
+	WiFi.macAddress(rawMac);
+	return format6Bytes(rawMac, delimiter);
 }
