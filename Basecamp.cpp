@@ -12,7 +12,7 @@ namespace {
 	const constexpr uint16_t defaultThreadStackSize = 3072;
 	const constexpr UBaseType_t defaultThreadPriority = 0;
 	// Default length for access point mode password
-	const constexpr unsigned defaultApSecretLength = 6;
+	const constexpr unsigned defaultApSecretLength = 8;
 }
 
 Basecamp::Basecamp()
