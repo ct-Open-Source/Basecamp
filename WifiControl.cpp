@@ -125,9 +125,10 @@ String WifiControl::generateRandomSecret(unsigned length) const
 	// There is no "O" (Oh) to reduce confusion
 	const String validChars{"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ0123456789.-,:!$/"};
 	String returnValue;
-	returnValue.reserve(length);
 
 	unsigned useLength = (length < minApSecretLength)?minApSecretLength:length;
+	returnValue.reserve(useLength);
+
 	for (unsigned i = 0; i < useLength; i++)
 	{
 		auto randomValue = validChars[(esp_random() % validChars.length())];
