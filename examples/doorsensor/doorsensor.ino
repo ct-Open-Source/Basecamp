@@ -33,7 +33,7 @@ void resetToFactoryDefaults()
     Configuration config(String{"/basecamp.json"});
     config.load();
     config.resetExcept({ConfigurationKey::accessPointSecret, });
-    config.save();  
+    config.save();
 }
 
 void setup() {
@@ -75,7 +75,7 @@ void setup() {
 //This function is called when the MQTT-Server is connected
 void onMqttConnect(bool sessionPresent) {
   DEBUG_PRINTLN(__func__);
-  
+
   //Subscribe to the delay topic
   iot.mqtt.subscribe(delaySleepTopic.c_str(), 0);
   //Trigger the transmission of the current state.
@@ -135,10 +135,10 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 
 void suspendESP(uint16_t packetId) {
   DEBUG_PRINTLN(__func__);
-  
+
   //Check if the published package is the one of the door sensor
   if (packetId == statusPacketIdSub) {
-   
+
     if (delaySleep == true) {
       DEBUG_PRINTLN("Delaying Sleep");
       return;
@@ -151,6 +151,6 @@ void suspendESP(uint16_t packetId) {
   }
 }
 
-void loop() 
+void loop()
 {
 }

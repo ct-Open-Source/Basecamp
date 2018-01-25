@@ -11,6 +11,8 @@
 namespace {
 	const constexpr uint16_t defaultThreadStackSize = 3072;
 	const constexpr UBaseType_t defaultThreadPriority = 0;
+	// Default length for access point mode password
+	const constexpr unsigned defaultApSecretLength = 6;
 }
 
 Basecamp::Basecamp()
@@ -59,7 +61,7 @@ bool Basecamp::begin()
 	// If configuration.load() fails, reset the configuration
 	if (!configuration.load()) {
 		DEBUG_PRINTLN("Configuration is broken. Resetting.");
-		configuration.resetExcept({ConfigurationKey::accessPointSecret, });
+		configuration.reset();
 	};
 
 	// Get a cleaned version of the device name.
@@ -73,13 +75,27 @@ bool Basecamp::begin()
 
 #ifndef BASECAMP_NOWIFI
 
+	// If there is no access point secret set yet, generate one and save it.
+	// It will survive the default config reset.
+	if (!configuration.isKeySet(ConfigurationKey::accessPointSecret))
+	{
+		Serial.println("Generating access point secret...");
+		auto apSecret = wifi.generateRandomSecret(defaultApSecretLength);
+		configuration.set(ConfigurationKey::accessPointSecret, apSecret);
+		configuration.save();
+	}
+
+	Serial.printf("Secret: %s\n", configuration.get(ConfigurationKey::accessPointSecret).c_str());
+
 	// Initialize Wifi with the stored configuration data.
 	wifi.begin(
 			configuration.get("WifiEssid"), // The (E)SSID or WiFi-Name
 			configuration.get("WifiPassword"), // The WiFi password
 			configuration.get("WifiConfigured"), // Has the WiFi been configured
-			hostname // The system hostname to use for DHCP
-		  );
+			hostname, // The system hostname to use for DHCP
+			configuration.get(ConfigurationKey::accessPointSecret)
+	);
+
 	// Get WiFI MAC
 	mac = wifi.getSoftwareMacAddress(":");
 	DEBUG_PRINTLN(showSystemInfo().c_str());
@@ -365,7 +381,14 @@ void Basecamp::OTAHandling(void * OTAParams) {
 String Basecamp::showSystemInfo() {
 	std::ostringstream info;
 	info << "MAC-Address: " << mac.c_str();
-	info << ", Hardware MAC: " << wifi.getHardwareMacAddress(":").c_str();
+	info << ", Hardware MAC: " << wifi.getHardwareMacAddress(":").c_str() << std::endl;
+
+	if (configuration.isKeySet(ConfigurationKey::accessPointSecret)) {
+			info << "*******************************************" << std::endl;
+			info << "* ACCESS POINT PASSWORD: ";
+			info << configuration.get(ConfigurationKey::accessPointSecret).c_str() << std::endl;
+			info << "*******************************************" << std::endl;
+	}
 
 	return {info.str().c_str()};
 }

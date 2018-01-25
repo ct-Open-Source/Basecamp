@@ -10,7 +10,13 @@
 #include "debug.hpp"
 #include "Basecamp.hpp"
 
-void WifiControl::begin(String essid, String password, String configured, String hostname)
+namespace {
+	// Minumum access point secret length to be generated (8 is min for ESP32)
+	const constexpr unsigned minApSecretLength = 8;
+}
+
+void WifiControl::begin(String essid, String password, String configured,
+												String hostname, String apSecret)
 {
 	DEBUG_PRINTLN("Connecting to Wifi");
 
@@ -35,7 +41,14 @@ void WifiControl::begin(String essid, String password, String configured, String
 		DEBUG_PRINTF("Starting Wifi AP '%s'", _wifiAPName);
 
 		WiFi.mode(WIFI_AP_STA);
-		WiFi.softAP(_wifiAPName.c_str());
+		if (apSecret.length() > 0) {
+			// Start with password protection
+			Serial.printf("Starting AP with password %s\n", apSecret.c_str());
+			WiFi.softAP(_wifiAPName.c_str(), apSecret.c_str());
+		} else {
+			// Start without password protection
+			WiFi.softAP(_wifiAPName.c_str());
+		}
 	}
 }
 
@@ -105,4 +118,21 @@ String WifiControl::getSoftwareMacAddress(const String& delimiter)
 	uint8_t rawMac[6];
 	WiFi.macAddress(rawMac);
 	return format6Bytes(rawMac, delimiter);
+}
+
+String WifiControl::generateRandomSecret(unsigned length) const
+{
+	// There is no "O" (Oh) to reduce confusion
+	const String validChars{"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ0123456789.-,:!$/"};
+	String returnValue;
+	returnValue.reserve(length);
+
+	unsigned useLength = (length < minApSecretLength)?minApSecretLength:length;
+	for (unsigned i = 0; i < useLength; i++)
+	{
+		auto randomValue = validChars[(esp_random() % validChars.length())];
+		returnValue += randomValue;
+	}
+
+	return returnValue;
 }
