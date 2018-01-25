@@ -32,7 +32,7 @@ void resetToFactoryDefaults()
     DEBUG_PRINTLN("Resetting to factory defaults");
     Configuration config(String{"/basecamp.json"});
     config.load();
-    config.reset();
+    config.resetExcept({ConfigurationKey::accessPointSecret, });
     config.save();  
 }
 

@@ -16,7 +16,6 @@ namespace {
 Basecamp::Basecamp()
 	: configuration(String{"/basecamp.json"})
 {
-
 }
 
 /**
@@ -49,7 +48,6 @@ String Basecamp::_generateHostname()
 /**
  * This is the initialisation function for the Basecamp class.
  */
-
 bool Basecamp::begin()
 {
 	// Enable serial output
@@ -61,7 +59,7 @@ bool Basecamp::begin()
 	// If configuration.load() fails, reset the configuration
 	if (!configuration.load()) {
 		DEBUG_PRINTLN("Configuration is broken. Resetting.");
-		configuration.reset();
+		configuration.resetExcept({ConfigurationKey::accessPointSecret, });
 	};
 
 	// Get a cleaned version of the device name.
@@ -228,8 +226,8 @@ void Basecamp::MqttHandling(void *mqttPointer)
 
 #ifdef DNSServer_h
 // This is a task that handles DNS requests from clients
-void Basecamp::DnsHandling(void * dnsServerPointer) {
-
+void Basecamp::DnsHandling(void * dnsServerPointer)
+{
 		DNSServer * dnsServer = (DNSServer *) dnsServerPointer;
 		while(1) {
 			// handle each request
@@ -238,7 +236,6 @@ void Basecamp::DnsHandling(void * dnsServerPointer) {
 		}
 };
 #endif
-
 
 // This function checks the reset reason returned by the ESP and resets the configuration if neccessary.
 // It counts all system reboots that occured by power cycles or button resets.
