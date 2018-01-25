@@ -51,6 +51,9 @@ class Configuration {
 		// Returns true if the key 'key' exists
 		bool keyExists(ConfigurationKey key) const;
 
+		// Returns true if the key 'key' exists and is not empty
+		bool isKeySet(ConfigurationKey key) const;
+
 		// Reset the whole configuration
 		void reset();
 

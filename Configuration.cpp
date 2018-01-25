@@ -121,6 +121,17 @@ bool Configuration::keyExists(ConfigurationKey key) const
 	return (configuration.find(getKeyName(key)) != configuration.end());
 }
 
+bool Configuration::isKeySet(ConfigurationKey key) const
+{
+	auto found = configuration.find(getKeyName(key));
+	if (found == configuration.end())
+	{
+		return false;
+	}
+
+	return (found->second.length() > 0);
+}
+
 void Configuration::reset()
 {
 	configuration.clear();
