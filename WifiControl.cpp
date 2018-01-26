@@ -123,7 +123,7 @@ String WifiControl::getSoftwareMacAddress(const String& delimiter)
 String WifiControl::generateRandomSecret(unsigned length) const
 {
 	// There is no "O" (Oh) to reduce confusion
-	const String validChars{"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ0123456789.-,:!$/"};
+	const String validChars{"abcdefghjkmnopqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789.-,:$/"};
 	String returnValue;
 
 	unsigned useLength = (length < minApSecretLength)?minApSecretLength:length;
