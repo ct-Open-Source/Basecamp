@@ -23,10 +23,11 @@ void WifiControl::begin(String essid, String password, String configured,
 	String _wifiConfigured = std::move(configured);
 	_wifiEssid = std::move(essid);
 	_wifiPassword = std::move(password);
-	 _wifiAPName = "ESP32_" + getHardwareMacAddress();
+	_wifiAPName = "ESP32_" + getHardwareMacAddress();
 
 	WiFi.onEvent(WiFiEvent);
 	if (_wifiConfigured == "True") {
+		operationMode_ = Mode::client;
 		DEBUG_PRINTLN("Wifi is configured");
 		DEBUG_PRINT("Connecting to ");
 		DEBUG_PRINTLN(_wifiEssid);
@@ -36,7 +37,7 @@ void WifiControl::begin(String essid, String password, String configured,
 		//WiFi.setAutoConnect ( true );
 		//WiFi.setAutoReconnect ( true );
 	} else {
-
+		operationMode_ = Mode::accessPoint;
 		DEBUG_PRINTLN("Wifi is NOT configured");
 		DEBUG_PRINTF("Starting Wifi AP '%s'", _wifiAPName);
 
@@ -50,6 +51,11 @@ void WifiControl::begin(String essid, String password, String configured,
 			WiFi.softAP(_wifiAPName.c_str());
 		}
 	}
+}
+
+WifiControl::Mode WifiControl::getOperationMode() const
+{
+	return operationMode_;
 }
 
 int WifiControl::status() {

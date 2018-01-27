@@ -13,9 +13,17 @@
 
 class WifiControl {
 	public:
+		enum class Mode {
+			unconfigured,
+			accessPoint,
+			client,
+		};
+
 		WifiControl(){};
 		bool connect();
 		bool disconnect();
+
+		Mode getOperationMode() const;
 
 		void begin(String essid, String password = "", String configured = "False",
 							 String hostname = "BasecampDevice", String apSecret="");
@@ -38,6 +46,8 @@ class WifiControl {
 		String _wifiPassword;
 		String _ap;
 		String _wifiAPName;
+
+		Mode operationMode_ = Mode::unconfigured;
 };
 
 #endif
