@@ -5,8 +5,11 @@
 #include <Basecamp.hpp>
 #include <Configuration.hpp>
 
-//Create a new Basecamp instance called iot
-Basecamp iot;
+// Create a new Basecamp instance called iot
+// Uncomment the following line to start the ESP with secured WiFi-AP on first start
+Basecamp iot{Basecamp::SetupModeWifiEncryption::secured};
+// ..or run it in default mode with open wifi-ap network
+// Basecamp iot;
 
 //Variables for the sensor and the battery
 static const int ResetPin = 35;
