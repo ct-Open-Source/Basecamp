@@ -15,8 +15,9 @@ namespace {
 	const constexpr unsigned defaultApSecretLength = 8;
 }
 
-Basecamp::Basecamp()
+Basecamp::Basecamp(SetupModeWifiEncryption setupModeWifiEncryption)
 	: configuration(String{"/basecamp.json"})
+	, setupModeWifiEncryption_(setupModeWifiEncryption)
 {
 }
 
@@ -93,12 +94,12 @@ bool Basecamp::begin()
 			configuration.get("WifiPassword"), // The WiFi password
 			configuration.get("WifiConfigured"), // Has the WiFi been configured
 			hostname, // The system hostname to use for DHCP
-			configuration.get(ConfigurationKey::accessPointSecret)
+			(setupModeWifiEncryption_ == SetupModeWifiEncryption::none)?"":configuration.get(ConfigurationKey::accessPointSecret)
 	);
 
 	// Get WiFI MAC
 	mac = wifi.getSoftwareMacAddress(":");
-	DEBUG_PRINTLN(showSystemInfo().c_str());
+	Serial.println(showSystemInfo().c_str());
 #endif
 #ifndef BASECAMP_NOMQTT
 	// Check if MQTT has been disabled by the user

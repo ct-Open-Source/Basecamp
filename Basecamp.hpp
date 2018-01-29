@@ -30,7 +30,14 @@
 
 class Basecamp {
 	public:
-		Basecamp();
+		// How to handle encryption in setup mode (AP mode)
+		enum class SetupModeWifiEncryption
+		{
+			none,			///< Do not use WiFi encryption (open network)
+			secured,	///< Use ESP32 default encryption (WPA2 at this time)
+		};
+
+		Basecamp(Basecamp::SetupModeWifiEncryption setupModeWifiEncryption = Basecamp::SetupModeWifiEncryption::none);
 		~Basecamp() = default;
 		Configuration configuration;
 		Preferences preferences;
@@ -67,5 +74,6 @@ class Basecamp {
 	private:
 		// TODO: Functionname is misleading
 		String _generateHostname();
+		SetupModeWifiEncryption setupModeWifiEncryption_;
 };
 #endif
