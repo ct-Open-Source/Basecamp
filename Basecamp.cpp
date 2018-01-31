@@ -11,12 +11,14 @@
 namespace {
 	const constexpr uint16_t defaultThreadStackSize = 3072;
 	const constexpr UBaseType_t defaultThreadPriority = 0;
+	// Default length for access point mode password
+	const constexpr unsigned defaultApSecretLength = 8;
 }
 
-Basecamp::Basecamp()
+Basecamp::Basecamp(SetupModeWifiEncryption setupModeWifiEncryption)
 	: configuration(String{"/basecamp.json"})
+	, setupModeWifiEncryption_(setupModeWifiEncryption)
 {
-
 }
 
 /**
@@ -49,7 +51,6 @@ String Basecamp::_generateHostname()
 /**
  * This is the initialisation function for the Basecamp class.
  */
-
 bool Basecamp::begin()
 {
 	// Enable serial output
@@ -75,16 +76,30 @@ bool Basecamp::begin()
 
 #ifndef BASECAMP_NOWIFI
 
+	// If there is no access point secret set yet, generate one and save it.
+	// It will survive the default config reset.
+	if (!configuration.isKeySet(ConfigurationKey::accessPointSecret))
+	{
+		Serial.println("Generating access point secret...");
+		auto apSecret = wifi.generateRandomSecret(defaultApSecretLength);
+		configuration.set(ConfigurationKey::accessPointSecret, apSecret);
+		configuration.save();
+	}
+
+	Serial.printf("Secret: %s\n", configuration.get(ConfigurationKey::accessPointSecret).c_str());
+
 	// Initialize Wifi with the stored configuration data.
 	wifi.begin(
 			configuration.get("WifiEssid"), // The (E)SSID or WiFi-Name
 			configuration.get("WifiPassword"), // The WiFi password
 			configuration.get("WifiConfigured"), // Has the WiFi been configured
-			hostname // The system hostname to use for DHCP
-		  );
+			hostname, // The system hostname to use for DHCP
+			(setupModeWifiEncryption_ == SetupModeWifiEncryption::none)?"":configuration.get(ConfigurationKey::accessPointSecret)
+	);
+
 	// Get WiFI MAC
 	mac = wifi.getSoftwareMacAddress(":");
-	DEBUG_PRINTLN(showSystemInfo().c_str());
+	Serial.println(showSystemInfo().c_str());
 #endif
 #ifndef BASECAMP_NOMQTT
 	// Check if MQTT has been disabled by the user
@@ -228,8 +243,8 @@ void Basecamp::MqttHandling(void *mqttPointer)
 
 #ifdef DNSServer_h
 // This is a task that handles DNS requests from clients
-void Basecamp::DnsHandling(void * dnsServerPointer) {
-
+void Basecamp::DnsHandling(void * dnsServerPointer)
+{
 		DNSServer * dnsServer = (DNSServer *) dnsServerPointer;
 		while(1) {
 			// handle each request
@@ -238,7 +253,6 @@ void Basecamp::DnsHandling(void * dnsServerPointer) {
 		}
 };
 #endif
-
 
 // This function checks the reset reason returned by the ESP and resets the configuration if neccessary.
 // It counts all system reboots that occured by power cycles or button resets.
@@ -368,7 +382,14 @@ void Basecamp::OTAHandling(void * OTAParams) {
 String Basecamp::showSystemInfo() {
 	std::ostringstream info;
 	info << "MAC-Address: " << mac.c_str();
-	info << ", Hardware MAC: " << wifi.getHardwareMacAddress(":").c_str();
+	info << ", Hardware MAC: " << wifi.getHardwareMacAddress(":").c_str() << std::endl;
+
+	if (configuration.isKeySet(ConfigurationKey::accessPointSecret)) {
+			info << "*******************************************" << std::endl;
+			info << "* ACCESS POINT PASSWORD: ";
+			info << configuration.get(ConfigurationKey::accessPointSecret).c_str() << std::endl;
+			info << "*******************************************" << std::endl;
+	}
 
 	return {info.str().c_str()};
 }

@@ -73,7 +73,6 @@ bool Configuration::save() {
 	return true;
 }
 
-
 void Configuration::set(String key, String value) {
 	std::ostringstream debug;
 	debug << "Settting " << key.c_str() << " to " << value.c_str() << "(was " << get(key).c_str() << ")";
@@ -87,7 +86,13 @@ void Configuration::set(String key, String value) {
 	}
 }
 
-const String &Configuration::get(String key) const {
+void Configuration::set(ConfigurationKey key, String value)
+{
+	set(getKeyName(key), std::move(value));
+}
+
+const String &Configuration::get(String key) const
+{
 	auto found = configuration.find(key);
 	if (found != configuration.end()) {
 		std::ostringstream debug;
@@ -101,8 +106,55 @@ const String &Configuration::get(String key) const {
 	return noResult_;
 }
 
-void Configuration::reset() {
+const String &Configuration::get(ConfigurationKey key) const
+{
+	return get(getKeyName(key));
+}
+
+bool Configuration::keyExists(const String& key) const
+{
+	return (configuration.find(key) != configuration.end());
+}
+
+bool Configuration::keyExists(ConfigurationKey key) const
+{
+	return (configuration.find(getKeyName(key)) != configuration.end());
+}
+
+bool Configuration::isKeySet(ConfigurationKey key) const
+{
+	auto found = configuration.find(getKeyName(key));
+	if (found == configuration.end())
+	{
+		return false;
+	}
+
+	return (found->second.length() > 0);
+}
+
+void Configuration::reset()
+{
 	configuration.clear();
+	this->save();
+	this->load();
+}
+
+void Configuration::resetExcept(const std::list<ConfigurationKey> &keysToPreserve)
+{
+	std::map<ConfigurationKey, String> preservedKeys;
+	for (const auto &key : keysToPreserve) {
+		if (keyExists(key)) {
+			// Make a copy of the old value
+			preservedKeys[key] = get(key);
+		}
+	}
+
+	configuration.clear();
+
+	for (const auto &key : preservedKeys) {
+		set(key.first, key.second);
+	}
+
 	this->save();
 	this->load();
 }

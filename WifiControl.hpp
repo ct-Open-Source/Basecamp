@@ -16,11 +16,15 @@ class WifiControl {
 		WifiControl(){};
 		bool connect();
 		bool disconnect();
-		void begin(String essid, String password = "", String configured = "False", String hostname = "BasecampDevice");
+
+		void begin(String essid, String password = "", String configured = "False",
+							 String hostname = "BasecampDevice", String apSecret="");
 		IPAddress getIP();
 		IPAddress getSoftAPIP();
 		int status();
 		static void WiFiEvent(WiFiEvent_t event);
+
+		String generateRandomSecret(unsigned length) const;
 
 		/*
 			Returns the MAC Address of the wifi adapter in hexadecimal form, optionally delimited
