@@ -150,57 +150,61 @@ bool Basecamp::begin()
 #endif
 
 #ifndef BASECAMP_NOWEB
-	// Start webserver and pass the configuration object to it
-	web.begin(configuration);
+	// Starting the webserver only makes sense in setup mode. In productive mode,
+	// the device will enter deep sleep so the server will not work at all.
+	if (wifi.getOperationMode() == WifiControl::Mode::accessPoint)
+	{
+		// Start webserver and pass the configuration object to it
+		web.begin(configuration);
 
-	// Add a webinterface element for the h1 that contains the device name. It is a child of the #wrapper-element.
-	web.addInterfaceElement("heading", "h1", configuration.get("DeviceName"),"#wrapper");
-	// Set the class attribute of the element to fat-border.
-	web.setInterfaceElementAttribute("heading", "class", "fat-border");
+		// Add a webinterface element for the h1 that contains the device name. It is a child of the #wrapper-element.
+		web.addInterfaceElement("heading", "h1", configuration.get("DeviceName"),"#wrapper");
+		// Set the class attribute of the element to fat-border.
+		web.setInterfaceElementAttribute("heading", "class", "fat-border");
 
-	// Add a paragraph with some basic information
-	web.addInterfaceElement("infotext1", "p", "Configure your device with the following options:","#wrapper");
+		// Add a paragraph with some basic information
+		web.addInterfaceElement("infotext1", "p", "Configure your device with the following options:","#wrapper");
 
-	// Add the configuration form, that will include all inputs for config data
-	web.addInterfaceElement("configform", "form", "","#wrapper");
-	web.setInterfaceElementAttribute("configform", "action", "saveConfig");
+		// Add the configuration form, that will include all inputs for config data
+		web.addInterfaceElement("configform", "form", "","#wrapper");
+		web.setInterfaceElementAttribute("configform", "action", "saveConfig");
 
-	web.addInterfaceElement("DeviceName", "input", "Device name","#configform" , "DeviceName");
+		web.addInterfaceElement("DeviceName", "input", "Device name","#configform" , "DeviceName");
 
-	// Add an input field for the WIFI data and link it to the corresponding configuration data
-	web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
-	web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
-	web.setInterfaceElementAttribute("WifiPassword", "type", "password");
-	web.addInterfaceElement("WifiConfigured", "input", "", "#configform", "WifiConfigured");
-	web.setInterfaceElementAttribute("WifiConfigured", "type", "hidden");
-	web.setInterfaceElementAttribute("WifiConfigured", "value", "true");
+		// Add an input field for the WIFI data and link it to the corresponding configuration data
+		web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
+		web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
+		web.setInterfaceElementAttribute("WifiPassword", "type", "password");
+		web.addInterfaceElement("WifiConfigured", "input", "", "#configform", "WifiConfigured");
+		web.setInterfaceElementAttribute("WifiConfigured", "type", "hidden");
+		web.setInterfaceElementAttribute("WifiConfigured", "value", "true");
 
-	// Add input fields for MQTT configurations if it hasn't been disabled
-	if (configuration.get("MQTTActive") != "false") {
-		web.addInterfaceElement("MQTTHost", "input", "MQTT Host:","#configform" , "MQTTHost");
-		web.addInterfaceElement("MQTTPort", "input", "MQTT Port:","#configform" , "MQTTPort");
-		web.setInterfaceElementAttribute("MQTTPort", "type", "number");
-		web.addInterfaceElement("MQTTUser", "input", "MQTT Username:","#configform" , "MQTTUser");
-		web.addInterfaceElement("MQTTPass", "input", "MQTT Password:","#configform" , "MQTTPass");
-		web.setInterfaceElementAttribute("MQTTPass", "type", "password");
-	}
-	// Add a save button that calls the JavaScript function collectConfiguration() on click
-	web.addInterfaceElement("saveform", "input", " ","#configform");
-	web.setInterfaceElementAttribute("saveform", "type", "button");
-	web.setInterfaceElementAttribute("saveform", "value", "Save");
-	web.setInterfaceElementAttribute("saveform", "onclick", "collectConfiguration()");
+		// Add input fields for MQTT configurations if it hasn't been disabled
+		if (configuration.get("MQTTActive") != "false") {
+			web.addInterfaceElement("MQTTHost", "input", "MQTT Host:","#configform" , "MQTTHost");
+			web.addInterfaceElement("MQTTPort", "input", "MQTT Port:","#configform" , "MQTTPort");
+			web.setInterfaceElementAttribute("MQTTPort", "type", "number");
+			web.addInterfaceElement("MQTTUser", "input", "MQTT Username:","#configform" , "MQTTUser");
+			web.addInterfaceElement("MQTTPass", "input", "MQTT Password:","#configform" , "MQTTPass");
+			web.setInterfaceElementAttribute("MQTTPass", "type", "password");
+		}
+		// Add a save button that calls the JavaScript function collectConfiguration() on click
+		web.addInterfaceElement("saveform", "input", " ","#configform");
+		web.setInterfaceElementAttribute("saveform", "type", "button");
+		web.setInterfaceElementAttribute("saveform", "value", "Save");
+		web.setInterfaceElementAttribute("saveform", "onclick", "collectConfiguration()");
 
-	// Show the devices MAC in the Webinterface
-	String infotext2 = "This device has the MAC-Address: " + mac;
-	web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
-#ifdef DNSServer_h
-	if(configuration.get("WifiConfigured") != "True"){
-    		dnsServer.start(53, "*", wifi.getSoftAPIP());
-		xTaskCreatePinnedToCore(&DnsHandling, "DNSTask", 4096, (void*) &dnsServer, 5, NULL,0);
+		// Show the devices MAC in the Webinterface
+		String infotext2 = "This device has the MAC-Address: " + mac;
+		web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
+		#ifdef DNSServer_h
+		if(configuration.get("WifiConfigured") != "True"){
+			dnsServer.start(53, "*", wifi.getSoftAPIP());
+			xTaskCreatePinnedToCore(&DnsHandling, "DNSTask", 4096, (void*) &dnsServer, 5, NULL,0);
+		}
+		#endif
 	}
 	#endif
-#endif
-
 	Serial.println(showSystemInfo());
 
 	// TODO: only return true if everything setup up correctly
