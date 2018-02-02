@@ -12,6 +12,12 @@ mkdir $TMPDIR
 #change into data folder
 cp $DATA/* $TMPDIR
 cd $TMPDIR
+
+yuicompressor -o '.css$:.css' *.css
+yuicompressor -o '.js$:.js' *.js
+
+sed  -i.bak ':a;N;$!ba;s/>\s*</></g' *.htm
+rm *.bak
 gzip *
 cat > $OUTFILE <<DELIMITER
 /*

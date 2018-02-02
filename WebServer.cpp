@@ -50,6 +50,12 @@ void WebServer::begin(Configuration &configuration) {
 			response->addHeader("Content-Encoding", "gzip");
 			request->send(response);
 	});
+	server.on("/logo.svg" , HTTP_GET, [](AsyncWebServerRequest * request)
+	{
+			AsyncWebServerResponse *response = request->beginResponse_P(200, "image/svg+xml", logo_svg_gz, logo_svg_gz_len);
+			response->addHeader("Content-Encoding", "gzip");
+			request->send(response);
+	});
 
 	server.on("/data.json" , HTTP_GET, [&configuration, this](AsyncWebServerRequest * request)
 	{
@@ -57,8 +63,6 @@ void WebServer::begin(Configuration &configuration) {
 			DynamicJsonBuffer _jsonBuffer;
 
 			JsonObject &_jsonData = response->getRoot();
-			JsonObject &meta = _jsonData.createNestedObject("meta");
-			meta["title"] = configuration.get("DeviceName");
 			JsonArray &elements = _jsonData.createNestedArray("elements");
 
 			for (const auto &interfaceElement : interfaceElements)

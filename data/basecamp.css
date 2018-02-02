@@ -4,7 +4,7 @@ html {
 }
 
 @media (min-device-width: 400px) {
-	#wrapper {
+	#wrapper, footer {
 		width:80%;
 		max-width: 1000px;
 		margin: 0 auto;
@@ -21,7 +21,7 @@ h2, h3, h4 {
 	line-height:110%;
 }
 
-p {
+p,footer {
 	color: rgba(0,0,0,0.71);
 }
 
@@ -29,6 +29,9 @@ label {
 	display:block;
 }
 
+footer {
+	font-size: .8em;
+}
 
 input[type=text], input[type=password], input[type=number], input:not([type]) {
 	display:block;
@@ -45,6 +48,7 @@ input[type=button], input[type=submit], button, a.button {
 	font-size: 1.25em;
 	line-height: 150%;
 	box-shadow: rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px, rgba(0, 0, 0, 0.2) 0px 3px 1px -2px;
+	font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 
 input[type=button]:hover, input[type=submit]:hover, button, a.button:hover {
@@ -80,4 +84,10 @@ input[type=button]:hover, input[type=submit]:hover, button, a.button:hover {
 
 #labelforsaveform {
 	order: 100;
+}
+
+#logo {
+	height: 1em;
+	width: auto;
+	margin-right: .25em;
 }

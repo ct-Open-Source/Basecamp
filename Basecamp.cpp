@@ -156,12 +156,19 @@ bool Basecamp::begin()
 	{
 		// Start webserver and pass the configuration object to it
 		web.begin(configuration);
-
 		// Add a webinterface element for the h1 that contains the device name. It is a child of the #wrapper-element.
-		web.addInterfaceElement("heading", "h1", configuration.get("DeviceName"),"#wrapper");
+		web.addInterfaceElement("heading", "h1", "","#wrapper");
+		web.setInterfaceElementAttribute("heading", "class", "fat-border");
+		web.addInterfaceElement("logo", "img", "", "#heading");
+		web.setInterfaceElementAttribute("logo", "src", "/logo.svg");
+		String DeviceName = configuration.get("DeviceName");
+		if (DeviceName == "") {	
+			DeviceName = "Unconfigured Basecamp Device";
+		}
+		web.addInterfaceElement("title", "title", DeviceName,"head");
+		web.addInterfaceElement("devicename", "span", DeviceName,"#heading");
 		// Set the class attribute of the element to fat-border.
 		web.setInterfaceElementAttribute("heading", "class", "fat-border");
-
 		// Add a paragraph with some basic information
 		web.addInterfaceElement("infotext1", "p", "Configure your device with the following options:","#wrapper");
 
@@ -184,6 +191,8 @@ bool Basecamp::begin()
 			web.addInterfaceElement("MQTTHost", "input", "MQTT Host:","#configform" , "MQTTHost");
 			web.addInterfaceElement("MQTTPort", "input", "MQTT Port:","#configform" , "MQTTPort");
 			web.setInterfaceElementAttribute("MQTTPort", "type", "number");
+			web.setInterfaceElementAttribute("MQTTPort", "min", "0");
+			web.setInterfaceElementAttribute("MQTTPort", "max", "65535");
 			web.addInterfaceElement("MQTTUser", "input", "MQTT Username:","#configform" , "MQTTUser");
 			web.addInterfaceElement("MQTTPass", "input", "MQTT Password:","#configform" , "MQTTPass");
 			web.setInterfaceElementAttribute("MQTTPass", "type", "password");
@@ -197,6 +206,11 @@ bool Basecamp::begin()
 		// Show the devices MAC in the Webinterface
 		String infotext2 = "This device has the MAC-Address: " + mac;
 		web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
+		
+		web.addInterfaceElement("footer", "footer", "Powered by ", "body");
+		web.addInterfaceElement("footerlink", "a", "Basecamp", "footer");
+		web.setInterfaceElementAttribute("footerlink", "href", "https://github.com/merlinschumacher/Basecamp");
+		web.setInterfaceElementAttribute("footerlink", "target", "_blank");
 		#ifdef DNSServer_h
 		if(configuration.get("WifiConfigured") != "True"){
 			dnsServer.start(53, "*", wifi.getSoftAPIP());

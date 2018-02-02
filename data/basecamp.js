@@ -12,7 +12,6 @@ function load() {
 	function transferComplete() {
 			        var data = JSON.parse(this.responseText);
 				buildSite(data.elements);
-				setMeta(data.meta);
 		}; 
 	function transferFailed(evt) {
 			console.log('Looks like there was a problem. Status Code: ' + request.status);
@@ -92,10 +91,6 @@ function buildSite (data) {
 		}
 	}
 
-}
-
-function setMeta(data) {
-	document.title = data.title;
 }
 
 function collectConfiguration() {

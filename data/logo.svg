@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg" xmlns:osb="http://www.openswatchbook.org/uri/2009/osb" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+<linearGradient id="a" x1="140.27" x2="157.2" y1="172.46" y2="172.46" gradientUnits="userSpaceOnUse">
+<stop stop-color="#26a69a" offset="0"/>
+</linearGradient>
+</defs>
+<g transform="translate(-140.27 -164)">
+<rect x="140.5" y="164.22" width="16.47" height="16.47" ry="1.42" fill="#f9f9f9" stroke="url(#a)" stroke-linecap="square" stroke-width=".47"/>
+<g fill="#26a69a" font-family="Sans" font-weight="400">
+<path d="M148.82 170.36c-1.17 0-2.24.47-3.03 1.24l.87.86a3.12 3.12 0 0 1 4.36.03l.87-.86a4.33 4.33 0 0 0-3.07-1.27z" overflow="visible" style="text-decoration-line:none;text-indent:0;text-transform:none"/>
+<path d="M148.82 167.9a6.8 6.8 0 0 0-4.78 1.96l.87.87a5.55 5.55 0 0 1 7.85.03l.87-.87a6.8 6.8 0 0 0-4.8-2z" overflow="visible" style="text-decoration-line:none;text-indent:0;text-transform:none"/>
+<path d="M148.82 165.44a9.27 9.27 0 0 0-6.53 2.68l.87.87a8.01 8.01 0 0 1 5.66-2.32 8 8 0 0 1 5.69 2.34l.87-.86a9.27 9.27 0 0 0-6.56-2.71z" overflow="visible" style="text-decoration-line:none;text-indent:0;text-transform:none"/>
+</g>
+<path d="M147.84 167.52l-.33.18 1.1 2.06-5 9.4h-1.16v.37h12.73v-.37h-1.15l-5-9.4 1.1-2.06-.33-.17-.98 1.83zm.98 6.7l2.63 4.94h-5.26z" stroke="#fff" stroke-width=".16"/>
+</g>
+</svg>
