@@ -17,7 +17,7 @@ namespace {
 
 Basecamp::Basecamp(SetupModeWifiEncryption setupModeWifiEncryption)
 	: configuration(String{"/basecamp.json"})
-	, setupModeWifiEncryption_(setupModeWifiEncryption)
+	, setupModeWifiEncryption_(SetupModeWifiEncryption::none)
 {
 }
 
@@ -51,8 +51,17 @@ String Basecamp::_generateHostname()
 /**
  * This is the initialisation function for the Basecamp class.
  */
-bool Basecamp::begin()
+bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 {
+	// Make sure we only accept valid passwords for ap
+	if (fixedWiFiApEncryptionPassword.length() != 0) {
+		if (fixedWiFiApEncryptionPassword.length() >= wifi.getMinimumSecretLength()) {
+			setupModeWifiEncryption_ = SetupModeWifiEncryption::secured;
+		} else {
+			Serial.println("Error: Given fixed ap secret is too short. Refusing.");
+		}
+	}
+
 	// Enable serial output
 	Serial.begin(115200);
 	// Display a simple lifesign
@@ -78,10 +87,17 @@ bool Basecamp::begin()
 
 	// If there is no access point secret set yet, generate one and save it.
 	// It will survive the default config reset.
-	if (!configuration.isKeySet(ConfigurationKey::accessPointSecret))
+	if (!configuration.isKeySet(ConfigurationKey::accessPointSecret) ||
+		fixedWiFiApEncryptionPassword.length() >= wifi.getMinimumSecretLength())
 	{
-		Serial.println("Generating access point secret...");
-		auto apSecret = wifi.generateRandomSecret(defaultApSecretLength);
+		String apSecret = fixedWiFiApEncryptionPassword;
+		if (apSecret.length() < wifi.getMinimumSecretLength()) {
+			// Not set or too short. Generate a random one.
+			Serial.println("Generating access point secret.");
+			apSecret = wifi.generateRandomSecret(defaultApSecretLength);
+		} else {
+			Serial.println("Using fixed access point secret.");
+		}
 		configuration.set(ConfigurationKey::accessPointSecret, apSecret);
 		configuration.save();
 	}
@@ -97,7 +113,7 @@ bool Basecamp::begin()
 			(setupModeWifiEncryption_ == SetupModeWifiEncryption::none)?"":configuration.get(ConfigurationKey::accessPointSecret)
 	);
 
-	// Get WiFI MAC
+	// Get WiFi MAC
 	mac = wifi.getSoftwareMacAddress(":");
 	Serial.println(showSystemInfo().c_str());
 #endif
@@ -162,7 +178,7 @@ bool Basecamp::begin()
 		web.addInterfaceElement("logo", "img", "", "#heading");
 		web.setInterfaceElementAttribute("logo", "src", "/logo.svg");
 		String DeviceName = configuration.get("DeviceName");
-		if (DeviceName == "") {	
+		if (DeviceName == "") {
 			DeviceName = "Unconfigured Basecamp Device";
 		}
 		web.addInterfaceElement("title", "title", DeviceName,"head");
@@ -206,7 +222,7 @@ bool Basecamp::begin()
 		// Show the devices MAC in the Webinterface
 		String infotext2 = "This device has the MAC-Address: " + mac;
 		web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
-		
+
 		web.addInterfaceElement("footer", "footer", "Powered by ", "body");
 		web.addInterfaceElement("footerlink", "a", "Basecamp", "footer");
 		web.setInterfaceElementAttribute("footerlink", "href", "https://github.com/merlinschumacher/Basecamp");
