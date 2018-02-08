@@ -13,9 +13,11 @@
 #ifndef BASECAMP_NOWIFI
 #include "WifiControl.hpp"
 #endif
-#ifndef BASECAMP_NOWEB
 
+#ifndef BASECAMP_NOWEB
+#ifdef BASECAMP_USEDNS
 #include <DNSServer.h>
+#endif
 
 #include "WebServer.hpp"
 #endif
@@ -33,7 +35,7 @@ class Basecamp {
 		// How to handle encryption in setup mode (AP mode)
 		enum class SetupModeWifiEncryption
 		{
-			none,			///< Do not use WiFi encryption (open network)
+			none,		///< Do not use WiFi encryption (open network)
 			secured,	///< Use ESP32 default encryption (WPA2 at this time)
 		};
 
@@ -61,9 +63,11 @@ class Basecamp {
 
 #ifndef BASECAMP_NOWEB
 
+#ifdef BASECAMP_USEDNS
 #ifdef DNSServer_h
 		DNSServer dnsServer;
 		static void DnsHandling(void *);
+#endif
 #endif
 		WebServer web;
 #endif

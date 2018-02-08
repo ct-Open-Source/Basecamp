@@ -18,8 +18,10 @@
 #include <AsyncJson.h>
 #include <ArduinoJson.h>
 #include "WebInterface.hpp"
+#ifdef BASECAMP_USEDNS
 #ifdef DNSServer_h
 #include "CaptiveRequestHandler.hpp"
+#endif
 #endif
 
 class WebServer {

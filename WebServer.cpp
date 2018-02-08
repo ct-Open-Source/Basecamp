@@ -21,8 +21,10 @@ WebServer::WebServer()
 	, server(80)
 {
 	server.addHandler(&events);
+#ifdef BASECAMP_USEDNS
 #ifdef DNSServer_h
 	server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+#endif
 #endif
 }
 

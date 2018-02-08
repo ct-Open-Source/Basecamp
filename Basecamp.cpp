@@ -211,11 +211,13 @@ bool Basecamp::begin()
 		web.addInterfaceElement("footerlink", "a", "Basecamp", "footer");
 		web.setInterfaceElementAttribute("footerlink", "href", "https://github.com/merlinschumacher/Basecamp");
 		web.setInterfaceElementAttribute("footerlink", "target", "_blank");
+		#ifdef BASECAMP_USEDNS
 		#ifdef DNSServer_h
 		if(configuration.get("WifiConfigured") != "True"){
 			dnsServer.start(53, "*", wifi.getSoftAPIP());
 			xTaskCreatePinnedToCore(&DnsHandling, "DNSTask", 4096, (void*) &dnsServer, 5, NULL,0);
 		}
+		#endif
 		#endif
 	}
 	#endif
@@ -259,6 +261,7 @@ void Basecamp::MqttHandling(void *mqttPointer)
 };
 #endif
 
+#ifdef BASECAMP_USEDNS
 #ifdef DNSServer_h
 // This is a task that handles DNS requests from clients
 void Basecamp::DnsHandling(void * dnsServerPointer)
@@ -270,6 +273,7 @@ void Basecamp::DnsHandling(void * dnsServerPointer)
 			vTaskDelay(100);
 		}
 };
+#endif
 #endif
 
 // This function checks the reset reason returned by the ESP and resets the configuration if neccessary.
