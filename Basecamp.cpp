@@ -17,7 +17,7 @@ namespace {
 
 Basecamp::Basecamp(SetupModeWifiEncryption setupModeWifiEncryption)
 	: configuration(String{"/basecamp.json"})
-	, setupModeWifiEncryption_(SetupModeWifiEncryption::none)
+	, setupModeWifiEncryption_(setupModeWifiEncryption)
 {
 }
 
