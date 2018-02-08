@@ -112,8 +112,8 @@ bool Basecamp::begin()
 		// INFO: that library just copies the pointer to the hostname. As long as nobody
 		// modifies the config, this may work.
 		mqtt.setClientId(hostname.c_str());
-		// FIXME: It this is empty -> defaults?
 		auto mqttport = configuration.get("MQTTPort").toInt();
+		if (mqttport == 0) mqttport = 1883;
 		// INFO: that library just copies the pointer to the hostname. As long as nobody
 		// modifies the config, this may work.
 		// Define the hostname and port of the MQTT broker.
