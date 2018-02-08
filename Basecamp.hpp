@@ -76,8 +76,7 @@ class Basecamp {
 		static void OTAHandling(void *);
 #endif
 	private:
-		// TODO: Functionname is misleading
-		String _generateHostname();
+		String _cleanHostname();
 		SetupModeWifiEncryption setupModeWifiEncryption_;
 };
 #endif

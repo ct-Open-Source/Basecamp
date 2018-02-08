@@ -24,7 +24,7 @@ Basecamp::Basecamp(SetupModeWifiEncryption setupModeWifiEncryption)
 /**
  * This function generates a cleaned string from the device name set by the user.
  */
-String Basecamp::_generateHostname()
+String Basecamp::_cleanHostname()
 {
 	String clean_hostname =	configuration.get("DeviceName"); // Get device name from configuration
 
@@ -67,7 +67,7 @@ bool Basecamp::begin()
 
 	// Get a cleaned version of the device name.
 	// It is used as a hostname for DHCP and ArduinoOTA.
-	hostname = _generateHostname();
+	hostname = _cleanHostname();
 	DEBUG_PRINTLN(hostname);
 
 	// Have checkResetReason() control if the device configuration
