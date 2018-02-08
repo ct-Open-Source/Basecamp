@@ -111,6 +111,16 @@ const String &Configuration::get(ConfigurationKey key) const
 	return get(getKeyName(key));
 }
 
+// return a char* instead of a Arduino String to maintain backwards compatibility
+// with printed examples
+[[deprecated("getCString() is deprecated. Use get() instead")]]
+char* Configuration::getCString(String key)
+{
+	char *newCString = (char*) malloc(configuration[key].length()+1);
+	strcpy(newCString,get(key).c_str());
+	return newCString;
+}
+
 bool Configuration::keyExists(const String& key) const
 {
 	return (configuration.find(key) != configuration.end());

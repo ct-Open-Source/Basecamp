@@ -32,6 +32,7 @@ static const String getKeyName(ConfigurationKey key)
 			return "APSecret";
 			break;
 	}
+	return "";
 }
 
 class Configuration {
@@ -71,7 +72,7 @@ class Configuration {
 		const String& get(String key) const;
 		// FIXME: use this instead
 		const String& get(ConfigurationKey key) const;
-
+		char* getCString(String key);
 		struct cmp_str
 		{
 			bool operator()(const String &a, const String &b) const
