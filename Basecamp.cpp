@@ -65,6 +65,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 	// Enable serial output
 	Serial.begin(115200);
 	// Display a simple lifesign
+	Serial.println("");
 	Serial.println("Basecamp V.0.1.6");
 
 	// Load configuration from internal flash storage.
@@ -102,7 +103,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		configuration.save();
 	}
 
-	Serial.printf("Secret: %s\n", configuration.get(ConfigurationKey::accessPointSecret).c_str());
+	DEBUG_PRINTF("Secret: %s\n", configuration.get(ConfigurationKey::accessPointSecret).c_str());
 
 	// Initialize Wifi with the stored configuration data.
 	wifi.begin(
@@ -115,7 +116,6 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 
 	// Get WiFi MAC
 	mac = wifi.getSoftwareMacAddress(":");
-	Serial.println(showSystemInfo().c_str());
 #endif
 #ifndef BASECAMP_NOMQTT
 	// Check if MQTT has been disabled by the user
