@@ -39,11 +39,20 @@ class Basecamp {
 			secured,	///< Use ESP32 default encryption (WPA2 at this time)
 		};
 
-		Basecamp(Basecamp::SetupModeWifiEncryption setupModeWifiEncryption = Basecamp::SetupModeWifiEncryption::none);
+		explicit Basecamp(Basecamp::SetupModeWifiEncryption setupModeWifiEncryption =
+			Basecamp::SetupModeWifiEncryption::none);
+
 		~Basecamp() = default;
+
 		Configuration configuration;
 		Preferences preferences;
-		bool begin();
+
+		/** Initialize.
+		 * Give a fixex ap secret here to override the one-time secret
+		 * password generation. If a password is given, the ctor given
+		 * SetupModeWifiEncryption will be overriden to SetupModeWifiEncryption::secure.
+		*/
+		bool begin(String fixedWiFiApEncryptionPassword = {});
 		void checkResetReason();
 		String showSystemInfo();
 		String hostname;

@@ -32,6 +32,7 @@ class WifiControl {
 		int status();
 		static void WiFiEvent(WiFiEvent_t event);
 
+		unsigned getMinimumSecretLength() const;
 		String generateRandomSecret(unsigned length) const;
 
 		/*

@@ -126,6 +126,11 @@ String WifiControl::getSoftwareMacAddress(const String& delimiter)
 	return format6Bytes(rawMac, delimiter);
 }
 
+unsigned WifiControl::getMinimumSecretLength() const
+{
+	return minApSecretLength;
+}
+
 String WifiControl::generateRandomSecret(unsigned length) const
 {
 	// There is no "O" (Oh) to reduce confusion

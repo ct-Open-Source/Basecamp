@@ -54,8 +54,10 @@ void setup() {
     resetToFactoryDefaults();
   }
 
-  //Initialize Basecamp
+  // Initialize Basecamp
   iot.begin();
+  // Alternate example: optional initialization with a fixed ap password for setup-mode:
+  // iot.begin("yoursecurepassword");
 
   if (resetPressed) {
     DEBUG_PRINTLN("**** CONFIG HAS BEEN MANUALLY RESET ****");
