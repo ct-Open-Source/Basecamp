@@ -9,7 +9,11 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 
 		bool canHandle(AsyncWebServerRequest *request) {
 			//skip all basecamp related sources - handle all other requests and return the default html
-			if (request->url() != "/basecamp.css" && request->url() != "/basecamp.js" && request->url() != "/data.json" && request->url() != "/submitconfig") {
+			if (request->url() != "/basecamp.css" && 
+					request->url() != "/basecamp.js" && 
+					request->url() != "/data.json" && 
+					request->url() != "/logo.svg" && 
+					request->url() != "/submitconfig") {
 				return true;
 			} else {
 				return false;
