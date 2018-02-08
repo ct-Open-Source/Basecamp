@@ -249,7 +249,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 // TODO: Think about making void* the real corresponding type
 void Basecamp::MqttHandling(void *mqttPointer)
 {
-		// is set to true, when a connection attempt is already running. Paralell connection attempts
+		// is set to true, when a connection attempt is already running. Parallel connection attempts
 		// seem to mess up the async-mqtt-client library.
 		bool mqttIsConnecting = false;
 		AsyncMqttClient *mqtt = (AsyncMqttClient *)mqttPointer;
