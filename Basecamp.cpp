@@ -168,8 +168,10 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 #ifndef BASECAMP_NOWEB
 	// Starting the webserver only makes sense in setup mode. In productive mode,
 	// the device will enter deep sleep so the server will not work at all.
-	if (wifi.getOperationMode() == WifiControl::Mode::accessPoint)
-	{
+	// TODO: Make this optional, some people use devices powered all the time and want 
+	// them to be reconfigurable
+	//if (wifi.getOperationMode() == WifiControl::Mode::accessPoint)
+	//{
 		// Start webserver and pass the configuration object to it
 		web.begin(configuration);
 		// Add a webinterface element for the h1 that contains the device name. It is a child of the #wrapper-element.
@@ -235,7 +237,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		}
 		#endif
 		#endif
-	}
+	//}
 	#endif
 	Serial.println(showSystemInfo());
 
