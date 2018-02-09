@@ -1,8 +1,10 @@
 # Basecamp
 
 Basecamp - ESP32 library to simplify the basics of IoT projects
-Written by Merlin Schumacher [(mls@ct.de)](mailto://mls@ct.de) for [c't magazin für computer technik](https://www.ct.de)
+Originally written by Merlin Schumacher [(mls@ct.de)](mailto://mls@ct.de) for [c't magazin für computer technik](https://www.ct.de)
 Licensed under GPLv3. See LICENSE for details.
+
+## Attention: Do not use the master-branch for production use! Use only the releases!
 
 ## Dependencies
 
