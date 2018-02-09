@@ -7,17 +7,18 @@
 #ifndef WebServer_h
 #define WebServer_h
 
+#include "debug.hpp"
+
 #include <map>
 #include <vector>
-
-#include <ESPAsyncWebServer.h>
-#include "data.hpp"
-#include "debug.hpp"
 #include <SPIFFS.h>
-#include "Configuration.hpp"
+#include <ESPAsyncWebServer.h>
 #include <AsyncJson.h>
-#include <ArduinoJson.h>
+
+#include "data.hpp"
+#include "Configuration.hpp"
 #include "WebInterface.hpp"
+
 #ifdef BASECAMP_USEDNS
 #ifdef DNSServer_h
 #include "CaptiveRequestHandler.hpp"

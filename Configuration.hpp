@@ -7,14 +7,13 @@
 #ifndef Configuration_h
 #define Configuration_h
 
+#include "debug.hpp"
+
 #include <sstream>
 #include <list>
 #include <map>
-
 #include <ArduinoJson.h>
-#include <FS.h>
 #include <SPIFFS.h>
-#include "debug.hpp"
 
 // TODO: Extend with all known keys
 enum class ConfigurationKey {

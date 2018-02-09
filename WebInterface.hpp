@@ -6,7 +6,7 @@
 
 #ifndef WebInterface_h
 #define WebInterface_h
-#include "map"
+#include <map>
 
 // TODO: Discuss if this could not be modified to a struct as there is no
 // real programatically-wise logic inside this clas.

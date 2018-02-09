@@ -3,10 +3,8 @@
    Written by Merlin Schumacher (mls@ct.de) for c't magazin für computer technik (https://www.ct.de)
    Licensed under GPLv3. See LICENSE for details.
    */
-#include <map>
 
 #include "WebServer.hpp"
-#include "debug.hpp"
 
 namespace {
 	template<typename NAMEVALUETYPE>

@@ -4,11 +4,7 @@
    Licensed under GPLv3. See LICENSE for details.
    */
 
-#include <iomanip>
-
 #include "WifiControl.hpp"
-#include "debug.hpp"
-#include "Basecamp.hpp"
 
 namespace {
 	// Minumum access point secret length to be generated (8 is min for ESP32)

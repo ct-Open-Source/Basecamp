@@ -4,7 +4,6 @@
    Licensed under GPLv3. See LICENSE for details.
    */
 #include "Configuration.hpp"
-#include "debug.hpp"
 
 Configuration::Configuration(String filename)
 	: _jsonFile(std::move(filename))
