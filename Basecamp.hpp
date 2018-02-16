@@ -40,8 +40,16 @@ class Basecamp {
 			secured,	///< Use ESP32 default encryption (WPA2 at this time)
 		};
 
+		// When to enable the Configuration UI (setup via local webserver)
+		enum class ConfigurationUI
+		{
+			always,	///< Always start the configuration-ui webserver
+			accessPoint,	///< Only start the server if acting as an access  (first setup mode)
+		};
+
 		explicit Basecamp(Basecamp::SetupModeWifiEncryption setupModeWifiEncryption =
-			Basecamp::SetupModeWifiEncryption::none);
+			Basecamp::SetupModeWifiEncryption::none,
+			Basecamp::ConfigurationUI configurationUi = Basecamp::ConfigurationUI::always);
 
 		~Basecamp() = default;
 
@@ -87,6 +95,9 @@ class Basecamp {
 #endif
 	private:
 		String _cleanHostname();
+		bool shouldEnableConfigWebserver() const;
+
 		SetupModeWifiEncryption setupModeWifiEncryption_;
+		ConfigurationUI configurationUi_;
 };
 #endif

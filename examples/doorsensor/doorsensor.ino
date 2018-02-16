@@ -5,10 +5,9 @@
 #include <Basecamp.hpp>
 #include <Configuration.hpp>
 
-// Create a new Basecamp instance called iot
-// Uncomment the following line to start the ESP with secured WiFi-AP on first start
-Basecamp iot{Basecamp::SetupModeWifiEncryption::secured};
-// ..or run it in default mode with open wifi-ap network
+// Create a new Basecamp instance called iot that will start the ap in secure mode and the webserver ui only in setup mode
+Basecamp iot{Basecamp::SetupModeWifiEncryption::secured, Basecamp::ConfigurationUI::accessPoint};
+// Uncomment the following line and comment to one above to start the ESP with open wifi and always running config ui
 // Basecamp iot;
 
 //Variables for the sensor and the battery
