@@ -40,7 +40,7 @@ void WifiControl::begin(String essid, String password, String configured,
 		WiFi.mode(WIFI_AP_STA);
 		if (apSecret.length() > 0) {
 			// Start with password protection
-			Serial.printf("Starting AP with password %s\n", apSecret.c_str());
+			DEBUG_PRINTF("Starting AP with password %s\n", apSecret.c_str());
 			WiFi.softAP(_wifiAPName.c_str(), apSecret.c_str());
 		} else {
 			// Start without password protection
