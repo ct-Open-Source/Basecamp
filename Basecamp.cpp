@@ -15,9 +15,10 @@ namespace {
 	const constexpr unsigned defaultApSecretLength = 8;
 }
 
-Basecamp::Basecamp(SetupModeWifiEncryption setupModeWifiEncryption)
+Basecamp::Basecamp(SetupModeWifiEncryption setupModeWifiEncryption, ConfigurationUI configurationUi)
 	: configuration(String{"/basecamp.json"})
 	, setupModeWifiEncryption_(setupModeWifiEncryption)
+	, configurationUi_(configurationUi)
 {
 }
 
@@ -166,12 +167,8 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 #endif
 
 #ifndef BASECAMP_NOWEB
-	// Starting the webserver only makes sense in setup mode. In productive mode,
-	// the device will enter deep sleep so the server will not work at all.
-	// TODO: Make this optional, some people use devices powered all the time and want 
-	// them to be reconfigurable
-	//if (wifi.getOperationMode() == WifiControl::Mode::accessPoint)
-	//{
+	if (shouldEnableConfigWebserver())
+	{
 		// Start webserver and pass the configuration object to it
 		web.begin(configuration);
 		// Add a webinterface element for the h1 that contains the device name. It is a child of the #wrapper-element.
@@ -237,7 +234,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		}
 		#endif
 		#endif
-	//}
+	}
 	#endif
 	Serial.println(showSystemInfo());
 
@@ -246,6 +243,12 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 }
 
 #ifndef BASECAMP_NOMQTT
+
+bool Basecamp::shouldEnableConfigWebserver() const
+{
+	return (configurationUi_ == ConfigurationUI::always ||
+	   (configurationUi_ == ConfigurationUI::accessPoint && wifi.getOperationMode() == WifiControl::Mode::accessPoint));
+}
 
 //This is a task that checks if the MQTT client is still connected or not. If not it automatically reconnect.
 // TODO: Think about making void* the real corresponding type
