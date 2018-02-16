@@ -45,6 +45,7 @@ class WebServer {
 			}
 		};
 
+		AsyncWebServer server;
 	private:
 		static void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 		std::map<const char*, const char* > _URLList;
@@ -61,7 +62,6 @@ class WebServer {
 		int _typeof(std::map<String, String, cmp_str> a){ return 2; };
 
 		AsyncEventSource events;
-		AsyncWebServer server;
 		std::vector<InterfaceElement> interfaceElements;
 };
 
