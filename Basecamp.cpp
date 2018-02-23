@@ -67,7 +67,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 	Serial.begin(115200);
 	// Display a simple lifesign
 	Serial.println("");
-	Serial.println("Basecamp V.0.1.6");
+	Serial.println("Basecamp V.0.1.8");
 
 	// Load configuration from internal flash storage.
 	// If configuration.load() fails, reset the configuration
