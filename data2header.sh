@@ -16,8 +16,13 @@ cd $TMPDIR
 yuicompressor -o '.css$:.css' *.css
 yuicompressor -o '.js$:.js' *.js
 
-sed  -i.bak ':a;N;$!ba;s/>\s*</></g' *.htm
-rm *.bak
+# :a;N;$!ba; will move all lines into the pattern space (internal buffer of sed)
+# so that the next command will also remove the line breaks (which are also whitespaces)
+# s/>\s*</></g' will remove all whitespaces between the HTML tags
+# example: 
+#"> 
+#		<" becomes "><"
+sed  -i ':a;N;$!ba;s/>\s*</></g' *.htm
 gzip *
 cat > $OUTFILE <<DELIMITER
 /*
