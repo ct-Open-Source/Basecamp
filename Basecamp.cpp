@@ -242,13 +242,13 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 	return true;
 }
 
-#ifndef BASECAMP_NOMQTT
-
 bool Basecamp::shouldEnableConfigWebserver() const
 {
 	return (configurationUi_ == ConfigurationUI::always ||
 	   (configurationUi_ == ConfigurationUI::accessPoint && wifi.getOperationMode() == WifiControl::Mode::accessPoint));
 }
+
+#ifndef BASECAMP_NOMQTT
 
 //This is a task that checks if the MQTT client is still connected or not. If not it automatically reconnect.
 // TODO: Think about making void* the real corresponding type
