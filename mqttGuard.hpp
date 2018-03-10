@@ -8,8 +8,8 @@
 
 /**
   Helper to guard outgoing mqtt packets.
-  On packet sending, register the packets within this class and
-  pull the empty() function to see if everything has been sent completely.
+  On packet sending, register the packets within this class, unregister them within the onPublish and
+  pull the allSent() function to see if everything has been sent completely.
 */
 class MqttGuard
 {

@@ -11,7 +11,7 @@ MqttGuard::MqttGuard(basecampLog::LogCallback logCallback)
 void MqttGuard::registerPacket(IdType packetId)
 {
     if (!isValidPacketId(packetId)) {
-        tryLog(basecampLog::Severity::info, "Not registering invlaid MQTT-packet.", packetId);
+        tryLog(basecampLog::Severity::info, "Not registering invalid MQTT-packet.", packetId);
         return;
     }
 
