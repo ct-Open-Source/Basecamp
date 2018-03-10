@@ -50,6 +50,27 @@ String Basecamp::_cleanHostname()
 };
 
 /**
+ * Returns true if a secret for the setup WiFi AP is set
+ */
+bool Basecamp::isSetupModeWifiEncrypted(){
+	return (setupModeWifiEncryption_ == SetupModeWifiEncryption::secured);
+}
+
+/**
+ * Returns the SSID of the setup WiFi network
+ */
+String Basecamp::getSetupModeWifiName(){
+	return "ESP32_" + wifi.getHardwareMacAddress();
+}
+
+/**
+ * Returns the secret of the setup WiFi network
+ */
+String Basecamp::getSetupModeWifiSecret(){
+	return configuration.get(ConfigurationKey::accessPointSecret);
+}
+
+/**
  * This is the initialisation function for the Basecamp class.
  */
 bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
@@ -67,7 +88,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 	Serial.begin(115200);
 	// Display a simple lifesign
 	Serial.println("");
-	Serial.println("Basecamp V.0.1.6");
+	Serial.println("Basecamp V.0.1.8");
 
 	// Load configuration from internal flash storage.
 	// If configuration.load() fails, reset the configuration

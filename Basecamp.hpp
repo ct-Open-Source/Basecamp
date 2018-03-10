@@ -64,6 +64,9 @@ class Basecamp {
 		bool begin(String fixedWiFiApEncryptionPassword = {});
 		void checkResetReason();
 		String showSystemInfo();
+		bool isSetupModeWifiEncrypted();
+		String getSetupModeWifiName();
+		String getSetupModeWifiSecret();
 		String hostname;
 		struct taskParms {
 			const char* parm1;
