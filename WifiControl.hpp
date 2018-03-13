@@ -32,6 +32,7 @@ class WifiControl {
 							 String hostname = "BasecampDevice", String apSecret="");
 		IPAddress getIP();
 		IPAddress getSoftAPIP();
+		String getAPName();
 		int status();
 		static void WiFiEvent(WiFiEvent_t event);
 

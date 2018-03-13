@@ -60,7 +60,7 @@ bool Basecamp::isSetupModeWifiEncrypted(){
  * Returns the SSID of the setup WiFi network
  */
 String Basecamp::getSetupModeWifiName(){
-	return "ESP32_" + wifi.getHardwareMacAddress();
+	return wifi.getAPName();
 }
 
 /**
