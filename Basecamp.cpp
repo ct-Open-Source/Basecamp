@@ -291,7 +291,7 @@ void Basecamp::DnsHandling(void * dnsServerPointer)
 		while(1) {
 			// handle each request
 			dnsServer->processNextRequest();
-			vTaskDelay(100);
+			vTaskDelay(1000);
 		}
 };
 #endif
