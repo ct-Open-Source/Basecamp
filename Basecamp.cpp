@@ -16,7 +16,8 @@ namespace {
 }
 
 Basecamp::Basecamp(SetupModeWifiEncryption setupModeWifiEncryption, ConfigurationUI configurationUi)
-	: configuration(String{"/basecamp.json"})
+	: MqttGuardInterface(mqtt)
+	, configuration(String{"/basecamp.json"})
 	, setupModeWifiEncryption_(setupModeWifiEncryption)
 	, configurationUi_(configurationUi)
 {

@@ -25,13 +25,18 @@
 
 #ifndef BASECAMP_NOMQTT
 #include <AsyncMqttClient.h>
+#include "mqttGuardInterface.hpp"
 #endif
 
 #ifndef BASECAMP_NOOTA
 #include <ArduinoOTA.h>
 #endif
 
-class Basecamp {
+class Basecamp
+#ifndef BASECAMP_NOMQTT
+ : public MqttGuardInterface
+#endif
+{
 	public:
 		// How to handle encryption in setup mode (AP mode)
 		enum class SetupModeWifiEncryption
