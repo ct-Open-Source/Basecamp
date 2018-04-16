@@ -65,6 +65,10 @@ IPAddress WifiControl::getSoftAPIP() {
 	return WiFi.softAPIP();
 }
 
+String WifiControl::getAPName() {
+	return _wifiAPName;
+}
+
 void WifiControl::WiFiEvent(WiFiEvent_t event)
 {
 	Preferences preferences;
