@@ -36,13 +36,25 @@ static const String getKeyName(ConfigurationKey key)
 
 class Configuration {
 	public:
+		// Default constructor: Memory-only configuration (NO EEPROM read/writes
+		Configuration();
+		// Constructor with filename: Can be read from and written to EEPROM
 		explicit Configuration(String filename);
 		~Configuration() = default;
+		
+		// Switched configuration to memory-only and empties filename
+		void setMemOnly();
+		// Sets new filename and removes memory-only tag
+		void setFileName(const String& filename);
+		// Returns memory-only state of configuration
+		bool isMemOnly() {return _memOnlyConfig;}
 
 		const String& getKey(ConfigurationKey configKey) const;
 
+		// Both functions return true on successful load or save. Return false on any failure. Also return false for memory-only configurations.
 		bool load();
 		bool save();
+		
 		void dump();
 
 		// Returns true if the key 'key' exists
@@ -87,6 +99,8 @@ class Configuration {
 		String _jsonFile;
 		bool _configurationTainted = false;
 		String noResult_ = {};
+		// Set to true if configuration is memory-only
+		bool _memOnlyConfig;
 };
 
 #endif
