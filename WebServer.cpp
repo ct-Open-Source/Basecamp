@@ -28,8 +28,7 @@ WebServer::WebServer()
 
 void WebServer::begin(Configuration &configuration) {
 	SPIFFS.begin();
-	server.begin();
-
+	
 	server.on("/" , HTTP_GET, [](AsyncWebServerRequest * request)
 	{
 			AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_htm_gz, index_htm_gz_len);
@@ -133,6 +132,8 @@ void WebServer::begin(Configuration &configuration) {
 #endif
 			request->send(404);
 	});
+	
+	server.begin();
 }
 
 void WebServer::debugPrintRequest(AsyncWebServerRequest *request)
