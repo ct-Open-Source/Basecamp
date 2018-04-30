@@ -192,7 +192,11 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 	if (shouldEnableConfigWebserver())
 	{
 		// Start webserver and pass the configuration object to it
-		web.begin(configuration);
+		// Also pass a Lambda-function that restarts the device after the configuration has been saved.
+		web.begin(configuration, [](){
+			delay(2000);
+			esp_restart();
+		});
 		// Add a webinterface element for the h1 that contains the device name. It is a child of the #wrapper-element.
 		web.addInterfaceElement("heading", "h1", "","#wrapper");
 		web.setInterfaceElementAttribute("heading", "class", "fat-border");
