@@ -67,16 +67,15 @@ class Basecamp
 		 * SetupModeWifiEncryption will be overriden to SetupModeWifiEncryption::secure.
 		*/
 		bool begin(String fixedWiFiApEncryptionPassword = {});
+		void handle();
+
 		void checkResetReason();
 		String showSystemInfo();
 		bool isSetupModeWifiEncrypted();
 		String getSetupModeWifiName();
 		String getSetupModeWifiSecret();
 		String hostname;
-		struct taskParms {
-			const char* parm1;
-			const char* parm2;
-		};
+
 #ifndef BASECAMP_NOWIFI
 		String mac;
 		WifiControl wifi;
@@ -98,9 +97,6 @@ class Basecamp
 		WebServer web;
 #endif
 
-#ifndef BASECAMP_NOOTA
-		static void OTAHandling(void *);
-#endif
 	private:
 		String _cleanHostname();
 		bool shouldEnableConfigWebserver() const;
