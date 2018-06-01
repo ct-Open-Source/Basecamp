@@ -18,6 +18,7 @@
 // TODO: Extend with all known keys
 enum class ConfigurationKey {
 	accessPointSecret,
+	ethConfigured,
 };
 
 // TODO: Extend with all known keys
@@ -29,6 +30,9 @@ static const String getKeyName(ConfigurationKey key)
 	{
 		case ConfigurationKey::accessPointSecret:
 			return "APSecret";
+			break;
+		case ConfigurationKey::ethConfigured:
+			return "EthConfigured";
 			break;
 	}
 	return "";

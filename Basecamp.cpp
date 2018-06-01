@@ -108,7 +108,6 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 	checkResetReason();
 
 #ifndef BASECAMP_NOWIFI
-
 	// If there is no access point secret set yet, generate one and save it.
 	// It will survive the default config reset.
 	if (!configuration.isKeySet(ConfigurationKey::accessPointSecret) ||
@@ -140,6 +139,23 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 	// Get WiFi MAC
 	mac = wifi.getSoftwareMacAddress(":");
 #endif
+
+#ifndef BASECAMP_NOETH
+	if(!configuration.isKeySet(ConfigurationKey::ethConfigured))
+		if(configuration.get(ConfigurationKey::ethConfigured) != "false"){
+			const auto &ethIP = configuration.get("EthIP");
+			const auto &ethGateway = configuration.get("EthGateway");
+			const auto &ethSubnetMask = configuration.get("EthSubnetMask");
+			const auto &ethDNS1 = configuration.get("EthDNS1");
+			const auto &ethDNS2 = configuration.get("EthDNS2");
+
+			eth.config(ethIP, ethGateway, ethSubnetMask, ethDNS1, ethDNS2);
+		}
+	eth.begin(hostname);
+
+	macEth = eth.getMac();
+#endif
+
 #ifndef BASECAMP_NOMQTT
 	// Check if MQTT has been disabled by the user
 	if (configuration.get("MQTTActive") != "false") {
@@ -214,7 +230,8 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.setInterfaceElementAttribute("configform", "action", "saveConfig");
 
 		web.addInterfaceElement("DeviceName", "input", "Device name","#configform" , "DeviceName");
-
+		
+		#ifndef BASECAMP_NOWIFI
 		// Add an input field for the WIFI data and link it to the corresponding configuration data
 		web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
 		web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
@@ -222,6 +239,19 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.addInterfaceElement("WifiConfigured", "input", "", "#configform", "WifiConfigured");
 		web.setInterfaceElementAttribute("WifiConfigured", "type", "hidden");
 		web.setInterfaceElementAttribute("WifiConfigured", "value", "true");
+		#endif
+
+		#ifndef BASECAMP_NOETH
+		// Add an input field for the eth data and link it to the corresponding configuration data
+		web.addInterfaceElement("EthIP", "input", "ETH IP:","#configform" , "EthIP");
+		web.addInterfaceElement("EthGateway", "input", "ETH Gateway:", "#configform", "EthGateway");
+		web.addInterfaceElement("EthSubnet", "input", "ETH Subnet:", "#configform", "EthSubnet");
+		web.addInterfaceElement("EthDNS1", "input", "ETH DNS 1:", "#configform", "EthDNS1");
+		web.addInterfaceElement("EthDNS2", "input", "ETH DNS 2:", "#configform", "EthDNS2");
+		web.addInterfaceElement("EthConfigured", "input", "", "#configform", "EthConfigured");
+		web.setInterfaceElementAttribute("WifiConfigured", "type", "hidden");
+		web.setInterfaceElementAttribute("WifiConfigured", "value", "true");
+		#endif
 
 		// Add input fields for MQTT configurations if it hasn't been disabled
 		if (configuration.get("MQTTActive") != "false") {
@@ -241,8 +271,11 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.setInterfaceElementAttribute("saveform", "onclick", "collectConfiguration()");
 
 		// Show the devices MAC in the Webinterface
-		String infotext2 = "This device has the MAC-Address: " + mac;
+		String infotext2 = "This device has the WiFi MAC-Address: " + mac;
 		web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
+
+		String infotext3 = "This device has the ETH MAC-Address: " + macEth;
+		web.addInterfaceElement("infotext3", "p", infotext3,"#wrapper");
 
 		web.addInterfaceElement("footer", "footer", "Powered by ", "body");
 		web.addInterfaceElement("footerlink", "a", "Basecamp", "footer");
@@ -448,6 +481,10 @@ String Basecamp::showSystemInfo() {
 	std::ostringstream info;
 	info << "MAC-Address: " << mac.c_str();
 	info << ", Hardware MAC: " << wifi.getHardwareMacAddress(":").c_str() << std::endl;
+
+	#ifndef BASECAMP_NOETH
+	info << "ETH MAC-Address:" << macEth.c_str() << std::endl;
+	#endif
 
 	if (configuration.isKeySet(ConfigurationKey::accessPointSecret)) {
 			info << "*******************************************" << std::endl;
