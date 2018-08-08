@@ -89,7 +89,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 	Serial.begin(115200);
 	// Display a simple lifesign
 	Serial.println("");
-	Serial.println("Basecamp V.0.1.8");
+	Serial.println("Basecamp Startup");
 
 	// Load configuration from internal flash storage.
 	// If configuration.load() fails, reset the configuration
@@ -172,19 +172,50 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 #ifndef BASECAMP_NOOTA
 	// Set up Over-the-Air-Updates (OTA) if it hasn't been disabled.
 	if(configuration.get("OTAActive") != "false") {
-		// Create struct that stores the parameters for the OTA task
-		struct taskParms OTAParams[1];
-		// TODO: How long do these params have to be living?
-		// Set OTA password
-		OTAParams[0].parm1 = configuration.get("OTAPass").c_str();
-		// Set OTA hostname
-		OTAParams[0].parm2 = hostname.c_str();
 
-		// Create a task that takes care of OTA update handling.
-		// It's pinned to the same core (0) as FreeRTOS so the Arduino code inside setup()
-		// and loop() will not be interrupted, as they are pinned to core 1.
-		xTaskCreatePinnedToCore(&OTAHandling, "ArduinoOTATask", defaultThreadStackSize,
-				(void *)&OTAParams[0], defaultThreadPriority, NULL, 0);
+		// Set OTA password
+		String otaPass = configuration.get("OTAPass");
+		if (otaPass.length() != 0) {
+			ArduinoOTA.setPassword(otaPass.c_str());
+		}
+
+		// Set OTA hostname
+		ArduinoOTA.setHostname(hostname.c_str());
+
+		// The following code is copied verbatim from the ESP32 BasicOTA.ino example
+		// This is the callback for the beginning of the OTA process
+		ArduinoOTA
+			.onStart([]() {
+					String type;
+					if (ArduinoOTA.getCommand() == U_FLASH)
+					type = "sketch";
+					else // U_SPIFFS
+					type = "filesystem";
+					SPIFFS.end();
+
+					Serial.println("Start updating " + type);
+					})
+		// When the update ends print it to serial
+		.onEnd([]() {
+				Serial.println("\nEnd");
+				})
+		// Show the progress of the update
+		.onProgress([](unsigned int progress, unsigned int total) {
+				Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+				})
+		// Error handling for the update
+		.onError([](ota_error_t error) {
+				Serial.printf("Error[%u]: ", error);
+				if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+				else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+				else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+				else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+				else if (error == OTA_END_ERROR) Serial.println("End Failed");
+				});
+
+		// Start the OTA service
+		ArduinoOTA.begin();
+
 	}
 #endif
 
@@ -264,13 +295,25 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 	return true;
 }
 
+/**
+ * This is the background task function for the Basecamp class. To be called from Arduino loop.
+ */
+void Basecamp::handle (void)
+{
+	#ifndef BASECAMP_NOOTA
+		// This call takes care of the ArduinoOTA function provided by Basecamp
+		ArduinoOTA.handle();
+	#endif
+}
+
+
+#ifndef BASECAMP_NOMQTT
+
 bool Basecamp::shouldEnableConfigWebserver() const
 {
 	return (configurationUi_ == ConfigurationUI::always ||
 	   (configurationUi_ == ConfigurationUI::accessPoint && wifi.getOperationMode() == WifiControl::Mode::accessPoint));
 }
-
-#ifndef BASECAMP_NOMQTT
 
 //This is a task that checks if the MQTT client is still connected or not. If not it automatically reconnect.
 // TODO: Think about making void* the real corresponding type
@@ -383,65 +426,6 @@ void Basecamp::checkResetReason()
 	preferences.end();
 };
 
-#ifndef BASECAMP_NOOTA
-// This tasks takes care of the ArduinoOTA function provided by Basecamp
-void Basecamp::OTAHandling(void * OTAParams) {
-
-	// Create a struct to store the given parameters
-	struct taskParms *params;
-	// Cast the void type pointer given to the task into a struct
-	params = (struct taskParms *) OTAParams;
-
-	// The first parameter is assumed to be the password for the OTA process
-	// If it's set, require a password for upgrades
-	if (strlen(params->parm1) != 0) {
-		ArduinoOTA.setPassword(params->parm1);
-	}
-	// The second parameter is assumed to be the hostname of the esp
-	// It is set to be distinctive in the Arduino IDE
-	ArduinoOTA.setHostname(params->parm2);
-	// The following code is copied verbatim from the ESP32 BasicOTA.ino example
-	// This is the callback for the beginning of the OTA process
-	ArduinoOTA
-		.onStart([]() {
-				String type;
-				if (ArduinoOTA.getCommand() == U_FLASH)
-				type = "sketch";
-				else // U_SPIFFS
-				type = "filesystem";
-				SPIFFS.end();
-				// NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-				Serial.println("Start updating " + type);
-				})
-	// When the update ends print it to serial
-	.onEnd([]() {
-			Serial.println("\nEnd");
-			})
-	// Show the progress of the update
-	.onProgress([](unsigned int progress, unsigned int total) {
-			Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-			})
-	// Error handling for the update
-	.onError([](ota_error_t error) {
-			Serial.printf("Error[%u]: ", error);
-			if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-			else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-			else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-			else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-			else if (error == OTA_END_ERROR) Serial.println("End Failed");
-			});
-	// Start the OTA service
-	ArduinoOTA.begin();
-	// The while loop checks if OTA requests are received and sleeps for a bit if not
-	while (1) {
-		ArduinoOTA.handle();
-
-		vTaskDelay(100);
-
-	}
-};
-#endif
-
 // This shows basic information about the system. Currently only the mac
 // TODO: expand infos
 String Basecamp::showSystemInfo() {
@@ -458,3 +442,4 @@ String Basecamp::showSystemInfo() {
 
 	return {info.str().c_str()};
 }
+
