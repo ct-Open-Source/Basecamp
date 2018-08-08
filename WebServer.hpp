@@ -30,12 +30,18 @@ class WebServer {
 		WebServer();
 		~WebServer() = default;
 
-		void begin(Configuration &configuration);
+		void begin(Configuration &configuration, std::function<void()> submitFunc = 0);
 		bool addURL(const char* url, const char* content, const char* mimetype);
+		
+		// Remark: The server should be stopped before any changes to the interface elements are done to avoid inconsistent results if a request comes in at that very moment.
+		// However, ESPAsyncWebServer does not support any kind of end() function or something like that in the moment.
 		void addInterfaceElement(const String &id, String element, String content, String parent = "#configform", String configvariable = "");
 
 		// Sets "key" to "value" in element with id "id" if exists.
 		void setInterfaceElementAttribute(const String &id, const String &key, String value);
+		
+		// Removes all interface elements
+		void reset();
 
 		struct cmp_str
 		{

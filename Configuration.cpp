@@ -5,13 +5,36 @@
    */
 #include "Configuration.hpp"
 
-Configuration::Configuration(String filename)
-	: _jsonFile(std::move(filename))
+Configuration::Configuration()
+	: _memOnlyConfig( true ),
+	_jsonFile()
 {
+}
+
+Configuration::Configuration(String filename)
+	: _memOnlyConfig( false ),
+	_jsonFile(std::move(filename))
+{
+}
+
+void Configuration::setMemOnly() {
+	_memOnlyConfig = true;
+	_jsonFile = "";
+}
+
+void Configuration::setFileName(const String& filename) {
+	_memOnlyConfig = false;
+	_jsonFile = filename;
 }
 
 bool Configuration::load() {
 	DEBUG_PRINTLN("Loading config file ");
+	
+	if (_memOnlyConfig) {
+		DEBUG_PRINTLN("Memory-only configuration: Nothing loaded!");
+		return false;
+	}
+	
 	DEBUG_PRINTLN(_jsonFile);
 	if (!SPIFFS.begin(true)) {
 		Serial.println("Could not access SPIFFS.");
@@ -43,6 +66,11 @@ bool Configuration::load() {
 
 bool Configuration::save() {
 	DEBUG_PRINTLN("Saving config file");
+	
+	if (_memOnlyConfig) {
+		DEBUG_PRINTLN("Memory-only configuration: Nothing saved!");
+		return false;
+	}
 
 	File configFile = SPIFFS.open(_jsonFile, "w");
 	if (!configFile) {
