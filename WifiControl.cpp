@@ -19,7 +19,9 @@ void WifiControl::begin(String essid, String password, String configured,
 	String _wifiConfigured = std::move(configured);
 	_wifiEssid = std::move(essid);
 	_wifiPassword = std::move(password);
-	_wifiAPName = "ESP32_" + getHardwareMacAddress();
+	if (_wifiAPName.length() == 0) {
+		_wifiAPName = "ESP32_" + getHardwareMacAddress();
+	}
 
 	WiFi.onEvent(WiFiEvent);
 	if (_wifiConfigured.equalsIgnoreCase("true")) {
@@ -63,6 +65,10 @@ IPAddress WifiControl::getIP() {
 }
 IPAddress WifiControl::getSoftAPIP() {
 	return WiFi.softAPIP();
+}
+
+void WifiControl::setAPName(const String &name) {
+	_wifiAPName = name;
 }
 
 String WifiControl::getAPName() {
