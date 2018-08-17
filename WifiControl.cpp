@@ -22,7 +22,7 @@ void WifiControl::begin(String essid, String password, String configured,
 	_wifiAPName = "ESP32_" + getHardwareMacAddress();
 
 	WiFi.onEvent(WiFiEvent);
-	if (_wifiConfigured == "True") {
+	if (_wifiConfigured.equalsIgnoreCase("true")) {
 		operationMode_ = Mode::client;
 		DEBUG_PRINTLN("Wifi is configured");
 		DEBUG_PRINT("Connecting to ");

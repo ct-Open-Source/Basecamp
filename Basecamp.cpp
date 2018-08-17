@@ -142,7 +142,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 #endif
 #ifndef BASECAMP_NOMQTT
 	// Check if MQTT has been disabled by the user
-	if (configuration.get(ConfigurationKey::mqttActive) != "false") {
+	if (!configuration.get(ConfigurationKey::mqttActive).equalsIgnoreCase("false")) {
 		// Setting up variables for the MQTT client. This is necessary due to
 		// the nature of the library. It won't work properly with Arduino Strings.
 		const auto &mqtthost = configuration.get(ConfigurationKey::mqttHost);
@@ -171,7 +171,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 
 #ifndef BASECAMP_NOOTA
 	// Set up Over-the-Air-Updates (OTA) if it hasn't been disabled.
-	if(configuration.get(ConfigurationKey::otaActive) != "false") {
+	if (!configuration.get(ConfigurationKey::otaActive).equalsIgnoreCase("false")) {
 
 		// Set OTA password
 		String otaPass = configuration.get(ConfigurationKey::otaPass);
@@ -253,7 +253,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.setInterfaceElementAttribute("WifiConfigured", "value", "true");
 
 		// Add input fields for MQTT configurations if it hasn't been disabled
-		if (configuration.get(ConfigurationKey::mqttActive) != "false") {
+		if (!configuration.get(ConfigurationKey::mqttActive).equalsIgnoreCase("false")) {
 			web.addInterfaceElement("MQTTHost", "input", "MQTT Host:","#configform" , "MQTTHost");
 			web.addInterfaceElement("MQTTPort", "input", "MQTT Port:","#configform" , "MQTTPort");
 			web.setInterfaceElementAttribute("MQTTPort", "type", "number");
@@ -279,7 +279,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.setInterfaceElementAttribute("footerlink", "target", "_blank");
 		#ifdef BASECAMP_USEDNS
 		#ifdef DNSServer_h
-		if(configuration.get(ConfigurationKey::wifiConfigured) != "True"){
+		if (!configuration.get(ConfigurationKey::wifiConfigured).equalsIgnoreCase("true")) {
 			dnsServer.start(53, "*", wifi.getSoftAPIP());
 			xTaskCreatePinnedToCore(&DnsHandling, "DNSTask", 4096, (void*) &dnsServer, 5, NULL,0);
 		}
@@ -405,7 +405,7 @@ void Basecamp::checkResetReason()
 			ESP.restart();
 
 			// If the WiFi is unconfigured and the device is rebooted twice format the internal flash storage
-		} else if (bootCounter > 2 && configuration.get(ConfigurationKey::wifiConfigured) == "False") {
+		} else if (bootCounter > 2 && configuration.get(ConfigurationKey::wifiConfigured).equalsIgnoreCase("false")) {
 			Serial.println("Factory reset was forced.");
 			// Format the flash storage
 			SPIFFS.format();
