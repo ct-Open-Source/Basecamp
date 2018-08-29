@@ -161,16 +161,16 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		if (mqttuser.length() != 0) {
 			mqtt.setCredentials(mqttuser.c_str(), mqttpass.c_str());
 		};
-		// Create a timer and register a "onDisconnect" callback function that manages the (re)connection of the MQTT client
-		// It will be called by the Asyc-MQTT-Client KeepAlive function if a connection loss is detected
+    // Create a timer and register a "onDisconnect" callback function that manages the (re)connection of the MQTT client
+    // It will be called by the Asyc-MQTT-Client KeepAlive function if a connection loss is detected
     // The timer is then started and will a function to reconnect MQTT after 2 seconds 
     mqttReconnectTimer = xTimerCreate("mqttTimer", pdMS_TO_TICKS(2000), pdFALSE, (void*)&mqtt, reinterpret_cast<TimerCallbackFunction_t>(connectToMqtt));
     mqtt.onDisconnect(onMqttDisconnect);
-   // Do not connect MQTT directly but only start the timer to give the main setup() time to register all MQTT callbacks before 
-   // Especially a "onConnect" callback should be in place to get informed about a successful MQTT connection
-   // setup() can optionally call mqtt.connect() by itself if MQTT is needed before timer elapses
+    // Do not connect MQTT directly but only start the timer to give the main setup() time to register all MQTT callbacks before 
+    // Especially a "onConnect" callback should be in place to get informed about a successful MQTT connection
+    // setup() can optionally call mqtt.connect() by itself if MQTT is needed before timer elapses
     xTimerStart(mqttReconnectTimer, 0);
-	};
+  };
 #endif
 
 #ifndef BASECAMP_NOOTA
