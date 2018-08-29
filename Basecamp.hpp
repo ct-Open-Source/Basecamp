@@ -26,6 +26,7 @@
 #ifndef BASECAMP_NOMQTT
 #include <AsyncMqttClient.h>
 #include "mqttGuardInterface.hpp"
+#include "freertos/timers.h"
 #endif
 
 #ifndef BASECAMP_NOOTA
@@ -83,7 +84,9 @@ class Basecamp
 
 #ifndef BASECAMP_NOMQTT
 		AsyncMqttClient mqtt;
-		static void MqttHandling(void *);
+    static TimerHandle_t mqttReconnectTimer;
+    static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason); 
+    static void connectToMqtt(TimerHandle_t xTimer); 
 #endif
 
 #ifndef BASECAMP_NOWEB
