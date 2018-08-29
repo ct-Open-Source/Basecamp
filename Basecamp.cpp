@@ -337,10 +337,10 @@ void Basecamp::connectToMqtt(TimerHandle_t xTimer)
 {
   AsyncMqttClient *mqtt = (AsyncMqttClient *) pvTimerGetTimerID(xTimer);
 
-  if (WiFi.status() == WL_CONNECTED){
+  if (WiFi.status() == WL_CONNECTED) {
     Serial.println("Trying to connect ...");
     mqtt->connect();    // has no effect if already connected ( if (_connected) return;) 
-	}
+  }
   else {
     Serial.println("Waiting for WiFi ...");
     xTimerStart(xTimer, 0);

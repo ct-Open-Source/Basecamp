@@ -83,7 +83,7 @@ class Basecamp
 #endif
 
 #ifndef BASECAMP_NOMQTT
-		AsyncMqttClient mqtt;
+    AsyncMqttClient mqtt;
     static TimerHandle_t mqttReconnectTimer;
     static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason); 
     static void connectToMqtt(TimerHandle_t xTimer); 
@@ -93,7 +93,7 @@ class Basecamp
 
 #ifdef BASECAMP_USEDNS
 #ifdef DNSServer_h
-		DNSServer dnsServer;
+    DNSServer dnsServer;
 		static void DnsHandling(void *);
 #endif
 #endif
