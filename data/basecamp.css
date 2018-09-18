@@ -37,12 +37,13 @@ input[type=text], input[type=password], input[type=number], input:not([type]) {
 	display:block;
 	margin-bottom:1em;
 	width:100%;
+	box-sizing: border-box;
 }
 
 input[type=button], input[type=submit], button, a.button {
 	border: none;
 	border-radius: 2px;
-	background: #26a69a; 
+	background: #26a69a;
 	color: white;
 	cursor: pointer;
 	font-size: 1.25em;
@@ -59,13 +60,13 @@ input[type=button]:hover, input[type=submit]:hover, button, a.button:hover {
 .slim-border {
 	border-bottom-width: 1px;
 	border-bottom-style:solid;
-	border-image: linear-gradient(to right, rgba(192,192,192,1), rgba(0, 0, 0, 0)) 10; 
+	border-image: linear-gradient(to right, rgba(192,192,192,1), rgba(0, 0, 0, 0)) 10;
 }
 
 .fat-border {
 	border-bottom-width: 3px;
 	border-bottom-style:solid;
-	border-image: linear-gradient(to right, rgba(192,192,192,1), rgba(0, 0, 0, 0)) 10; 
+	border-image: linear-gradient(to right, rgba(192,192,192,1), rgba(0, 0, 0, 0)) 10;
 }
 
 .warning {
@@ -82,8 +83,10 @@ input[type=button]:hover, input[type=submit]:hover, button, a.button:hover {
 	flex: 1 100%;
 }
 
-#labelforsaveform {
+#saveform {
 	order: 100;
+	margin-top: 1em;
+	flex: 0 auto;
 }
 
 #logo {
