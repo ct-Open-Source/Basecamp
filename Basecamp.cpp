@@ -288,7 +288,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		// Also pass a Lambda-function that restarts the device after the configuration has been saved.
 		web.begin(configuration, [](){
 			delay(2000);
-			esp_restart();
+			ESP.restart();
 		});
 	}
 	#endif
