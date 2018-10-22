@@ -17,18 +17,7 @@
 
 // TODO: Extend with all known keys
 enum class ConfigurationKey {
-	deviceName,
 	accessPointSecret,
-	wifiConfigured,
-	wifiEssid,
-	wifiPassword,
-	mqttActive,
-	mqttHost,
-	mqttPort,
-	mqttUser,
-	mqttPass,
-	otaActive,
-	otaPass,
 };
 
 // TODO: Extend with all known keys
@@ -38,41 +27,9 @@ static const String getKeyName(ConfigurationKey key)
 	// (if the warnings are turned on exactly...)
 	switch (key)
 	{
-		case ConfigurationKey::deviceName:
-			return "DeviceName";
-
 		case ConfigurationKey::accessPointSecret:
 			return "APSecret";
-
-		case ConfigurationKey::wifiConfigured:
-			return "WifiConfigured";
-
-		case ConfigurationKey::wifiEssid:
-			return "WifiEssid";
-
-		case ConfigurationKey::wifiPassword:
-			return "WifiPassword";
-
-		case ConfigurationKey::mqttActive:
-			return "MQTTActive";
-
-		case ConfigurationKey::mqttHost:
-			return "MQTTHost";
-
-		case ConfigurationKey::mqttPort:
-			return "MQTTPort";
-
-		case ConfigurationKey::mqttUser:
-			return "MQTTUser";
-
-		case ConfigurationKey::mqttPass:
-			return "MQTTPass";
-
-		case ConfigurationKey::otaActive:
-			return "OTAActive";
-
-		case ConfigurationKey::otaPass:
-			return "OTAPass";
+			break;
 	}
 	return "";
 }
