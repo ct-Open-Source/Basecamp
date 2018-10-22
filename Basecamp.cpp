@@ -161,11 +161,15 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		if (mqttuser.length() != 0) {
 			mqtt.setCredentials(mqttuser.c_str(), mqttpass.c_str());
 		};
-		// Start a task that manages the (re)connection of the MQTT client
-		// It's pinned to the same core (0) as FreeRTOS so the Arduino code inside setup()
-		// and loop() will not be interrupted, as they are pinned to core 1.
-		xTaskCreatePinnedToCore(&MqttHandling, "MqttTask", defaultThreadStackSize,
-				(void *)&mqtt, defaultThreadPriority, NULL, 0);
+		// Create a timer and register a "onDisconnect" callback function that manages the (re)connection of the MQTT client
+		// It will be called by the Asyc-MQTT-Client KeepAlive function if a connection loss is detected
+		// The timer is then started and will start a function to reconnect MQTT after 2 seconds 
+		mqttReconnectTimer = xTimerCreate("mqttTimer", pdMS_TO_TICKS(2000), pdFALSE, (void*)&mqtt, reinterpret_cast<TimerCallbackFunction_t>(connectToMqtt));
+		mqtt.onDisconnect(onMqttDisconnect);
+		// Do not connect MQTT directly but only start the timer to give the main setup() time to register all MQTT callbacks before 
+		// Especially a "onConnect" callback should be in place to get informed about a successful MQTT connection
+		// setup() can optionally call mqtt.connect() by itself if MQTT is needed before timer elapses
+		xTimerStart(mqttReconnectTimer, 0);
 	};
 #endif
 
@@ -319,36 +323,30 @@ bool Basecamp::shouldEnableConfigWebserver() const
 	   (configurationUi_ == ConfigurationUI::accessPoint && wifi.getOperationMode() == WifiControl::Mode::accessPoint));
 }
 
-//This is a task that checks if the MQTT client is still connected or not. If not it automatically reconnect.
-// TODO: Think about making void* the real corresponding type
-void Basecamp::MqttHandling(void *mqttPointer)
+// This is a task that is called if MQTT client has lost connection. After 2 seconds it automatically trys to reconnect.
+
+TimerHandle_t Basecamp::mqttReconnectTimer;
+  
+void Basecamp::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) 
 {
-		// is set to true, when a connection attempt is already running. Parallel connection attempts
-		// seem to mess up the async-mqtt-client library.
-		bool mqttIsConnecting = false;
-		AsyncMqttClient *mqtt = (AsyncMqttClient *)mqttPointer;
-		while(1) {
-			// TODO: What is the sense behind these magics?
-			// If the MQTT client is not connected force a disconnect.
-			if (mqtt->connected() != 1) {
-				mqttIsConnecting = false;
-				mqtt->disconnect(true);
-			}
-			// If the MQTT client is not connecting, not already connected and the WiFi has a
-			// connection, try to connect
-			if (!mqttIsConnecting) {
-				if(mqtt->connected() != 1) {
-					if (WiFi.status() == WL_CONNECTED) {
-						mqtt->connect();
-						mqttIsConnecting = true;
-					} else {
-						mqtt->disconnect();
-					}
-				}
-			}
-			vTaskDelay(100);
-		}
-};
+  Serial.print("MQTT Disconnected. Reason: "); Serial.println((int)reason, DEC); 
+  xTimerStart(mqttReconnectTimer, 0);
+}
+
+void Basecamp::connectToMqtt(TimerHandle_t xTimer) 
+{
+  AsyncMqttClient *mqtt = (AsyncMqttClient *) pvTimerGetTimerID(xTimer);
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("Trying to connect ...");
+    mqtt->connect();    // has no effect if already connected ( if (_connected) return;) 
+  }
+  else {
+    Serial.println("Waiting for WiFi ...");
+    xTimerStart(xTimer, 0);
+  }  
+}
+
 #endif
 
 #ifdef BASECAMP_USEDNS
