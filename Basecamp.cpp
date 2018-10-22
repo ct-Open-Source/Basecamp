@@ -244,7 +244,8 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 
 		// Add the configuration form, that will include all inputs for config data
 		web.addInterfaceElement("configform", "form", "","#wrapper");
-		web.setInterfaceElementAttribute("configform", "action", "saveConfig");
+		web.setInterfaceElementAttribute("configform", "action", "#");
+		web.setInterfaceElementAttribute("configform", "onsubmit", "collectConfiguration()");
 
 		web.addInterfaceElement("DeviceName", "input", "Device name","#configform" , "DeviceName");
 
@@ -268,10 +269,8 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 			web.setInterfaceElementAttribute("MQTTPass", "type", "password");
 		}
 		// Add a save button that calls the JavaScript function collectConfiguration() on click
-		web.addInterfaceElement("saveform", "input", " ","#configform");
-		web.setInterfaceElementAttribute("saveform", "type", "button");
-		web.setInterfaceElementAttribute("saveform", "value", "Save");
-		web.setInterfaceElementAttribute("saveform", "onclick", "collectConfiguration()");
+		web.addInterfaceElement("saveform", "button", "Save","#configform");
+		web.setInterfaceElementAttribute("saveform", "type", "submit");
 
 		// Show the devices MAC in the Webinterface
 		String infotext2 = "This device has the MAC-Address: " + mac;
@@ -293,7 +292,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		// Also pass a Lambda-function that restarts the device after the configuration has been saved.
 		web.begin(configuration, [](){
 			delay(2000);
-			esp_restart();
+			ESP.restart();
 		});
 	}
 	#endif
