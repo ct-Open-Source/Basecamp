@@ -25,6 +25,7 @@ class WifiControl {
 		WifiControl(){};
 		bool connect();
 		bool disconnect();
+		static bool isConnected() ;
 
 		Mode getOperationMode() const;
 

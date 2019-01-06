@@ -5,17 +5,21 @@
    */
 
 #include "WifiControl.hpp"
+#ifdef BASECAMP_WIRED_NETWORK
+#include <ETH.h>
+#endif
 
 namespace {
 	// Minumum access point secret length to be generated (8 is min for ESP32)
 	const constexpr unsigned minApSecretLength = 8;
+	static bool eth_connected = false;
 }
 
 void WifiControl::begin(String essid, String password, String configured,
 												String hostname, String apSecret)
 {
+#ifndef BASECAMP_WIRED_NETWORK
 	DEBUG_PRINTLN("Connecting to Wifi");
-
 	String _wifiConfigured = std::move(configured);
 	_wifiEssid = std::move(essid);
 	_wifiPassword = std::move(password);
@@ -49,6 +53,30 @@ void WifiControl::begin(String essid, String password, String configured,
 			WiFi.softAP(_wifiAPName.c_str());
 		}
 	}
+#else
+	DEBUG_PRINTLN("Connecting to Ethernet");
+	operationMode_ = Mode::client;
+	WiFi.onEvent(WiFiEvent);
+	ETH.begin() ;
+	ETH.setHostname(hostname.c_str());
+	DEBUG_PRINTLN ("Ethernet initialized") ;
+	DEBUG_PRINTLN ("Waiting for connection") ;
+	while (!eth_connected) {
+		DEBUG_PRINT (".") ;
+		delay(100) ;
+	}
+#endif
+
+}
+
+
+bool WifiControl::isConnected()
+{
+#ifndef BASECAMP_WIRED_NETWORK
+	return WiFi.isConnected() ;
+#else
+	return eth_connected ;
+#endif
 }
 
 WifiControl::Mode WifiControl::getOperationMode() const
@@ -61,7 +89,11 @@ int WifiControl::status() {
 
 }
 IPAddress WifiControl::getIP() {
+#ifndef BASECAMP_WIRED_NETWORK
 	return WiFi.localIP();
+#else
+	return ETH.localIP() ;
+#endif
 }
 IPAddress WifiControl::getSoftAPIP() {
 	return WiFi.softAPIP();
@@ -83,6 +115,7 @@ void WifiControl::WiFiEvent(WiFiEvent_t event)
 	// In case somebody wants to know this..
 	DEBUG_PRINTF("[WiFi-event] event. Bootcounter is %d\n", bootCounter);
 	DEBUG_PRINTF("[WiFi-event] event: %d\n", event);
+#ifndef BASECAMP_WIRED_NETWORK
 	switch(event) {
 		case SYSTEM_EVENT_STA_GOT_IP:
 			DEBUG_PRINT("Wifi IP address: ");
@@ -97,6 +130,41 @@ void WifiControl::WiFiEvent(WiFiEvent_t event)
 			// INFO: Default = do nothing
 			break;
 	}
+#else
+	switch (event) {
+    case SYSTEM_EVENT_ETH_START:
+      Serial.println("ETH Started");
+      //set eth hostname here
+      ETH.setHostname("esp32-ethernet");
+      break;
+    case SYSTEM_EVENT_ETH_CONNECTED:
+      Serial.println("ETH Connected");
+      break;
+    case SYSTEM_EVENT_ETH_GOT_IP:
+      Serial.print("ETH MAC: ");
+      Serial.print(ETH.macAddress());
+      Serial.print(", IPv4: ");
+      Serial.print(ETH.localIP());
+      if (ETH.fullDuplex()) {
+        Serial.print(", FULL_DUPLEX");
+      }
+      Serial.print(", ");
+      Serial.print(ETH.linkSpeed());
+      Serial.println("Mbps");
+      eth_connected = true;
+      break;
+    case SYSTEM_EVENT_ETH_DISCONNECTED:
+      Serial.println("ETH Disconnected");
+      eth_connected = false;
+      break;
+    case SYSTEM_EVENT_ETH_STOP:
+      Serial.println("ETH Stopped");
+      eth_connected = false;
+      break;
+    default:
+      break;
+  }
+#endif
 }
 
 namespace {
@@ -120,16 +188,25 @@ namespace {
 // See https://github.com/espressif/esp-idf/blob/master/components/esp32/include/esp_system.h
 String WifiControl::getHardwareMacAddress(const String& delimiter)
 {
+#ifndef BASECAMP_WIRED_NETWORK
 	uint8_t rawMac[6];
 	esp_efuse_mac_get_default(rawMac);
 	return format6Bytes(rawMac, delimiter);
+#else
+	return ETH.macAddress() ;
+#endif
 }
 
 String WifiControl::getSoftwareMacAddress(const String& delimiter)
 {
+#ifndef BASECAMP_WIRED_NETWORK
 	uint8_t rawMac[6];
 	WiFi.macAddress(rawMac);
 	return format6Bytes(rawMac, delimiter);
+#else
+	return ETH.macAddress() ;
+#endif
+	
 }
 
 unsigned WifiControl::getMinimumSecretLength() const
