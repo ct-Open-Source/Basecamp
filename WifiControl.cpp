@@ -133,32 +133,30 @@ void WifiControl::WiFiEvent(WiFiEvent_t event)
 #else
 	switch (event) {
     case SYSTEM_EVENT_ETH_START:
-      Serial.println("ETH Started");
-      //set eth hostname here
-      ETH.setHostname("esp32-ethernet");
+      DEBUG_PRINTLN("ETH Started");
       break;
     case SYSTEM_EVENT_ETH_CONNECTED:
-      Serial.println("ETH Connected");
+      DEBUG_PRINTLN("ETH Connected");
       break;
     case SYSTEM_EVENT_ETH_GOT_IP:
-      Serial.print("ETH MAC: ");
-      Serial.print(ETH.macAddress());
-      Serial.print(", IPv4: ");
-      Serial.print(ETH.localIP());
+      DEBUG_PRINT("ETH MAC: ");
+      DEBUG_PRINT(ETH.macAddress());
+      DEBUG_PRINT(", IPv4: ");
+      DEBUG_PRINT(ETH.localIP());
       if (ETH.fullDuplex()) {
-        Serial.print(", FULL_DUPLEX");
+        DEBUG_PRINT(", FULL_DUPLEX");
       }
-      Serial.print(", ");
-      Serial.print(ETH.linkSpeed());
-      Serial.println("Mbps");
+      DEBUG_PRINT(", ");
+      DEBUG_PRINT(ETH.linkSpeed());
+      DEBUG_PRINTLN("Mbps");
       eth_connected = true;
       break;
     case SYSTEM_EVENT_ETH_DISCONNECTED:
-      Serial.println("ETH Disconnected");
+      DEBUG_PRINTLN("ETH Disconnected");
       eth_connected = false;
       break;
     case SYSTEM_EVENT_ETH_STOP:
-      Serial.println("ETH Stopped");
+      DEBUG_PRINTLN("ETH Stopped");
       eth_connected = false;
       break;
     default:
