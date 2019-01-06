@@ -18,7 +18,19 @@ namespace {
 void WifiControl::begin(String essid, String password, String configured,
 												String hostname, String apSecret)
 {
-#ifndef BASECAMP_WIRED_NETWORK
+#ifdef BASECAMP_WIRED_NETWORK
+	DEBUG_PRINTLN("Connecting to Ethernet");
+	operationMode_ = Mode::client;
+	WiFi.onEvent(WiFiEvent);
+	ETH.begin() ;
+	ETH.setHostname(hostname.c_str());
+	DEBUG_PRINTLN ("Ethernet initialized") ;
+	DEBUG_PRINTLN ("Waiting for connection") ;
+	while (!eth_connected) {
+		DEBUG_PRINT (".") ;
+		delay(100) ;
+	}
+#else
 	DEBUG_PRINTLN("Connecting to Wifi");
 	String _wifiConfigured = std::move(configured);
 	_wifiEssid = std::move(essid);
@@ -53,18 +65,6 @@ void WifiControl::begin(String essid, String password, String configured,
 			WiFi.softAP(_wifiAPName.c_str());
 		}
 	}
-#else
-	DEBUG_PRINTLN("Connecting to Ethernet");
-	operationMode_ = Mode::client;
-	WiFi.onEvent(WiFiEvent);
-	ETH.begin() ;
-	ETH.setHostname(hostname.c_str());
-	DEBUG_PRINTLN ("Ethernet initialized") ;
-	DEBUG_PRINTLN ("Waiting for connection") ;
-	while (!eth_connected) {
-		DEBUG_PRINT (".") ;
-		delay(100) ;
-	}
 #endif
 
 }
@@ -72,10 +72,10 @@ void WifiControl::begin(String essid, String password, String configured,
 
 bool WifiControl::isConnected()
 {
-#ifndef BASECAMP_WIRED_NETWORK
-	return WiFi.isConnected() ;
-#else
+#ifdef BASECAMP_WIRED_NETWORK
 	return eth_connected ;
+#else
+	return WiFi.isConnected() ;
 #endif
 }
 
@@ -89,10 +89,10 @@ int WifiControl::status() {
 
 }
 IPAddress WifiControl::getIP() {
-#ifndef BASECAMP_WIRED_NETWORK
-	return WiFi.localIP();
-#else
+#ifdef BASECAMP_WIRED_NETWORK
 	return ETH.localIP() ;
+#else
+	return WiFi.localIP();
 #endif
 }
 IPAddress WifiControl::getSoftAPIP() {
@@ -115,22 +115,7 @@ void WifiControl::WiFiEvent(WiFiEvent_t event)
 	// In case somebody wants to know this..
 	DEBUG_PRINTF("[WiFi-event] event. Bootcounter is %d\n", bootCounter);
 	DEBUG_PRINTF("[WiFi-event] event: %d\n", event);
-#ifndef BASECAMP_WIRED_NETWORK
-	switch(event) {
-		case SYSTEM_EVENT_STA_GOT_IP:
-			DEBUG_PRINT("Wifi IP address: ");
-			DEBUG_PRINTLN(WiFi.localIP());
-			preferences.putUInt("bootcounter", 0);
-			break;
-		case SYSTEM_EVENT_STA_DISCONNECTED:
-			DEBUG_PRINTLN("WiFi lost connection");
-			WiFi.reconnect();
-			break;
-		default:
-			// INFO: Default = do nothing
-			break;
-	}
-#else
+#ifdef BASECAMP_WIRED_NETWORK
 	switch (event) {
     case SYSTEM_EVENT_ETH_START:
       DEBUG_PRINTLN("ETH Started");
@@ -162,6 +147,21 @@ void WifiControl::WiFiEvent(WiFiEvent_t event)
     default:
       break;
   }
+#else
+	switch(event) {
+		case SYSTEM_EVENT_STA_GOT_IP:
+			DEBUG_PRINT("Wifi IP address: ");
+			DEBUG_PRINTLN(WiFi.localIP());
+			preferences.putUInt("bootcounter", 0);
+			break;
+		case SYSTEM_EVENT_STA_DISCONNECTED:
+			DEBUG_PRINTLN("WiFi lost connection");
+			WiFi.reconnect();
+			break;
+		default:
+			// INFO: Default = do nothing
+			break;
+	}
 #endif
 }
 
@@ -186,23 +186,23 @@ namespace {
 // See https://github.com/espressif/esp-idf/blob/master/components/esp32/include/esp_system.h
 String WifiControl::getHardwareMacAddress(const String& delimiter)
 {
-#ifndef BASECAMP_WIRED_NETWORK
+#ifdef BASECAMP_WIRED_NETWORK
+	return ETH.macAddress() ;
+#else
 	uint8_t rawMac[6];
 	esp_efuse_mac_get_default(rawMac);
 	return format6Bytes(rawMac, delimiter);
-#else
-	return ETH.macAddress() ;
 #endif
 }
 
 String WifiControl::getSoftwareMacAddress(const String& delimiter)
 {
-#ifndef BASECAMP_WIRED_NETWORK
+#ifdef BASECAMP_WIRED_NETWORK
+	return ETH.macAddress() ;
+#else
 	uint8_t rawMac[6];
 	WiFi.macAddress(rawMac);
 	return format6Bytes(rawMac, delimiter);
-#else
-	return ETH.macAddress() ;
 #endif
 	
 }
