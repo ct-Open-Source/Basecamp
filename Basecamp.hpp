@@ -30,6 +30,7 @@
 #ifndef BASECAMP_NOMQTT
 #include <AsyncMqttClient.h>
 #include "mqttGuardInterface.hpp"
+#include "freertos/timers.h"
 #endif
 
 #ifndef BASECAMP_NOOTA
@@ -71,16 +72,15 @@ class Basecamp
 		 * SetupModeWifiEncryption will be overriden to SetupModeWifiEncryption::secure.
 		*/
 		bool begin(String fixedWiFiApEncryptionPassword = {});
+		void handle();
+
 		void checkResetReason();
 		String showSystemInfo();
 		bool isSetupModeWifiEncrypted();
 		String getSetupModeWifiName();
 		String getSetupModeWifiSecret();
 		String hostname;
-		struct taskParms {
-			const char* parm1;
-			const char* parm2;
-		};
+
 #ifndef BASECAMP_NOWIFI
 		String mac;
 		WifiControl wifi;
@@ -92,24 +92,23 @@ class Basecamp
 #endif
 
 #ifndef BASECAMP_NOMQTT
-		AsyncMqttClient mqtt;
-		static void MqttHandling(void *);
+    AsyncMqttClient mqtt;
+    static TimerHandle_t mqttReconnectTimer;
+    static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason); 
+    static void connectToMqtt(TimerHandle_t xTimer); 
 #endif
 
 #ifndef BASECAMP_NOWEB
 
 #ifdef BASECAMP_USEDNS
 #ifdef DNSServer_h
-		DNSServer dnsServer;
+    DNSServer dnsServer;
 		static void DnsHandling(void *);
 #endif
 #endif
 		WebServer web;
 #endif
 
-#ifndef BASECAMP_NOOTA
-		static void OTAHandling(void *);
-#endif
 	private:
 		String _cleanHostname();
 		bool shouldEnableConfigWebserver() const;

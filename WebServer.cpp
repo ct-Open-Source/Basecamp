@@ -26,10 +26,9 @@ WebServer::WebServer()
 #endif
 }
 
-void WebServer::begin(Configuration &configuration) {
+void WebServer::begin(Configuration &configuration, std::function<void()> submitFunc) {
 	SPIFFS.begin();
-	server.begin();
-
+	
 	server.on("/" , HTTP_GET, [](AsyncWebServerRequest * request)
 	{
 			AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_htm_gz, index_htm_gz_len);
@@ -99,7 +98,7 @@ void WebServer::begin(Configuration &configuration) {
 			request->send(response);
 	});
 
-	server.on("/submitconfig", HTTP_POST, [&configuration, this](AsyncWebServerRequest *request)
+	server.on("/submitconfig", HTTP_POST, [&configuration, submitFunc, this](AsyncWebServerRequest *request)
 	{
 			if (request->params() == 0) {
 				DEBUG_PRINTLN("Refusing to take over an empty configuration submission.");
@@ -120,9 +119,8 @@ void WebServer::begin(Configuration &configuration) {
 			configuration.save();
 			request->send(201);
 
-			// Why? What is this magic value for?
-			delay(2000);
-			esp_restart();
+			// Only call submitFunc when it has been set to something useful
+			if( submitFunc ) submitFunc();
 	});
 
 	server.onNotFound([this](AsyncWebServerRequest *request)
@@ -133,6 +131,8 @@ void WebServer::begin(Configuration &configuration) {
 #endif
 			request->send(404);
 	});
+	
+	server.begin();
 }
 
 void WebServer::debugPrintRequest(AsyncWebServerRequest *request)
@@ -206,4 +206,17 @@ void WebServer::setInterfaceElementAttribute(const String &id, const String &key
 			return;
 		}
 	}
+}
+
+void WebServer::reset() {
+	interfaceElements.clear();
+	// We should also reset the server itself, according to documentation, but it will cause a crash.
+	// It works without reset, if you only configure one server after a reboot. Not sure what happens if you want to reconfigure during runtime.
+	//server.reset();
+	//server.addHandler(&events);
+//#ifdef BASECAMP_USEDNS
+//#ifdef DNSServer_h
+	//server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+//#endif
+//#endif
 }

@@ -12,7 +12,7 @@ function load() {
 	function transferComplete() {
 			        var data = JSON.parse(this.responseText);
 				buildSite(data.elements);
-		}; 
+		};
 	function transferFailed(evt) {
 			console.log('Looks like there was a problem. Status Code: ' + request.status);
 			addElementToDom("h1","error","Could not load configuration: " + request.status, {"style": "color:red"});
@@ -32,7 +32,6 @@ function configureElement(element) {
 			if (element.content) {
 				labelId = "labelfor" + element.id;
 				labelAttr = { "for": element.id };
-				console.log(element.content);
 				addElementToDom("label", labelId , element.content, labelAttr, element.parent);
 				addElementToDom("input", element.id, "", element.attributes, "#"+labelId);
 			} else {
@@ -45,20 +44,20 @@ function configureElement(element) {
 	}
 }
 
-function addElementToDom (elementType, elementID, elementContent) { 
+function addElementToDom (elementType, elementID, elementContent) {
 	var elementAttributes = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	var parentSelector = arguments[4];
-	var newElement = document.createElement(elementType); 
+	var element = document.getElementById(elementID);
+	if (!element) element = document.createElement(elementType);
 	if (elementContent) {
-		var newContent = document.createTextNode(elementContent); 
-		newElement.appendChild(newContent);
+		element.textContent = elementContent;
 	}
-	if (elementID) newElement.setAttribute("id", elementID);
+	if (elementID) element.setAttribute("id", elementID);
 
-	setAttributes(newElement, elementAttributes);
+	setAttributes(element, elementAttributes);
 	var parent = document.querySelector(parentSelector);
 	if(!parent) parent = document.querySelector("#wrapper");
-	parent.appendChild(newElement);
+	parent.appendChild(element);
 }
 
 function setAttributes(el, attrs) {
@@ -76,7 +75,7 @@ function buildSite (data) {
 		var elementGroup = []
 
 		for(var i = 0;i < data.length; i++)  {
-			if (data[i].parent == selectedParent) {	
+			if (data[i].parent == selectedParent) {
 				elementGroup.push(data[i]);
 				data.splice(i,1);
 				break;
@@ -90,7 +89,6 @@ function buildSite (data) {
 			selectedParent = data[0].parent;
 		}
 	}
-
 }
 
 function collectConfiguration() {
@@ -102,9 +100,9 @@ function collectConfiguration() {
 		var configurationValue = configurationElements[i].value;
 		if (configurationElements[i].hasAttribute("required") && configurationValue == "") {
 			alert("Please fill out all required values");
-			return;	
+			return;
 		}
-		if (configurationValue.length > 0 && configurationKey.length > 0) { 
+		if (configurationValue.length > 0 && configurationKey.length > 0) {
 			configurationData.append(configurationKey, configurationValue);
 		}
 	}

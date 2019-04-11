@@ -17,8 +17,19 @@
 
 // TODO: Extend with all known keys
 enum class ConfigurationKey {
+	deviceName,
 	accessPointSecret,
 	ethConfigured,
+	wifiConfigured,
+	wifiEssid,
+	wifiPassword,
+	mqttActive,
+	mqttHost,
+	mqttPort,
+	mqttUser,
+	mqttPass,
+	otaActive,
+	otaPass,
 };
 
 // TODO: Extend with all known keys
@@ -28,25 +39,67 @@ static const String getKeyName(ConfigurationKey key)
 	// (if the warnings are turned on exactly...)
 	switch (key)
 	{
+		case ConfigurationKey::deviceName:
+			return "DeviceName";
+
 		case ConfigurationKey::accessPointSecret:
 			return "APSecret";
-			break;
 		case ConfigurationKey::ethConfigured:
 			return "EthConfigured";
-			break;
+		case ConfigurationKey::wifiConfigured:
+			return "WifiConfigured";
+
+		case ConfigurationKey::wifiEssid:
+			return "WifiEssid";
+
+		case ConfigurationKey::wifiPassword:
+			return "WifiPassword";
+
+		case ConfigurationKey::mqttActive:
+			return "MQTTActive";
+
+		case ConfigurationKey::mqttHost:
+			return "MQTTHost";
+
+		case ConfigurationKey::mqttPort:
+			return "MQTTPort";
+
+		case ConfigurationKey::mqttUser:
+			return "MQTTUser";
+
+		case ConfigurationKey::mqttPass:
+			return "MQTTPass";
+
+		case ConfigurationKey::otaActive:
+			return "OTAActive";
+
+		case ConfigurationKey::otaPass:
+			return "OTAPass";
 	}
 	return "";
 }
 
 class Configuration {
 	public:
+		// Default constructor: Memory-only configuration (NO EEPROM read/writes
+		Configuration();
+		// Constructor with filename: Can be read from and written to EEPROM
 		explicit Configuration(String filename);
 		~Configuration() = default;
+		
+		// Switched configuration to memory-only and empties filename
+		void setMemOnly();
+		// Sets new filename and removes memory-only tag
+		void setFileName(const String& filename);
+		// Returns memory-only state of configuration
+		bool isMemOnly() {return _memOnlyConfig;}
 
 		const String& getKey(ConfigurationKey configKey) const;
 
+		// Both functions return true on successful load or save. Return false on any failure. Also return false for memory-only configurations.
 		bool load();
 		bool save();
+		
 		void dump();
 
 		// Returns true if the key 'key' exists
@@ -91,6 +144,8 @@ class Configuration {
 		String _jsonFile;
 		bool _configurationTainted = false;
 		String noResult_ = {};
+		// Set to true if configuration is memory-only
+		bool _memOnlyConfig;
 };
 
 #endif
