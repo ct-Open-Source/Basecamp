@@ -17,7 +17,13 @@
 #include <Preferences.h>
 #include <IPAddress.h>
 
-
+typedef enum eth_state_t {
+    ETH_STARTED,
+    ETH_CONNECTED,
+    ETH_GOT_IP,
+    ETH_DISCONNECTED,
+    ETH_STOPPED
+};
 
 class EthControl {
 	public:
@@ -26,14 +32,14 @@ class EthControl {
         void begin(String hostname = "BasecampDevice");
         bool config(IPAddress ip, IPAddress gateway, IPAddress subnet, IPAddress dns1, IPAddress dns2 );
         bool config(const String& ip, const String& gateway, const String& subnet, const String& dns1, const String& dns2 );
-
+        bool connected();
         IPAddress getIP();
         String getMac();
-        
+        static eth_state_t status();
 
         static void WiFiEvent(WiFiEvent_t event);
     private:
-
+        static eth_state_t _state;
 };
 
 #endif //EthControl_h

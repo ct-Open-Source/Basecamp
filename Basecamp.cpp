@@ -61,7 +61,11 @@ bool Basecamp::isSetupModeWifiEncrypted(){
  * Returns the SSID of the setup WiFi network
  */
 String Basecamp::getSetupModeWifiName(){
-	return wifi.getAPName();
+	#ifndef BASECAMP_NOWIFI
+		return wifi.getAPName();
+	#else
+		return "";
+	#endif
 }
 
 /**
@@ -76,6 +80,7 @@ String Basecamp::getSetupModeWifiSecret(){
  */
 bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 {
+	#ifndef BASECAMP_NOWIFI
 	// Make sure we only accept valid passwords for ap
 	if (fixedWiFiApEncryptionPassword.length() != 0) {
 		if (fixedWiFiApEncryptionPassword.length() >= wifi.getMinimumSecretLength()) {
@@ -84,6 +89,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 			Serial.println("Error: Given fixed ap secret is too short. Refusing.");
 		}
 	}
+	#endif
 
 	// Enable serial output
 	Serial.begin(115200);
@@ -141,6 +147,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 #endif
 
 #ifndef BASECAMP_NOETH
+	eth.begin(hostname);
 	if(!configuration.isKeySet(ConfigurationKey::ethConfigured))
 		if(configuration.get(ConfigurationKey::ethConfigured) != "false"){
 			const auto &ethIP = configuration.get("EthIP");
@@ -151,7 +158,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 
 			eth.config(ethIP, ethGateway, ethSubnetMask, ethDNS1, ethDNS2);
 		}
-	eth.begin(hostname);
+	
 
 	macEth = eth.getMac();
 #endif
@@ -302,12 +309,16 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.addInterfaceElement("saveform", "button", "Save","#configform");
 		web.setInterfaceElementAttribute("saveform", "type", "submit");
 
+		#ifndef BASECAMP_NOWIFI
 		// Show the devices MAC in the Webinterface
 		String infotext2 = "This device has the WiFi MAC-Address: " + mac;
 		web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
+		#endif 
 
+		#ifndef BASECAMP_NOETH
 		String infotext3 = "This device has the ETH MAC-Address: " + macEth;
 		web.addInterfaceElement("infotext3", "p", infotext3,"#wrapper");
+		#endif
 
 		web.addInterfaceElement("footer", "footer", "Powered by ", "body");
 		web.addInterfaceElement("footerlink", "a", "Basecamp", "footer");
@@ -351,8 +362,11 @@ void Basecamp::handle (void)
 
 bool Basecamp::shouldEnableConfigWebserver() const
 {
-	return (configurationUi_ == ConfigurationUI::always ||
-	   (configurationUi_ == ConfigurationUI::accessPoint && wifi.getOperationMode() == WifiControl::Mode::accessPoint));
+	return (configurationUi_ == ConfigurationUI::always 
+	#ifndef BASECAMP_NOWIFI
+		|| (configurationUi_ == ConfigurationUI::accessPoint && wifi.getOperationMode() == WifiControl::Mode::accessPoint)
+	#endif
+	);
 }
 
 // This is a task that is called if MQTT client has lost connection. After 2 seconds it automatically trys to reconnect.
@@ -369,7 +383,7 @@ void Basecamp::connectToMqtt(TimerHandle_t xTimer)
 {
   AsyncMqttClient *mqtt = (AsyncMqttClient *) pvTimerGetTimerID(xTimer);
 
-  if (WiFi.status() == WL_CONNECTED) {
+  if (WiFi.status() == WL_CONNECTED || EthControl::status() == ETH_GOT_IP ) {
     Serial.println("Trying to connect ...");
     mqtt->connect();    // has no effect if already connected ( if (_connected) return;) 
   }
@@ -464,8 +478,10 @@ void Basecamp::checkResetReason()
 // TODO: expand infos
 String Basecamp::showSystemInfo() {
 	std::ostringstream info;
+	#ifndef BASECAMP_NOWIFI
 	info << "MAC-Address: " << mac.c_str();
 	info << ", Hardware MAC: " << wifi.getHardwareMacAddress(":").c_str() << std::endl;
+	#endif 
 
 	#ifndef BASECAMP_NOETH
 	info << "ETH MAC-Address:" << macEth.c_str() << std::endl;

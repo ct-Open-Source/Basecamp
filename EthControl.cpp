@@ -33,15 +33,24 @@ String EthControl::getMac() {
     return ETH.macAddress();
 }
 
+eth_state_t EthControl::_state = ETH_STOPPED;
+
+eth_state_t EthControl::status() {
+    return EthControl::_state;
+}
+
 void EthControl::WiFiEvent(WiFiEvent_t event){
     switch (event) {
         case SYSTEM_EVENT_ETH_START:
+            EthControl::_state = ETH_STARTED;
             DEBUG_PRINTLN("ETH Started");
             break;
         case SYSTEM_EVENT_ETH_CONNECTED:
+            EthControl::_state = ETH_CONNECTED;
             DEBUG_PRINTLN("ETH Connected");
             break;
         case SYSTEM_EVENT_ETH_GOT_IP:
+            EthControl::_state = ETH_GOT_IP;
             DEBUG_PRINT("ETH MAC: ");
             DEBUG_PRINT(ETH.macAddress());
             DEBUG_PRINT(", IPv4: ");
@@ -54,9 +63,11 @@ void EthControl::WiFiEvent(WiFiEvent_t event){
             DEBUG_PRINTLN("Mbps");
             break;
         case SYSTEM_EVENT_ETH_DISCONNECTED:
+            EthControl::_state = ETH_DISCONNECTED;
             DEBUG_PRINTLN("ETH Disconnected");
             break;
         case SYSTEM_EVENT_ETH_STOP:
+            EthControl::_state = ETH_STOPPED;
             DEBUG_PRINTLN("ETH Stopped");
             break;
         default:
