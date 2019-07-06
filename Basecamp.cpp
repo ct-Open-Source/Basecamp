@@ -249,7 +249,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 
 		web.addInterfaceElement("DeviceName", "input", "Device name","#configform" , "DeviceName");
 
-#ifdef BASECAMP_WIRED_NETWORK
+#ifndef BASECAMP_WIRED_NETWORK
 		// Add an input field for the WIFI data and link it to the corresponding configuration data
 		web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
 		web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
