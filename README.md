@@ -1,3 +1,6 @@
+# Basecamp is deprecated now. And only for archival purposes. If you want to take over this project contact me at: mls@ct.de
+# There are a lot of alternatives for the ESP32 by now that also work with the ESP8266
+
 # Basecamp
 
 Basecamp - ESP32 library to simplify the basics of IoT projects
