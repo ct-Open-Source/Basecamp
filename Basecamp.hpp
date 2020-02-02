@@ -15,6 +15,10 @@
 #include "WifiControl.hpp"
 #endif
 
+#ifndef BASECAMP_NOETH
+#include "EthControl.hpp"
+#endif
+
 #ifndef BASECAMP_NOWEB
 #ifdef BASECAMP_USEDNS
 #include <DNSServer.h>
@@ -80,6 +84,11 @@ class Basecamp
 #ifndef BASECAMP_NOWIFI
 		String mac;
 		WifiControl wifi;
+#endif
+
+#ifndef BASECAMP_NOETH
+		String macEth;
+		EthControl eth;
 #endif
 
 #ifndef BASECAMP_NOMQTT

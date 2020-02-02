@@ -19,6 +19,7 @@
 enum class ConfigurationKey {
 	deviceName,
 	accessPointSecret,
+	ethConfigured,
 	wifiConfigured,
 	wifiEssid,
 	wifiPassword,
@@ -43,7 +44,8 @@ static const String getKeyName(ConfigurationKey key)
 
 		case ConfigurationKey::accessPointSecret:
 			return "APSecret";
-
+		case ConfigurationKey::ethConfigured:
+			return "EthConfigured";
 		case ConfigurationKey::wifiConfigured:
 			return "WifiConfigured";
 

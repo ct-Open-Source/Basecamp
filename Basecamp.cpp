@@ -61,7 +61,11 @@ bool Basecamp::isSetupModeWifiEncrypted(){
  * Returns the SSID of the setup WiFi network
  */
 String Basecamp::getSetupModeWifiName(){
-	return wifi.getAPName();
+	#ifndef BASECAMP_NOWIFI
+		return wifi.getAPName();
+	#else
+		return "";
+	#endif
 }
 
 /**
@@ -76,6 +80,7 @@ String Basecamp::getSetupModeWifiSecret(){
  */
 bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 {
+	#ifndef BASECAMP_NOWIFI
 	// Make sure we only accept valid passwords for ap
 	if (fixedWiFiApEncryptionPassword.length() != 0) {
 		if (fixedWiFiApEncryptionPassword.length() >= wifi.getMinimumSecretLength()) {
@@ -84,6 +89,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 			Serial.println("Error: Given fixed ap secret is too short. Refusing.");
 		}
 	}
+	#endif
 
 	// Enable serial output
 	Serial.begin(115200);
@@ -108,7 +114,6 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 	checkResetReason();
 
 #ifndef BASECAMP_NOWIFI
-
 	// If there is no access point secret set yet, generate one and save it.
 	// It will survive the default config reset.
 	if (!configuration.isKeySet(ConfigurationKey::accessPointSecret) ||
@@ -140,6 +145,24 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 	// Get WiFi MAC
 	mac = wifi.getSoftwareMacAddress(":");
 #endif
+
+#ifndef BASECAMP_NOETH
+	eth.begin(hostname);
+	if(!configuration.isKeySet(ConfigurationKey::ethConfigured))
+		if(configuration.get(ConfigurationKey::ethConfigured) != "false"){
+			const auto &ethIP = configuration.get("EthIP");
+			const auto &ethGateway = configuration.get("EthGateway");
+			const auto &ethSubnetMask = configuration.get("EthSubnetMask");
+			const auto &ethDNS1 = configuration.get("EthDNS1");
+			const auto &ethDNS2 = configuration.get("EthDNS2");
+
+			eth.config(ethIP, ethGateway, ethSubnetMask, ethDNS1, ethDNS2);
+		}
+	
+
+	macEth = eth.getMac();
+#endif
+
 #ifndef BASECAMP_NOMQTT
 	// Check if MQTT has been disabled by the user
 	if (!configuration.get(ConfigurationKey::mqttActive).equalsIgnoreCase("false")) {
@@ -248,7 +271,8 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.setInterfaceElementAttribute("configform", "onsubmit", "collectConfiguration()");
 
 		web.addInterfaceElement("DeviceName", "input", "Device name","#configform" , "DeviceName");
-
+		
+		#ifndef BASECAMP_NOWIFI
 		// Add an input field for the WIFI data and link it to the corresponding configuration data
 		web.addInterfaceElement("WifiEssid", "input", "WIFI SSID:","#configform" , "WifiEssid");
 		web.addInterfaceElement("WifiPassword", "input", "WIFI Password:", "#configform", "WifiPassword");
@@ -256,6 +280,19 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.addInterfaceElement("WifiConfigured", "input", "", "#configform", "WifiConfigured");
 		web.setInterfaceElementAttribute("WifiConfigured", "type", "hidden");
 		web.setInterfaceElementAttribute("WifiConfigured", "value", "true");
+		#endif
+
+		#ifndef BASECAMP_NOETH
+		// Add an input field for the eth data and link it to the corresponding configuration data
+		web.addInterfaceElement("EthIP", "input", "ETH IP:","#configform" , "EthIP");
+		web.addInterfaceElement("EthGateway", "input", "ETH Gateway:", "#configform", "EthGateway");
+		web.addInterfaceElement("EthSubnet", "input", "ETH Subnet:", "#configform", "EthSubnet");
+		web.addInterfaceElement("EthDNS1", "input", "ETH DNS 1:", "#configform", "EthDNS1");
+		web.addInterfaceElement("EthDNS2", "input", "ETH DNS 2:", "#configform", "EthDNS2");
+		web.addInterfaceElement("EthConfigured", "input", "", "#configform", "EthConfigured");
+		web.setInterfaceElementAttribute("WifiConfigured", "type", "hidden");
+		web.setInterfaceElementAttribute("WifiConfigured", "value", "true");
+		#endif
 
 		// Add input fields for MQTT configurations if it hasn't been disabled
 		if (!configuration.get(ConfigurationKey::mqttActive).equalsIgnoreCase("false")) {
@@ -272,9 +309,16 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.addInterfaceElement("saveform", "button", "Save","#configform");
 		web.setInterfaceElementAttribute("saveform", "type", "submit");
 
+		#ifndef BASECAMP_NOWIFI
 		// Show the devices MAC in the Webinterface
-		String infotext2 = "This device has the MAC-Address: " + mac;
+		String infotext2 = "This device has the WiFi MAC-Address: " + mac;
 		web.addInterfaceElement("infotext2", "p", infotext2,"#wrapper");
+		#endif 
+
+		#ifndef BASECAMP_NOETH
+		String infotext3 = "This device has the ETH MAC-Address: " + macEth;
+		web.addInterfaceElement("infotext3", "p", infotext3,"#wrapper");
+		#endif
 
 		web.addInterfaceElement("footer", "footer", "Powered by ", "body");
 		web.addInterfaceElement("footerlink", "a", "Basecamp", "footer");
@@ -318,8 +362,11 @@ void Basecamp::handle (void)
 
 bool Basecamp::shouldEnableConfigWebserver() const
 {
-	return (configurationUi_ == ConfigurationUI::always ||
-	   (configurationUi_ == ConfigurationUI::accessPoint && wifi.getOperationMode() == WifiControl::Mode::accessPoint));
+	return (configurationUi_ == ConfigurationUI::always 
+	#ifndef BASECAMP_NOWIFI
+		|| (configurationUi_ == ConfigurationUI::accessPoint && wifi.getOperationMode() == WifiControl::Mode::accessPoint)
+	#endif
+	);
 }
 
 // This is a task that is called if MQTT client has lost connection. After 2 seconds it automatically trys to reconnect.
@@ -336,7 +383,7 @@ void Basecamp::connectToMqtt(TimerHandle_t xTimer)
 {
   AsyncMqttClient *mqtt = (AsyncMqttClient *) pvTimerGetTimerID(xTimer);
 
-  if (WiFi.status() == WL_CONNECTED) {
+  if (WiFi.status() == WL_CONNECTED || EthControl::status() == ETH_GOT_IP ) {
     Serial.println("Trying to connect ...");
     mqtt->connect();    // has no effect if already connected ( if (_connected) return;) 
   }
@@ -431,8 +478,14 @@ void Basecamp::checkResetReason()
 // TODO: expand infos
 String Basecamp::showSystemInfo() {
 	std::ostringstream info;
+	#ifndef BASECAMP_NOWIFI
 	info << "MAC-Address: " << mac.c_str();
 	info << ", Hardware MAC: " << wifi.getHardwareMacAddress(":").c_str() << std::endl;
+	#endif 
+
+	#ifndef BASECAMP_NOETH
+	info << "ETH MAC-Address:" << macEth.c_str() << std::endl;
+	#endif
 
 	if (configuration.isKeySet(ConfigurationKey::accessPointSecret)) {
 			info << "*******************************************" << std::endl;
