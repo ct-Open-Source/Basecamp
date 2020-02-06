@@ -15,8 +15,7 @@ namespace {
 }
 
 WebServer::WebServer()
-	: events("/events")
-	, server(80)
+	: server(80), events("/events")
 {
 	server.addHandler(&events);
 #ifdef BASECAMP_USEDNS

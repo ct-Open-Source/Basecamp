@@ -139,11 +139,11 @@ class Configuration {
 
 	private:
 		static void CheckConfigStatus(void *);
+		// Set to true if configuration is memory-only
+		bool _memOnlyConfig;
 		String _jsonFile;
 		bool _configurationTainted = false;
 		String noResult_ = {};
-		// Set to true if configuration is memory-only
-		bool _memOnlyConfig;
 };
 
 #endif
