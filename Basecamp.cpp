@@ -28,7 +28,7 @@ Basecamp::Basecamp(SetupModeWifiEncryption setupModeWifiEncryption, Configuratio
  */
 String Basecamp::_cleanHostname()
 {
-	String clean_hostname =	configuration.get(ConfigurationKey::deviceName); // Get device name from configuration
+	String clean_hostname =	configuration.get("DeviceName"); // Get device name from configuration
 
 	// If hostname is not set, return default
 	if (clean_hostname == "") {
@@ -130,9 +130,9 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 
 	// Initialize Wifi with the stored configuration data.
 	wifi.begin(
-			configuration.get(ConfigurationKey::wifiEssid), // The (E)SSID or WiFi-Name
-			configuration.get(ConfigurationKey::wifiPassword), // The WiFi password
-			configuration.get(ConfigurationKey::wifiConfigured), // Has the WiFi been configured
+			configuration.get("WifiEssid"), // The (E)SSID or WiFi-Name
+			configuration.get("WifiPassword"), // The WiFi password
+			configuration.get("WifiConfigured"), // Has the WiFi been configured
 			hostname, // The system hostname to use for DHCP
 			(setupModeWifiEncryption_ == SetupModeWifiEncryption::none)?"":configuration.get(ConfigurationKey::accessPointSecret)
 	);
@@ -142,16 +142,16 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 #endif
 #ifndef BASECAMP_NOMQTT
 	// Check if MQTT has been disabled by the user
-	if (!configuration.get(ConfigurationKey::mqttActive).equalsIgnoreCase("false")) {
+	if (configuration.get("MQTTActive") != "false") {
 		// Setting up variables for the MQTT client. This is necessary due to
 		// the nature of the library. It won't work properly with Arduino Strings.
-		const auto &mqtthost = configuration.get(ConfigurationKey::mqttHost);
-		const auto &mqttuser = configuration.get(ConfigurationKey::mqttUser);
-		const auto &mqttpass = configuration.get(ConfigurationKey::mqttPass);
+		const auto &mqtthost = configuration.get("MQTTHost");
+		const auto &mqttuser = configuration.get("MQTTUser");
+		const auto &mqttpass = configuration.get("MQTTPass");
 		// INFO: that library just copies the pointer to the hostname. As long as nobody
 		// modifies the config, this may work.
 		mqtt.setClientId(hostname.c_str());
-		auto mqttport = configuration.get(ConfigurationKey::mqttPort).toInt();
+		auto mqttport = configuration.get("MQTTPort").toInt();
 		if (mqttport == 0) mqttport = 1883;
 		// INFO: that library just copies the pointer to the hostname. As long as nobody
 		// modifies the config, this may work.
@@ -175,10 +175,10 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 
 #ifndef BASECAMP_NOOTA
 	// Set up Over-the-Air-Updates (OTA) if it hasn't been disabled.
-	if (!configuration.get(ConfigurationKey::otaActive).equalsIgnoreCase("false")) {
+	if(configuration.get("OTAActive") != "false") {
 
 		// Set OTA password
-		String otaPass = configuration.get(ConfigurationKey::otaPass);
+		String otaPass = configuration.get("OTAPass");
 		if (otaPass.length() != 0) {
 			ArduinoOTA.setPassword(otaPass.c_str());
 		}
@@ -231,7 +231,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.setInterfaceElementAttribute("heading", "class", "fat-border");
 		web.addInterfaceElement("logo", "img", "", "#heading");
 		web.setInterfaceElementAttribute("logo", "src", "/logo.svg");
-		String DeviceName = configuration.get(ConfigurationKey::deviceName);
+		String DeviceName = configuration.get("DeviceName");
 		if (DeviceName == "") {
 			DeviceName = "Unconfigured Basecamp Device";
 		}
@@ -258,7 +258,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.setInterfaceElementAttribute("WifiConfigured", "value", "true");
 
 		// Add input fields for MQTT configurations if it hasn't been disabled
-		if (!configuration.get(ConfigurationKey::mqttActive).equalsIgnoreCase("false")) {
+		if (configuration.get("MQTTActive") != "false") {
 			web.addInterfaceElement("MQTTHost", "input", "MQTT Host:","#configform" , "MQTTHost");
 			web.addInterfaceElement("MQTTPort", "input", "MQTT Port:","#configform" , "MQTTPort");
 			web.setInterfaceElementAttribute("MQTTPort", "type", "number");
@@ -282,7 +282,7 @@ bool Basecamp::begin(String fixedWiFiApEncryptionPassword)
 		web.setInterfaceElementAttribute("footerlink", "target", "_blank");
 		#ifdef BASECAMP_USEDNS
 		#ifdef DNSServer_h
-		if (!configuration.get(ConfigurationKey::wifiConfigured).equalsIgnoreCase("true")) {
+		if(configuration.get("WifiConfigured") != "True"){
 			dnsServer.start(53, "*", wifi.getSoftAPIP());
 			xTaskCreatePinnedToCore(&DnsHandling, "DNSTask", 4096, (void*) &dnsServer, 5, NULL,0);
 		}
@@ -390,7 +390,7 @@ void Basecamp::checkResetReason()
 		if (bootCounter > 3){
 			DEBUG_PRINTLN("Configuration forcibly reset.");
 			// Mark the WiFi configuration as invalid
-			configuration.set(ConfigurationKey::wifiConfigured, "False");
+			configuration.set("WifiConfigured", "False");
 			// Save the configuration immediately
 			configuration.save();
 			// Reset the boot counter
@@ -402,7 +402,7 @@ void Basecamp::checkResetReason()
 			ESP.restart();
 
 			// If the WiFi is unconfigured and the device is rebooted twice format the internal flash storage
-		} else if (bootCounter > 2 && configuration.get(ConfigurationKey::wifiConfigured).equalsIgnoreCase("false")) {
+		} else if (bootCounter > 2 && configuration.get("WifiConfigured") == "False") {
 			Serial.println("Factory reset was forced.");
 			// Format the flash storage
 			SPIFFS.format();
